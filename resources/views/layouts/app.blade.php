@@ -32,16 +32,26 @@
                         <span class="avatar">
                             {{ strtoupper(auth()->user()->userInfo?->initials ?? 'DUP') }}
                         </span>
-                        <span class="d-none d-md-inline fw-medium">{{ auth()->user()->name }}</span>
+                        <span
+                            class="d-none d-md-inline fw-medium">{{ auth()->user()->userInfo?->full_name ?? auth()->user()->email }}</span>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0"
+                        style="background: var(--card); color: var(--ink);">
                         <li>
-                            <h6 class="dropdown-header">{{ auth()->user()->email }}</h6>
+                            <h6 class="dropdown-header text-muted">{{ auth()->user()->email }}</h6>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider" style="border-color: var(--line);">
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                                <i class="bi bi-person-gear me-2"></i>My Profile
+                            </a>
                         </li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
-                                <button type="submit" class="dropdown-item">
+                                <button type="submit" class="dropdown-item text-danger">
                                     <i class="bi bi-box-arrow-right me-2"></i>Sign out
                                 </button>
                             </form>

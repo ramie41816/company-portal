@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -9,7 +10,12 @@ Route::get('/', fn () => redirect()->route(auth()->check() ? 'home' : 'login'));
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'show'])->name('login');
-    Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1');
+
+    $loginRoute = Route::post('/login', [LoginController::class, 'login']);
+
+    if (app()->environment('production')) {
+        $loginRoute->middleware('throttle:5,1');
+    }
 });
 
 Route::middleware('auth')->group(function () {
@@ -27,5 +33,14 @@ Route::middleware('auth')->group(function () {
 
     // User Management Routes
     Route::get('users/archives', [UserController::class, 'archives'])->name('users.archives');
+    Route::put('users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
+    Route::delete('users/{id}/force-delete', [UserController::class, 'forceDelete'])->name('users.force-delete');
+    Route::put('users/{user}/reset-password', [UserController::class, 'sendTemporaryPassword'])
+        ->name('users.reset-password');
     Route::resource('users', UserController::class);
+
+    // Profile Routes
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 });
