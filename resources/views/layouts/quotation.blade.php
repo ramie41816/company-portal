@@ -8,14 +8,23 @@
             <div class="col-md-3 col-lg-2">
                 <nav class="side-nav">
                     <div class="side-title">Quotation</div>
+
+                    {{-- Dashboard Link --}}
+                    <a href="{{ route('quotations.dashboard') }}"
+                        class="{{ request()->routeIs('quotations.dashboard') ? 'active' : '' }}">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+
                     <a href="{{ route('quotations.create') }}"
                         class="{{ request()->routeIs('quotations.create') ? 'active' : '' }}">
                         <i class="bi bi-plus-circle"></i> Create Quotation
                     </a>
+
                     <a href="{{ route('quotations.index') }}"
                         class="{{ request()->routeIs('quotations.index', 'quotations.show', 'quotations.edit') ? 'active' : '' }}">
                         <i class="bi bi-list-ul"></i> Quotation List
                     </a>
+
                     <a href="{{ route('quotations.archives') }}"
                         class="{{ request()->routeIs('quotations.archives') ? 'active' : '' }}">
                         <i class="bi bi-archive"></i> Archived Quotations

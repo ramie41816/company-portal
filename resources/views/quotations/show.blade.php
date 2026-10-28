@@ -50,10 +50,12 @@
                 <i class="bi bi-pencil-square me-1"></i> Edit Quotation
             </a>
             <div>
-                <button type="button" class="btn btn-primary btn-sm me-2" data-bs-toggle="modal"
-                    data-bs-target="#emailSignatureModal">
-                    <i class="bi bi-envelope me-1"></i> Email Quotation
-                </button>
+                @if (strtolower($quotation->status) === 'pending')
+                    <button type="button" class="btn btn-primary btn-sm me-2" data-bs-toggle="modal"
+                        data-bs-target="#emailSignatureModal">
+                        <i class="bi bi-envelope me-1"></i> Email Quotation
+                    </button>
+                @endif
                 <a href="{{ route('quotations.pdf', $quotation->id) }}" class="btn btn-brand btn-sm" target="_blank">
                     <i class="bi bi-file-earmark-pdf me-1"></i> Generate PDF
                 </a>
@@ -87,6 +89,47 @@
             </div>
 
             <div class="mb-4" style="height: 3px; background: var(--accent); border-radius: 2px;"></div>
+
+            {{-- Status & Remarks Callout Box --}}
+            <div class="card border mb-4 p-3 rounded-3"
+                style="background-color: var(--surface); border-color: var(--line) !important;">
+                <div class="row align-items-center g-3">
+                    <div class="col-md-4">
+                        <span class="text-uppercase small text-muted d-block mb-1"
+                            style="letter-spacing: .08em;">Status</span>
+                        @php
+                            $statusBadge = match (strtolower($quotation->status)) {
+                                'approved' => 'bg-success text-white',
+                                'rejected' => 'bg-danger text-white',
+                                'pending' => 'bg-warning text-dark',
+                                'emailed' => 'bg-info text-white',
+                                'ongoing' => 'bg-primary text-white',
+                                'completed' => 'bg-secondary text-white',
+                                default => 'bg-secondary text-white',
+                            };
+                        @endphp
+                        <span class="badge {{ $statusBadge }} px-3 py-2 text-uppercase fs-6">
+                            {{ ucfirst($quotation->status) }}
+                        </span>
+                    </div>
+                    <div class="col-md-8">
+                        <span class="text-uppercase small text-muted d-block mb-1" style="letter-spacing: .08em;">Remarks /
+                            Audit Info</span>
+                        <div class="fw-medium mb-1" style="color: var(--ink);">
+                            {{ $quotation->remarks ?: 'No remarks provided.' }}
+                        </div>
+                        @if ($quotation->status_modified_by)
+                            <div class="text-muted small fst-italic">
+                                Last updated by <span class="fw-semibold"
+                                    style="color: var(--ink);">{{ $quotation->status_modified_by }}</span>
+                                @if ($quotation->status_modified_at)
+                                    on {{ \Carbon\Carbon::parse($quotation->status_modified_at)->format('F d, Y') }}
+                                @endif
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
 
             {{-- Customer & Project Details Grid --}}
             <div class="row g-4 mb-5">
@@ -183,11 +226,13 @@
                 @csrf
                 <div class="modal-content rounded-4 shadow">
                     <div class="modal-header border-0 pb-0">
-                        <h5 class="modal-title fw-bold text-brand" id="emailSignatureModalLabel">Authorize & Send Email</h5>
+                        <h5 class="modal-title fw-bold text-brand" id="emailSignatureModalLabel">Authorize & Send Email
+                        </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <p class="text-muted small">Please upload your eSignature to bind it to the PDF before emailing this
+                        <p class="text-muted small">Please upload your eSignature to bind it to the PDF before emailing
+                            this
                             quotation to <strong>{{ $quotation->contact_email }}</strong>.</p>
 
                         <div class="mb-3">

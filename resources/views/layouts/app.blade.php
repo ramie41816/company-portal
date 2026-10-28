@@ -29,7 +29,9 @@
                     <a href="#"
                         class="d-flex align-items-center gap-2 text-decoration-none text-ink dropdown-toggle"
                         data-bs-toggle="dropdown" aria-expanded="false">
-                        <span class="avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                        <span class="avatar">
+                            {{ strtoupper(auth()->user()->userInfo?->initials ?? 'DUP') }}
+                        </span>
                         <span class="d-none d-md-inline fw-medium">{{ auth()->user()->name }}</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
@@ -57,14 +59,19 @@
     @if (session('success'))
         <script>
             Swal.fire({
+                toast: true,
+                position: 'bottom-end',
                 icon: 'success',
-                title: 'Success!',
-                text: "{{ session('success') }}",
-                confirmButtonColor: '#2b3a67',
-                timer: 3500,
+                title: "{{ session('success') }}",
+                showConfirmButton: false,
+                timer: 4000,
                 timerProgressBar: true,
                 customClass: {
                     popup: 'rounded-4 shadow'
+                },
+                didOpen: (toast) => {
+                    toast.onmouseenter = Swal.stopTimer;
+                    toast.onmouseleave = Swal.resumeTimer;
                 }
             });
         </script>
@@ -73,12 +80,19 @@
     @if (session('error'))
         <script>
             Swal.fire({
+                toast: true,
+                position: 'bottom-end',
                 icon: 'error',
-                title: 'Oops...',
-                text: "{{ session('error') }}",
-                confirmButtonColor: '#2b3a67',
+                title: "{{ session('error') }}",
+                showConfirmButton: false,
+                timer: 5000,
+                timerProgressBar: true,
                 customClass: {
                     popup: 'rounded-4 shadow'
+                },
+                didOpen: (toast) => {
+                    toast.onmouseenter = Swal.stopTimer;
+                    toast.onmouseleave = Swal.resumeTimer;
                 }
             });
         </script>

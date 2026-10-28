@@ -15,7 +15,7 @@
                     'title' => 'Quotation',
                     'desc' => 'Create, manage and send customer quotations.',
                     'icon' => 'bi-file-earmark-text',
-                    'url' => route('quotations.index'),
+                    'url' => route('quotations.dashboard'),
                     'available' => true,
                 ],
                 [

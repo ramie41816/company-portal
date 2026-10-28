@@ -17,6 +17,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/home', fn () => view('home'))->name('home');
 
     // Quotations Routes
+    Route::get('quotations/dashboard', [QuotationController::class, 'dashboard'])->name('quotations.dashboard');
     Route::get('quotations/archives', [QuotationController::class, 'archives'])->name('quotations.archives');
     Route::patch('quotations/{id}/restore', [QuotationController::class, 'restore'])->name('quotations.restore');
     Route::delete('quotations/{id}/force-delete', [QuotationController::class, 'forceDelete'])->name('quotations.force-delete');

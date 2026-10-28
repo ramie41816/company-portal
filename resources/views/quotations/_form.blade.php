@@ -27,10 +27,51 @@
     </div>
 @endif
 
-<form method="POST" action="{{ $action }}">
+<form method="POST" action="{{ $action }}" id="quotationForm">
     @csrf
     @if ($isEdit)
         @method('PUT')
+        {{-- Status & Approval Remarks --}}
+        <div class="panel mb-4">
+            <div class="p-4">
+                <h6 class="fw-semibold mb-3">Status & Remarks</h6>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="status" class="form-label">Status</label>
+                        <select id="status" name="status" class="form-select">
+                            <option value="draft"
+                                {{ old('status', $quotation->status ?? 'draft') == 'draft' ? 'selected' : '' }}>Draft
+                            </option>
+                            <option value="pending"
+                                {{ old('status', $quotation->status ?? '') == 'pending' ? 'selected' : '' }}>Pending
+                            </option>
+                            <option value="emailed"
+                                {{ old('status', $quotation->status ?? '') == 'emailed' ? 'selected' : '' }}>Emailed
+                            </option>
+                            <option value="approved"
+                                {{ old('status', $quotation->status ?? '') == 'approved' ? 'selected' : '' }}>Approved
+                            </option>
+                            <option value="ongoing"
+                                {{ old('status', $quotation->status ?? '') == 'ongoing' ? 'selected' : '' }}>Ongoing
+                            </option>
+                            <option value="completed"
+                                {{ old('status', $quotation->status ?? '') == 'completed' ? 'selected' : '' }}>Completed
+                            </option>
+                            <option value="rejected"
+                                {{ old('status', $quotation->status ?? '') == 'rejected' ? 'selected' : '' }}>Rejected
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-8">
+                        <label for="remarks" class="form-label">Remarks / Approval Notes <span
+                                class="text-muted fw-normal">(optional)</span></label>
+                        <input id="remarks" type="text" name="remarks"
+                            value="{{ old('remarks', $quotation->remarks ?? '') }}" class="form-control"
+                            placeholder="Add any remarks or internal notes regarding the status...">
+                    </div>
+                </div>
+            </div>
+        </div>
     @endif
 
     {{-- Customer & Project Details --}}
@@ -173,6 +214,48 @@
     const currency = @json($currency);
     const tbody = document.querySelector('#items-table tbody');
     let index = 0;
+
+    // Intercept form submission to show SweetAlert2 confirmation
+    document.getElementById('quotationForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Stop the form from submitting instantly
+
+        const isEdit = @json($isEdit);
+        const actionText = isEdit ? 'update this quotation' : 'save this new quotation';
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Do you want to ${actionText}?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#2b3a67', // Matches your brand button theme
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, proceed!',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                popup: 'rounded-4 shadow'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading state while it submits
+                Swal.fire({
+                    title: 'Processing...',
+                    text: 'Please wait while we save your changes.',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                    customClass: {
+                        popup: 'rounded-4 shadow'
+                    }
+                });
+
+                // Submit the form programmatically
+                e.target.submit();
+            }
+        });
+    });
 
     function formatMoney(amount) {
         return currency + amount.toLocaleString('en-PH', {

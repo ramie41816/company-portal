@@ -64,7 +64,7 @@
                             <td class="text-muted">{{ $q->attention }}</td>
                             <td class="text-end fw-semibold">@money($q->total)</td>
                             <td class="text-end">
-                                <div class="d-inline-flex gap-1">
+                                <div class="btn-group btn-group-sm">
                                     <button type="button" class="btn btn-sm btn-outline-success" title="Restore Quotation"
                                         data-bs-toggle="modal" data-bs-target="#restoreModal"
                                         data-action="{{ route('quotations.restore', $q->id) }}"

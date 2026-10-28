@@ -16,6 +16,12 @@ return new class extends Migration
             $table->string('reference_project')->nullable();
             $table->string('prepared_by')->nullable();
 
+            // Approval Details Remarks
+            $table->text('remarks')->nullable();
+            $table->string('status_modified_by')->nullable();
+            $table->date('status_modified_at')->nullable();
+            $table->string('status')->default('draft');
+
             // Client details matching the template
             $table->string('quoted_to');                  // Client Name
             $table->string('client_company')->nullable(); // Company / Business Name

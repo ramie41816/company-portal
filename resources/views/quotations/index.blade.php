@@ -50,7 +50,7 @@
                         <th>No.</th>
                         <th>Date</th>
                         <th>To</th>
-                        <th>Attention</th>
+                        <th>Status</th>
                         <th class="text-end">Total</th>
                         <th class="text-end">Action</th>
                     </tr>
@@ -60,15 +60,33 @@
                         <tr>
                             <td class="fw-semibold text-brand">{{ $q->quotation_number }}</td>
                             <td>{{ $q->quotation_date->format('M d, Y') }}</td>
-                            <td class="fw-medium">{{ $q->quoted_to }}</td>
-                            <td class="text-muted">{{ $q->attention }}</td>
+                            <td>
+                                <div class="fw-medium">{{ $q->quoted_to }}</div>
+                                @if ($q->client_company)
+                                    <div class="text-muted small">{{ $q->client_company }}</div>
+                                @endif
+                            </td>
+                            <td>
+                                @php
+                                    $badgeColors = [
+                                        'draft' => 'bg-secondary text-white',
+                                        'pending' => 'bg-warning text-dark',
+                                        'approved' => 'bg-success text-white',
+                                        'rejected' => 'bg-danger text-white',
+                                        'emailed' => 'bg-info text-white',
+                                        'ongoing' => 'bg-primary text-white',
+                                        'completed' => 'bg-secondary text-white',
+                                    ];
+                                @endphp
+                                <span
+                                    class="badge {{ $badgeColors[$q->status] ?? 'bg-secondary text-white' }} text-uppercase px-2 py-1"
+                                    style="font-size: 0.7rem;">
+                                    {{ $q->status }}
+                                </span>
+                            </td>
                             <td class="text-end fw-semibold">@money($q->total)</td>
                             <td class="text-end">
-                                <div class="d-inline-flex gap-1">
-                                    <a href="{{ route('quotations.pdf', $q) }}" class="btn btn-sm btn-outline-secondary"
-                                        target="_blank" title="Generate PDF">
-                                        <i class="bi bi-file-earmark-pdf"></i>
-                                    </a>
+                                <div class="btn-group btn-group-sm">
                                     <a href="{{ route('quotations.show', $q) }}" class="btn btn-sm btn-outline-secondary"
                                         title="View">
                                         <i class="bi bi-eye"></i>
@@ -77,11 +95,11 @@
                                         title="Update">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
-                                        data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                    <button type="button" class="btn btn-sm btn-outline-warning" title="Delete"
+                                        data-bs-toggle="modal" data-bs-target="#archiveModal"
                                         data-action="{{ route('quotations.destroy', $q) }}"
                                         data-name="{{ $q->quotation_number }} &ndash; {{ $q->quoted_to }}">
-                                        <i class="bi bi-trash"></i>
+                                        <i class="bi bi-archive"></i>
                                     </button>
                                 </div>
                             </td>
@@ -102,30 +120,34 @@
 
     <div class="mt-3">{{ $quotations->links() }}</div>
 
-    {{-- Delete confirmation --}}
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    {{-- Archive confirmation modal --}}
+    <div class="modal fade" id="archiveModal" tabindex="-1" aria-labelledby="archiveModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <form method="POST" id="deleteForm" class="modal-content shadow"
+            <form method="POST" id="archiveForm" class="modal-content shadow"
                 style="background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 1rem;">
                 @csrf
                 @method('DELETE')
 
                 <div class="modal-body text-center p-4">
+                    {{-- Changed icon container to an archive/amber accent --}}
                     <div class="mx-auto mb-3"
-                        style="width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center;
-                                font-size: 1.6rem; background: rgba(220, 53, 69, .12); color: #dc3545;">
-                        <i class="bi bi-trash"></i>
+                        style="width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; font-size: 1.6rem; background: rgba(255, 193, 7, .15); color: #ffc107;">
+                        <i class="bi bi-archive"></i>
                     </div>
-                    <h5 class="fw-semibold mb-2" id="deleteModalLabel">Delete this quotation?</h5>
-                    <div class="fw-medium mb-2" id="deleteName"></div>
+
+                    <h5 class="fw-semibold mb-2" id="archiveModalLabel">Archive Quotation?</h5>
+                    <div class="fw-medium mb-2" id="archiveName"></div>
+
                     <p class="text-muted small mb-4">
-                        It will be removed from the list. The record is kept safely in the database,
-                        and its quotation number will never be reused.
+                        This quotation will be moved to the archive list and hidden from active records. You can restore it
+                        later if needed. Are you sure?
                     </p>
+
                     <div class="d-flex justify-content-center gap-2">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">
-                            <i class="bi bi-trash me-1"></i> Delete
+                        {{-- Changed from btn-danger to warning/amber to indicate archiving instead of permanent deletion --}}
+                        <button type="submit" class="btn btn-warning text-dark fw-medium">
+                            <i class="bi bi-archive me-1"></i> Yes, Archive
                         </button>
                     </div>
                 </div>
@@ -134,10 +156,10 @@
     </div>
 
     <script>
-        document.getElementById('deleteModal').addEventListener('show.bs.modal', function(event) {
+        document.getElementById('archiveModal').addEventListener('show.bs.modal', function(event) {
             const button = event.relatedTarget;
-            document.getElementById('deleteForm').action = button.dataset.action;
-            document.getElementById('deleteName').textContent = button.dataset.name;
+            document.getElementById('archiveForm').action = button.dataset.action;
+            document.getElementById('archiveName').textContent = button.dataset.name;
         });
     </script>
 @endsection
