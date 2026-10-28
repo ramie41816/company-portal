@@ -32,10 +32,11 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('access_level')->default('staff'); // RBAC level (admin, manager, staff)
-            $table->string('status')->default('active'); // active or inactive
+            $table->string('status')->default('inactive'); // active or inactive
             $table->foreignId('info_id')->nullable()->constrained('user_infos')->nullOnDelete();
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
         });
 
         // Seed default admin user profile info first
@@ -51,6 +52,7 @@ return new class extends Migration
             'email' => 'admin@example.com',
             'password' => Hash::make('password123'),
             'access_level' => 'admin',
+            'status' => 'active',
             'info_id' => $infoId,
             'email_verified_at' => now(),
             'created_at' => now(),

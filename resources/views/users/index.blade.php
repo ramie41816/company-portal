@@ -87,20 +87,20 @@
                             <td>{{ $user->userInfo?->birthday ? \Carbon\Carbon::parse($user->userInfo->birthday)->format('M d, Y') : '—' }}
                             </td>
                             <td class="text-end">
-                                <div class="d-inline-flex gap-1">
-                                    <a href="{{ route('users.show', $user) }}" class="btn btn-sm btn-outline-secondary"
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ route('users.show', $user) }}" class="btn btn-sm btn-primary"
                                         title="View Profile">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <a href="{{ route('users.edit', $user) }}" class="btn btn-sm btn-outline-secondary"
+                                    <a href="{{ route('users.edit', $user) }}" class="btn btn-sm btn-warning"
                                         title="Edit User">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Delete User"
-                                        data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                    <button type="button" class="btn btn-sm btn-danger" title="Archive User"
+                                        data-bs-toggle="modal" data-bs-target="#archiveModal"
                                         data-action="{{ route('users.destroy', $user) }}"
                                         data-name="{{ $user->userInfo?->full_name ?? $user->email }}">
-                                        <i class="bi bi-trash"></i>
+                                        <i class="bi bi-archive"></i> Archive
                                     </button>
                                 </div>
                             </td>
@@ -121,10 +121,10 @@
 
     <div class="mt-3">{{ $users->links() }}</div>
 
-    {{-- Delete confirmation modal --}}
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    {{-- Archive / Deactivate confirmation modal --}}
+    <div class="modal fade" id="archiveModal" tabindex="-1" aria-labelledby="archiveModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <form method="POST" id="deleteForm" class="modal-content shadow"
+            <form method="POST" id="archiveForm" class="modal-content shadow"
                 style="background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 1rem;">
                 @csrf
                 @method('DELETE')
@@ -132,19 +132,19 @@
                 <div class="modal-body text-center p-4">
                     <div class="mx-auto mb-3"
                         style="width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center;
-                                font-size: 1.6rem; background: rgba(220, 53, 69, .12); color: #dc3545;">
-                        <i class="bi bi-trash"></i>
+                                font-size: 1.6rem; background: rgba(255, 193, 7, .15); color: #ffc107;">
+                        <i class="bi bi-archive"></i>
                     </div>
-                    <h5 class="fw-semibold mb-2" id="deleteModalLabel">Delete this user account?</h5>
-                    <div class="fw-medium mb-2" id="deleteName"></div>
+                    <h5 class="fw-semibold mb-2" id="archiveModalLabel">Archive this user account?</h5>
+                    <div class="fw-medium mb-2 text-muted" id="deleteName"></div>
                     <p class="text-muted small mb-4">
-                        This user will be permanently removed from the system along with their associated information
-                        profile.
+                        This user will be moved to the archives and restricted from accessing the system. You can restore
+                        them anytime.
                     </p>
                     <div class="d-flex justify-content-center gap-2">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">
-                            <i class="bi bi-trash me-1"></i> Delete
+                        <button type="submit" class="btn btn-warning text-dark fw-medium">
+                            <i class="bi bi-archive me-1"></i> Yes, Archive
                         </button>
                     </div>
                 </div>
@@ -153,10 +153,13 @@
     </div>
 
     <script>
-        document.getElementById('deleteModal').addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            document.getElementById('deleteForm').action = button.dataset.action;
-            document.getElementById('deleteName').textContent = button.dataset.name;
-        });
+        const archiveModal = document.getElementById('archiveModal');
+        if (archiveModal) {
+            archiveModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                document.getElementById('archiveForm').action = button.dataset.action;
+                document.getElementById('deleteName').textContent = button.dataset.name;
+            });
+        }
     </script>
 @endsection

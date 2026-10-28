@@ -48,17 +48,12 @@
             <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning btn-sm">
                 <i class="bi bi-pencil-square me-1"></i> Edit Profile
             </a>
-            <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal"
-                data-action="{{ route('users.destroy', $user) }}"
-                data-name="{{ $user->userInfo?->full_name ?? $user->email }}">
-                <i class="bi bi-trash me-1"></i> Delete
-            </button>
         </div>
     </div>
 
     {{-- Main Profile Panel (Theme-Aware) --}}
-    <div class="panel border-0 shadow-sm"
-        style="background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 0.75rem;">
+    <div class="panel border-0 shadow-sm mb-4"
+        style="background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 1rem;">
         <div class="p-4 p-md-5">
 
             {{-- Profile Header / Cover Card --}}
@@ -66,7 +61,6 @@
                 style="border-color: var(--line) !important;">
                 <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white bg-primary shadow-sm"
                     style="width: 80px; height: 80px; font-size: 2rem;">
-                    {{-- Call Initial Function in the Model --}}
                     {{ strtoupper($user->userInfo?->initials ?? substr($user->email, 0, 1)) }}
                 </div>
                 <div>
@@ -89,10 +83,10 @@
                 {{-- Personal Information Section --}}
                 <div class="col-md-6">
                     <div class="card h-100 border shadow-none"
-                        style="background: var(--surface, var(--card)); border-color: var(--line) !important; border-radius: 0.5rem;">
-                        <div class="card-body">
+                        style="background: var(--surface, var(--card)); border-color: var(--line) !important; border-radius: 0.75rem;">
+                        <div class="card-body p-4">
                             <h6 class="text-uppercase small text-muted fw-semibold mb-3" style="letter-spacing: .08em;">
-                                <i class="bi bi-person-badge me-1"></i> Personal Information
+                                <i class="bi bi-person-badge me-1 text-primary"></i> Personal Information
                             </h6>
                             <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
                                 <li><strong>First Name:</strong> <span
@@ -116,10 +110,10 @@
                 {{-- Account & System Metadata Section --}}
                 <div class="col-md-6">
                     <div class="card h-100 border shadow-none"
-                        style="background: var(--surface, var(--card)); border-color: var(--line) !important; border-radius: 0.5rem;">
-                        <div class="card-body">
+                        style="background: var(--surface, var(--card)); border-color: var(--line) !important; border-radius: 0.75rem;">
+                        <div class="card-body p-4">
                             <h6 class="text-uppercase small text-muted fw-semibold mb-3" style="letter-spacing: .08em;">
-                                <i class="bi bi-shield-lock me-1"></i> Account & System Settings
+                                <i class="bi bi-shield-lock me-1 text-primary"></i> Account & System Settings
                             </h6>
                             <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
                                 <li><strong>Email Address:</strong> <span class="text-muted">{{ $user->email }}</span>

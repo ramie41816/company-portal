@@ -5,7 +5,7 @@
 
         <div class="hero mb-5">
             <p class="text-uppercase small opacity-75 mb-2" style="letter-spacing: .12em;">{{ config('company.tagline') }}</p>
-            <h1 class="display-6 mb-2">Welcome back, {{ explode(' ', auth()->user()->name)[0] }}</h1>
+            <h1 class="display-6 mb-2">Welcome back, {{ auth()->user()->userInfo->first_name }}</h1>
             <p class="opacity-75 mb-0">What would you like to work on today?</p>
         </div>
 
