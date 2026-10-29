@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\NewUserTemporaryPasswordMail;
+use App\Models\Role;
 use App\Models\User;
 use App\Models\UserInfo;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class UserController extends Controller
         $accessLevel = $request->input('access_level');
 
         $users = User::query()
-            ->with('userInfo')
+            ->with(['userInfo', 'roles'])
             ->where('id', '!=', auth()->id()) // Exclude the logged-in user
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -33,8 +34,10 @@ class UserController extends Controller
                         });
                 });
             })
-            ->when($status, fn ($q, $status) => $q->where('status', $status))
-            ->when($accessLevel, fn ($q, $level) => $q->where('access_level', $level))
+            ->when($status, fn($q, $status) => $q->where('status', $status))
+            ->when($accessLevel, function ($q, $level) {
+                $q->whereHas('roles', fn($sub) => $sub->where('name', $level));
+            })
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -44,7 +47,8 @@ class UserController extends Controller
 
     public function create()
     {
-        return view('users.create');
+        $roles = Role::all();
+        return view('users.create', compact('roles'));
     }
 
     public function store(Request $request)
@@ -67,7 +71,7 @@ class UserController extends Controller
                 },
             ],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'access_level' => ['required', 'string', 'in:admin,manager,staff'],
+            'role_id' => ['required', 'exists:roles,id'],
             'status' => ['required', 'string', 'in:active,inactive'],
         ]);
 
@@ -83,13 +87,18 @@ class UserController extends Controller
                 'birthday' => $validated['birthday'] ?? null,
             ]);
 
-            return User::create([
+            $newUser = User::create([
                 'email' => $validated['email'],
                 'password' => Hash::make($tempPassword),
-                'access_level' => $validated['access_level'],
+                'access_level' => 'staff', // Fallback/compatibility column if kept in schema
                 'status' => $validated['status'],
                 'info_id' => $userInfo->id,
             ]);
+
+            // Assign the selected role via pivot table
+            $newUser->roles()->sync([$validated['role_id']]);
+
+            return $newUser;
         });
 
         // Send branded temporary password email
@@ -100,16 +109,17 @@ class UserController extends Controller
 
     public function show(User $user)
     {
-        $user->load('userInfo');
+        $user->load(['userInfo', 'roles']);
 
         return view('users.show', compact('user'));
     }
 
     public function edit(User $user)
     {
-        $user->load('userInfo');
+        $user->load(['userInfo', 'roles']);
+        $roles = Role::all();
 
-        return view('users.edit', compact('user'));
+        return view('users.edit', compact('user', 'roles'));
     }
 
     public function update(Request $request, User $user)
@@ -131,8 +141,8 @@ class UserController extends Controller
                     }
                 },
             ],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
-            'access_level' => ['required', 'string', 'in:admin,manager,staff'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'role_id' => ['required', 'exists:roles,id'],
             'status' => ['required', 'string', 'in:active,inactive'],
         ]);
 
@@ -149,9 +159,11 @@ class UserController extends Controller
             }
 
             $user->email = $validated['email'];
-            $user->access_level = $validated['access_level'];
             $user->status = $validated['status'];
             $user->save();
+
+            // Sync updated role assignment
+            $user->roles()->sync([$validated['role_id']]);
         });
 
         return redirect()->route('users.index')->with('success', 'User account updated successfully.');
@@ -184,7 +196,7 @@ class UserController extends Controller
         $accessLevel = $request->input('access_level');
 
         $users = User::onlyTrashed()
-            ->with('userInfo')
+            ->with(['userInfo', 'roles'])
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('email', 'like', "%{$search}%")
@@ -196,7 +208,9 @@ class UserController extends Controller
                         });
                 });
             })
-            ->when($accessLevel, fn ($q, $level) => $q->where('access_level', $level))
+            ->when($accessLevel, function ($q, $level) {
+                $q->whereHas('roles', fn($sub) => $sub->where('name', $level));
+            })
             ->latest()
             ->paginate(10)
             ->withQueryString();

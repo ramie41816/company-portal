@@ -2,24 +2,23 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Services\PermissionRegistry;
+use App\Models\Role;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // 1. Sync permissions dynamically from your PermissionRegistry service
+        PermissionRegistry::sync();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // 2. Automatically grant ALL permissions to the 'admin' role so you never get locked out
+        $adminRole = Role::where('name', 'admin')->first();
+        if ($adminRole) {
+            $allPermissionIds = \App\Models\Permission::pluck('id')->toArray();
+            $adminRole->permissions()->sync($allPermissionIds);
+        }
     }
 }

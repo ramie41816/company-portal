@@ -2,7 +2,7 @@
 
 @section('user_content')
     <div class="page-head mb-4">
-        <h2 class="mb-1 fw-bold" style="color: var(--ink);">Create New User</h2>
+        <h2 class="mb-1 fw-bold" style="color: var(--ink);"> <i class="bi bi-person-plus"></i> Create New User</h2>
         <div class="text-muted">Add a new user account, configure role access, and set initial account status.</div>
     </div>
 
@@ -94,15 +94,16 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label small fw-semibold text-muted">Access Level (RBAC) *</label>
-                        <select name="access_level" class="form-select @error('access_level') is-invalid @enderror"
-                            required>
-                            <option value="staff" {{ old('access_level') == 'staff' ? 'selected' : '' }}>Staff</option>
-                            <option value="manager" {{ old('access_level') == 'manager' ? 'selected' : '' }}>Manager
-                            </option>
-                            <option value="admin" {{ old('access_level') == 'admin' ? 'selected' : '' }}>Admin</option>
+                        <label class="form-label small fw-semibold text-muted">User Role *</label>
+                        <select name="role_id" class="form-select @error('role_id') is-invalid @enderror" required>
+                            <option value="">Select Role</option>
+                            @foreach ($roles as $role)
+                                <option value="{{ $role->id }}" {{ old('role_id') == $role->id ? 'selected' : '' }}>
+                                    {{ $role->display_name }}
+                                </option>
+                            @endforeach
                         </select>
-                        @error('access_level')
+                        @error('role_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>

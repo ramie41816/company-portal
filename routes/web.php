@@ -3,10 +3,11 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuotationController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => redirect()->route(auth()->check() ? 'home' : 'login'));
+Route::get('/', fn() => redirect()->route(auth()->check() ? 'home' : 'login'));
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'show'])->name('login');
@@ -20,7 +21,7 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-    Route::get('/home', fn () => view('home'))->name('home');
+    Route::get('/home', fn() => view('home'))->name('home');
 
     // Quotations Routes
     Route::get('quotations/dashboard', [QuotationController::class, 'dashboard'])->name('quotations.dashboard');
@@ -43,4 +44,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+
+    // Role & Permission Management Routes (Protected with permission middleware)
+    Route::middleware(['permission:roles.index'])->group(function () {
+        Route::resource('roles', RoleController::class);
+    });
 });
