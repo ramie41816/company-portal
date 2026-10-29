@@ -3,7 +3,7 @@
 @section('user_content')
     <div class="page-head mb-4 d-flex justify-content-between align-items-center">
         <div>
-            <h2 class="mb-1">User Management</h2>
+            <h2 class="mb-1"><i class="bi bi-people"></i> User Management</h2>
             <div class="sub">View and manage system users, profiles, and access levels in one place.</div>
         </div>
     </div>

@@ -2,7 +2,7 @@
 
 @section('user_content')
     <div class="page-head mb-4">
-        <h2 class="mb-1 fw-bold" style="color: var(--ink);">Edit User Profile</h2>
+        <h2 class="mb-1 fw-bold" style="color: var(--ink);"><i class="bi bi-pencil-square"></i> Edit User Profile</h2>
         <div class="text-muted">Update account details, role access, and status configuration.</div>
     </div>
 
@@ -21,7 +21,6 @@
             <form action="{{ route('users.reset-password', $user) }}" method="POST" id="resetPasswordForm">
                 @csrf
                 @method('PUT')
-                {{-- Removed text-dark, keeping it clean with warning outline/solid styling that fits both modes --}}
                 <button type="submit" class="btn btn-warning fw-medium px-4 text-nowrap shadow-sm">
                     <i class="bi bi-key me-1"></i> Send Temporary Password
                 </button>
@@ -122,18 +121,17 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label small fw-semibold text-muted">Access Level (RBAC) *</label>
-                        <select name="access_level" class="form-select @error('access_level') is-invalid @enderror"
-                            required>
-                            <option value="staff"
-                                {{ old('access_level', $user->access_level) == 'staff' ? 'selected' : '' }}>Staff</option>
-                            <option value="manager"
-                                {{ old('access_level', $user->access_level) == 'manager' ? 'selected' : '' }}>Manager
-                            </option>
-                            <option value="admin"
-                                {{ old('access_level', $user->access_level) == 'admin' ? 'selected' : '' }}>Admin</option>
+                        <label class="form-label small fw-semibold text-muted">User Role *</label>
+                        <select name="role_id" class="form-select @error('role_id') is-invalid @enderror" required>
+                            <option value="">Select Role</option>
+                            @foreach ($roles as $role)
+                                <option value="{{ $role->id }}"
+                                    {{ old('role_id', $user->roles->first()?->id) == $role->id ? 'selected' : '' }}>
+                                    {{ $role->display_name }}
+                                </option>
+                            @endforeach
                         </select>
-                        @error('access_level')
+                        @error('role_id')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -163,75 +161,77 @@
         </div>
     </form>
 
-    <script>
-        document.getElementById('editUserForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+    @push('scripts')
+        <script>
+            document.getElementById('editUserForm').addEventListener('submit', function(e) {
+                e.preventDefault();
 
-            Swal.fire({
-                title: 'Update user profile?',
-                text: 'Do you want to save these changes to the user account?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#2b3a67',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, update changes!',
-                cancelButtonText: 'Cancel',
-                customClass: {
-                    popup: 'rounded-4 shadow'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        title: 'Processing...',
-                        text: 'Please wait while we save your changes.',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        },
-                        customClass: {
-                            popup: 'rounded-4 shadow'
-                        }
-                    });
-                    e.target.submit();
-                }
+                Swal.fire({
+                    title: 'Update user profile?',
+                    text: 'Do you want to save these changes to the user account?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#2b3a67',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, update changes!',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        popup: 'rounded-4 shadow'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Processing...',
+                            text: 'Please wait while we save your changes.',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            },
+                            customClass: {
+                                popup: 'rounded-4 shadow'
+                            }
+                        });
+                        e.target.submit();
+                    }
+                });
             });
-        });
 
-        document.getElementById('resetPasswordForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+            document.getElementById('resetPasswordForm').addEventListener('submit', function(e) {
+                e.preventDefault();
 
-            Swal.fire({
-                title: 'Send new temporary password?',
-                text: 'This will instantly invalidate the user\'s current password and email them a fresh temporary one.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ffc107',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, send temporary password!',
-                cancelButtonText: 'Cancel',
-                customClass: {
-                    popup: 'rounded-4 shadow'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        title: 'Sending Email...',
-                        text: 'Please wait while we generate and dispatch the credentials.',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        },
-                        customClass: {
-                            popup: 'rounded-4 shadow'
-                        }
-                    });
-                    e.target.submit();
-                }
+                Swal.fire({
+                    title: 'Send new temporary password?',
+                    text: 'This will instantly invalidate the user\'s current password and email them a fresh temporary one.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ffc107',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, send temporary password!',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        popup: 'rounded-4 shadow'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Sending Email...',
+                            text: 'Please wait while we generate and dispatch the credentials.',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            },
+                            customClass: {
+                                popup: 'rounded-4 shadow'
+                            }
+                        });
+                        e.target.submit();
+                    }
+                });
             });
-        });
-    </script>
+        </script>
+    @endpush
 @endsection

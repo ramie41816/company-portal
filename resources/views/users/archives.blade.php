@@ -3,7 +3,7 @@
 @section('user_content')
     <div class="page-head mb-4 d-flex justify-content-between align-items-center">
         <div>
-            <h2 class="mb-1">Archived Users</h2>
+            <h2 class="mb-1"><i class="bi bi-archive"></i> Archived Users</h2>
             <div class="sub">View and manage inactive or archived system user accounts.</div>
         </div>
     </div>

@@ -8,12 +8,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        // 1. Create user_infos table first so users can reference it
+        // 1. Create user_infos table
         Schema::create('user_infos', function (Blueprint $table) {
             $table->id();
             $table->string('first_name');
@@ -25,21 +22,72 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 2. Create users table without the redundant 'name' column
+        // 2. Create users table
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('access_level')->default('staff'); // RBAC level (admin, manager, staff)
-            $table->string('status')->default('inactive'); // active or inactive
+            $table->string('access_level')->default('staff');
+            $table->string('status')->default('inactive');
             $table->foreignId('info_id')->nullable()->constrained('user_infos')->nullOnDelete();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();
         });
 
-        // Seed default admin user profile info first
+        // 3. Create roles table
+        Schema::create('roles', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->string('display_name');
+            $table->text('description')->nullable();
+            $table->timestamps();
+        });
+
+        // 4. Create permissions table
+        Schema::create('permissions', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->unique();
+            $table->string('display_name');
+            $table->string('group')->default('General');
+            $table->timestamps();
+        });
+
+        // 5. Create permission_role pivot table
+        Schema::create('permission_role', function (Blueprint $table) {
+            $table->foreignId('role_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('permission_id')->constrained()->cascadeOnDelete();
+            $table->primary(['role_id', 'permission_id']);
+        });
+
+        // 6. Create role_user pivot table
+        Schema::create('role_user', function (Blueprint $table) {
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('role_id')->constrained()->cascadeOnDelete();
+            $table->primary(['user_id', 'role_id']);
+        });
+
+        // --- SEED DEFAULT ROLES & INITIAL ADMIN ---
+
+        $adminRoleId = DB::table('roles')->insertGetId([
+            'name' => 'admin',
+            'display_name' => 'Administrator',
+            'description' => 'Has full unrestricted access to all system modules and permissions.',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('roles')->insert([
+            [
+                'name' => 'staff',
+                'display_name' => 'Staff',
+                'description' => 'Standard user access level for day-to-day tasks.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
         $infoId = DB::table('user_infos')->insertGetId([
             'first_name' => 'Admin',
             'last_name' => 'User',
@@ -47,8 +95,7 @@ return new class extends Migration
             'updated_at' => now(),
         ]);
 
-        // Seed default admin user linked to user_info
-        DB::table('users')->insert([
+        $userId = DB::table('users')->insertGetId([
             'email' => 'admin@example.com',
             'password' => Hash::make('password123'),
             'access_level' => 'admin',
@@ -59,6 +106,13 @@ return new class extends Migration
             'updated_at' => now(),
         ]);
 
+        // Attach Admin role to admin user
+        DB::table('role_user')->insert([
+            'user_id' => $userId,
+            'role_id' => $adminRoleId,
+        ]);
+
+        // Other tables
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
@@ -75,13 +129,14 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('sessions');
         Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('role_user');
+        Schema::dropIfExists('permission_role');
+        Schema::dropIfExists('permissions');
+        Schema::dropIfExists('roles');
         Schema::dropIfExists('users');
         Schema::dropIfExists('user_infos');
     }
