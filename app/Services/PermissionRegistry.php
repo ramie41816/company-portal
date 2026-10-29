@@ -13,6 +13,7 @@ class PermissionRegistry
     {
         return [
             'User Management' => [
+                ['name' => 'users.dashboard', 'display_name' => 'View Users Dashboard'],
                 ['name' => 'users.index', 'display_name' => 'View Users List'],
                 ['name' => 'users.create', 'display_name' => 'Create User Form'],
                 ['name' => 'users.store', 'display_name' => 'Store New User'],
@@ -49,6 +50,7 @@ class PermissionRegistry
                 ['name' => 'quotations.send', 'display_name' => 'Send Quotation Email'],
             ],
             'Profile' => [
+                ['name' => 'profile.view', 'display_name' => 'View Own Profile'],
                 ['name' => 'profile.edit', 'display_name' => 'Edit Own Profile'],
                 ['name' => 'profile.update', 'display_name' => 'Update Own Profile'],
                 ['name' => 'profile.password', 'display_name' => 'Update Own Password'],

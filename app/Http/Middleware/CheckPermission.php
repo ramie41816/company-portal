@@ -10,9 +10,12 @@ class CheckPermission
 {
     public function handle(Request $request, Closure $next, string $permission): Response
     {
-        // Ensure user is logged in and has the requested permission
-        if (!auth()->check() || !auth()->user()->hasPermission($permission)) {
-            abort(403, 'Unauthorized action. You lack the required permission.');
+        if (! auth()->check() || ! auth()->user()->hasPermission($permission)) {
+            return response()
+                ->view('errors.403', [
+                    'message' => 'You do not have permission to access that page.',
+                ], 403)
+                ->header('Refresh', '5;url='.route('home')); // Automatically redirects to home after 5 seconds
         }
 
         return $next($request);

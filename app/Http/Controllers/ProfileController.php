@@ -8,6 +8,19 @@ use Illuminate\Validation\Rules\Password;
 
 class ProfileController extends Controller
 {
+    /**
+     * Show the read-only profile overview.
+     */
+    public function show()
+    {
+        $user = auth()->user()->load('userInfo', 'roles');
+
+        return view('profile.show', compact('user'));
+    }
+
+    /**
+     * Show the profile edit form.
+     */
     public function edit()
     {
         $user = auth()->user()->load('userInfo');
@@ -15,6 +28,9 @@ class ProfileController extends Controller
         return view('profile.edit', compact('user'));
     }
 
+    /**
+     * Update the user's personal information.
+     */
     public function update(Request $request)
     {
         $user = auth()->user();
@@ -46,6 +62,9 @@ class ProfileController extends Controller
         return back()->with('success', 'Profile updated successfully.');
     }
 
+    /**
+     * Update the user's password.
+     */
     public function updatePassword(Request $request)
     {
         $validated = $request->validate([

@@ -50,15 +50,17 @@
                 <i class="bi bi-pencil-square me-1"></i> Edit Quotation
             </a>
             <div>
-                @if (strtolower($quotation->status) === 'pending')
+                @if (strtolower($quotation->status) === 'pending' && auth()->user()->hasPermission('quotations.send'))
                     <button type="button" class="btn btn-primary btn-sm me-2" data-bs-toggle="modal"
                         data-bs-target="#emailSignatureModal">
                         <i class="bi bi-envelope me-1"></i> Email Quotation
                     </button>
                 @endif
-                <a href="{{ route('quotations.pdf', $quotation->id) }}" class="btn btn-brand btn-sm" target="_blank">
-                    <i class="bi bi-file-earmark-pdf me-1"></i> Generate PDF
-                </a>
+                @if (auth()->user()->hasPermission('quotations.pdf'))
+                    <a href="{{ route('quotations.pdf', $quotation->id) }}" class="btn btn-brand btn-sm" target="_blank">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> Generate PDF
+                    </a>
+                @endif
             </div>
         </div>
     </div>

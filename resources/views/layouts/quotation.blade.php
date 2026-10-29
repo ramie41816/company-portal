@@ -9,26 +9,37 @@
                 <nav class="side-nav">
                     <div class="side-title">Quotation</div>
 
-                    {{-- Dashboard Link --}}
-                    <a href="{{ route('quotations.dashboard') }}"
-                        class="{{ request()->routeIs('quotations.dashboard') ? 'active' : '' }}">
-                        <i class="bi bi-speedometer2"></i> Dashboard
-                    </a>
+                    @if (auth()->user()->hasPermission('quotations.dashboard'))
+                        {{-- Dashboard Link --}}
+                        <a href="{{ route('quotations.dashboard') }}"
+                            class="{{ request()->routeIs('quotations.dashboard') ? 'active' : '' }}">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    @endif
 
-                    <a href="{{ route('quotations.create') }}"
-                        class="{{ request()->routeIs('quotations.create') ? 'active' : '' }}">
-                        <i class="bi bi-plus-circle"></i> Create Quotation
-                    </a>
+                    @if (auth()->user()->hasPermission('quotations.create'))
+                        {{-- Create Quotation Link --}}
+                        <a href="{{ route('quotations.create') }}"
+                            class="{{ request()->routeIs('quotations.create') ? 'active' : '' }}">
+                            <i class="bi bi-plus-circle"></i> Create Quotation
+                        </a>
+                    @endif
 
-                    <a href="{{ route('quotations.index') }}"
-                        class="{{ request()->routeIs('quotations.index', 'quotations.show', 'quotations.edit') ? 'active' : '' }}">
-                        <i class="bi bi-list-ul"></i> Quotation List
-                    </a>
+                    @if (auth()->user()->hasPermission('quotations.index'))
+                        {{-- Quotation List Link --}}
+                        <a href="{{ route('quotations.index') }}"
+                            class="{{ request()->routeIs('quotations.index', 'quotations.show', 'quotations.edit') ? 'active' : '' }}">
+                            <i class="bi bi-list-ul"></i> Quotation List
+                        </a>
+                    @endif
 
-                    <a href="{{ route('quotations.archives') }}"
-                        class="{{ request()->routeIs('quotations.archives') ? 'active' : '' }}">
-                        <i class="bi bi-archive"></i> Archived Quotations
-                    </a>
+                    @if (auth()->user()->hasPermission('quotations.archives'))
+                        {{-- Archived Quotations Link --}}
+                        <a href="{{ route('quotations.archives') }}"
+                            class="{{ request()->routeIs('quotations.archives') ? 'active' : '' }}">
+                            <i class="bi bi-archive"></i> Archived Quotations
+                        </a>
+                    @endif
                 </nav>
                 <a href="{{ route('home') }}" class="btn btn-link text-muted ps-1 mt-2 text-decoration-none">
                     <i class="bi bi-arrow-left me-1"></i> All services
