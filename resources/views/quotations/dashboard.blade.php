@@ -8,12 +8,16 @@
             <p class="text-muted small mb-0">Overview of your business pipelines, quotations, and active statuses.</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('quotations.index') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-list-ul me-1"></i> All Quotations
-            </a>
-            <a href="{{ route('quotations.create') }}" class="btn btn-primary btn-sm">
-                <i class="bi bi-plus-lg me-1"></i> New Quotation
-            </a>
+            @if (auth()->user()->hasPermission('quotations.index'))
+                <a href="{{ route('quotations.index') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-list-ul me-1"></i> All Quotations
+                </a>
+            @endif
+            @if (auth()->user()->hasPermission('quotations.create'))
+                <a href="{{ route('quotations.create') }}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-lg me-1"></i> New Quotation
+                </a>
+            @endif
         </div>
     </div>
 

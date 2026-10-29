@@ -73,30 +73,37 @@
                             <td class="fw-semibold text-brand">{{ $user->userInfo?->full_name ?? '—' }}</td>
                             <td class="text-muted">{{ $user->email }}</td>
                             <td>
-                                <span
-                                    class="badge bg-{{ $user->access_level === 'admin' ? 'danger' : ($user->access_level === 'manager' ? 'warning text-dark' : 'secondary') }}">
-                                    {{ ucfirst($user->access_level) }}
-                                </span>
+                                <div class="d-flex flex-wrap gap-1">
+                                    @forelse($user->roles as $role)
+                                        <span class="badge bg-primary text-white px-2 py-1">
+                                            {{ $role->display_name }}
+                                        </span>
+                                    @empty
+                                        <span class="badge bg-secondary text-white px-2 py-1">No Role</span>
+                                    @endforelse
+                                </div>
                             </td>
                             <td>
-                                <span class="badge bg-{{ $user->status === 'active' ? 'success' : 'secondary' }}">
-                                    {{ ucfirst($user->status) }}
-                                </span>
+                                @if ($user->status === 'active')
+                                    <span class="badge bg-success text-white px-2 py-1 text-uppercase">Active</span>
+                                @else
+                                    <span class="badge bg-secondary text-white px-2 py-1 text-uppercase">Inactive</span>
+                                @endif
                             </td>
                             <td>{{ $user->userInfo?->gender ?? '—' }}</td>
                             <td>{{ $user->userInfo?->birthday ? \Carbon\Carbon::parse($user->userInfo->birthday)->format('M d, Y') : '—' }}
                             </td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm">
-                                    <a href="{{ route('users.show', $user) }}" class="btn btn-sm btn-primary"
+                                    <a href="{{ route('users.show', $user) }}" class="btn btn-sm btn-outline-primary"
                                         title="View Profile">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <a href="{{ route('users.edit', $user) }}" class="btn btn-sm btn-warning"
+                                    <a href="{{ route('users.edit', $user) }}" class="btn btn-sm btn-outline-warning"
                                         title="Edit User">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
-                                    <button type="button" class="btn btn-sm btn-danger" title="Archive User"
+                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Archive User"
                                         data-bs-toggle="modal" data-bs-target="#archiveModal"
                                         data-action="{{ route('users.destroy', $user) }}"
                                         data-name="{{ $user->userInfo?->full_name ?? $user->email }}">

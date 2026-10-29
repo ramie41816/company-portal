@@ -44,7 +44,7 @@
                             <hr class="dropdown-divider" style="border-color: var(--line);">
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                            <a class="dropdown-item" href="{{ route('profile.show') }}">
                                 <i class="bi bi-person-gear me-2"></i>My Profile
                             </a>
                         </li>
@@ -65,6 +65,8 @@
     <main class="pb-5">
         @yield('content')
     </main>
+
+    @stack('scripts')
 
     @if (session('success'))
         <script>

@@ -87,20 +87,26 @@
                             <td class="text-end fw-semibold">@money($q->total)</td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm">
-                                    <a href="{{ route('quotations.show', $q) }}" class="btn btn-sm btn-outline-secondary"
-                                        title="View">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                    <a href="{{ route('quotations.edit', $q) }}" class="btn btn-sm btn-outline-secondary"
-                                        title="Update">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-sm btn-outline-warning" title="Delete"
-                                        data-bs-toggle="modal" data-bs-target="#archiveModal"
-                                        data-action="{{ route('quotations.destroy', $q) }}"
-                                        data-name="{{ $q->quotation_number }} &ndash; {{ $q->quoted_to }}">
-                                        <i class="bi bi-archive"></i>
-                                    </button>
+                                    @if (auth()->user()->hasPermission('quotations.show'))
+                                        <a href="{{ route('quotations.show', $q) }}"
+                                            class="btn btn-sm btn-outline-secondary" title="View">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    @endif
+                                    @if (auth()->user()->hasPermission('quotations.edit'))
+                                        <a href="{{ route('quotations.edit', $q) }}"
+                                            class="btn btn-sm btn-outline-secondary" title="Update">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                    @endif
+                                    @if (auth()->user()->hasPermission('quotations.destroy'))
+                                        <button type="button" class="btn btn-sm btn-outline-warning" title="Delete"
+                                            data-bs-toggle="modal" data-bs-target="#archiveModal"
+                                            data-action="{{ route('quotations.destroy', $q) }}"
+                                            data-name="{{ $q->quotation_number }} &ndash; {{ $q->quoted_to }}">
+                                            <i class="bi bi-archive"></i>
+                                        </button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

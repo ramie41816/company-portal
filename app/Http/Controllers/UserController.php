@@ -34,9 +34,9 @@ class UserController extends Controller
                         });
                 });
             })
-            ->when($status, fn($q, $status) => $q->where('status', $status))
+            ->when($status, fn ($q, $status) => $q->where('status', $status))
             ->when($accessLevel, function ($q, $level) {
-                $q->whereHas('roles', fn($sub) => $sub->where('name', $level));
+                $q->whereHas('roles', fn ($sub) => $sub->where('name', $level));
             })
             ->latest()
             ->paginate(10)
@@ -45,9 +45,30 @@ class UserController extends Controller
         return view('users.index', compact('users', 'search', 'status', 'accessLevel'));
     }
 
+    public function dashboard()
+    {
+        $totalUsers = User::count();
+        $activeUsers = User::where('status', 'active')->count();
+        $inactiveUsers = User::where('status', 'inactive')->count();
+        $totalRoles = Role::count();
+        $recentUsers = User::with(['userInfo', 'roles'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        return view('users.dashboard', compact(
+            'totalUsers',
+            'activeUsers',
+            'inactiveUsers',
+            'totalRoles',
+            'recentUsers'
+        ));
+    }
+
     public function create()
     {
         $roles = Role::all();
+
         return view('users.create', compact('roles'));
     }
 
@@ -141,7 +162,7 @@ class UserController extends Controller
                     }
                 },
             ],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
             'role_id' => ['required', 'exists:roles,id'],
             'status' => ['required', 'string', 'in:active,inactive'],
         ]);
@@ -209,7 +230,7 @@ class UserController extends Controller
                 });
             })
             ->when($accessLevel, function ($q, $level) {
-                $q->whereHas('roles', fn($sub) => $sub->where('name', $level));
+                $q->whereHas('roles', fn ($sub) => $sub->where('name', $level));
             })
             ->latest()
             ->paginate(10)
