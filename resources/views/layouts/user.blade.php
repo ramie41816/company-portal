@@ -43,14 +43,24 @@
                     </nav>
                 @endif
 
-                {{-- Card 2: Access Control --}}
-                @if (auth()->user()->hasPermission('roles.index'))
-                    <nav class="side-nav">
+                {{-- Card 2: Access Control & Permissions Registry --}}
+                @if (auth()->user()->hasPermission('roles.index') || auth()->user()->hasPermission('permissions.manage'))
+                    <nav class="side-nav mb-4">
                         <div class="side-title text-uppercase small fw-bold text-muted mb-2 px-2">Access Control</div>
-                        <a href="{{ route('roles.index') }}"
-                            class="nav-link {{ request()->routeIs('roles.*') ? 'active' : '' }}">
-                            <i class="bi bi-shield-lock me-2"></i> Roles & Permissions
-                        </a>
+
+                        @if (auth()->user()->hasPermission('roles.index'))
+                            <a href="{{ route('roles.index') }}"
+                                class="nav-link {{ request()->routeIs('roles.*') ? 'active' : '' }}">
+                                <i class="bi bi-shield-lock me-2"></i> Roles Management
+                            </a>
+                        @endif
+
+                        @if (auth()->user()->hasPermission('permissions.manage'))
+                            <a href="{{ route('permissions.index') }}"
+                                class="nav-link {{ request()->routeIs('permissions.*') ? 'active' : '' }}">
+                                <i class="bi bi-shield-check me-2"></i> Permissions Registry
+                            </a>
+                        @endif
                     </nav>
                 @endif
 

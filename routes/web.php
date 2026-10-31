@@ -1,14 +1,17 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => redirect()->route(auth()->check() ? 'home' : 'login'));
+// --- Root Redirect ---
+Route::get('/', fn() => redirect()->route(auth()->check() ? 'home' : 'login'));
 
+// --- Guest Routes ---
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'show'])->name('login');
 
@@ -19,94 +22,111 @@ Route::middleware('guest')->group(function () {
     }
 });
 
+// --- Authenticated Routes ---
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
-    Route::get('/home', fn () => view('home'))->name('home');
-
-    // --- Quotations Individual Route Security ---
-    Route::get('quotations', [QuotationController::class, 'dashboard'])
-        ->middleware('permission:quotations.dashboard')->name('quotations.dashboard');
-
-    Route::get('quotations/archives', [QuotationController::class, 'archives'])
-        ->middleware('permission:quotations.archives')->name('quotations.archives');
-    Route::patch('quotations/{id}/restore', [QuotationController::class, 'restore'])
-        ->middleware('permission:quotations.restore')->name('quotations.restore');
-
-    Route::delete('quotations/{id}/force-delete', [QuotationController::class, 'forceDelete'])
-        ->middleware('permission:quotations.force-delete')->name('quotations.force-delete');
-
-    Route::get('quotations/{quotation}/pdf', [QuotationController::class, 'generatePDF'])
-        ->middleware('permission:quotations.pdf')->name('quotations.pdf');
-
-    Route::post('/quotations/{quotation}/send', [QuotationController::class, 'sendEmail'])
-        ->middleware('permission:quotations.send')->name('quotations.send');
-
-    // Quotation Resource Actions individually mapped
-    Route::get('quotations/list', [QuotationController::class, 'index'])
-        ->middleware('permission:quotations.index')->name('quotations.index');
-    Route::get('quotations/create', [QuotationController::class, 'create'])
-        ->middleware('permission:quotations.create')->name('quotations.create');
-    Route::post('quotations', [QuotationController::class, 'store'])
-        ->middleware('permission:quotations.store')->name('quotations.store');
-    Route::get('quotations/{quotation}', [QuotationController::class, 'show'])
-        ->middleware('permission:quotations.show')->name('quotations.show');
-    Route::get('quotations/{quotation}/edit', [QuotationController::class, 'edit'])
-        ->middleware('permission:quotations.edit')->name('quotations.edit');
-    Route::put('quotations/{quotation}', [QuotationController::class, 'update'])
-        ->middleware('permission:quotations.update')->name('quotations.update');
-    Route::delete('quotations/{quotation}', [QuotationController::class, 'destroy'])
-        ->middleware('permission:quotations.destroy')->name('quotations.destroy');
-
-    // --- User Management Individual Route Security ---
-    Route::get('users', [UserController::class, 'dashboard'])
-        ->middleware('permission:users.dashboard')->name('users.dashboard');
-
-    Route::get('users/list', [UserController::class, 'index'])
-        ->middleware('permission:users.index')->name('users.index');
-
-    Route::get('users/archives', [UserController::class, 'archives'])
-        ->middleware('permission:users.archives')->name('users.archives');
-
-    Route::put('users/{id}/restore', [UserController::class, 'restore'])
-        ->middleware('permission:users.restore')->name('users.restore');
-
-    Route::delete('users/{id}/force-delete', [UserController::class, 'forceDelete'])
-        ->middleware('permission:users.force-delete')->name('users.force-delete');
-
-    Route::put('users/{user}/reset-password', [UserController::class, 'sendTemporaryPassword'])
-        ->middleware('permission:users.reset-password')->name('users.reset-password');
-
-    // User Resource Actions individually mapped
-    Route::get('users/create', [UserController::class, 'create'])
-        ->middleware('permission:users.create')->name('users.create');
-    Route::post('users', [UserController::class, 'store'])
-        ->middleware('permission:users.store')->name('users.store');
-    Route::get('users/{user}', [UserController::class, 'show'])
-        ->middleware('permission:users.show')->name('users.show');
-    Route::get('users/{user}/edit', [UserController::class, 'edit'])
-        ->middleware('permission:users.edit')->name('users.edit');
-    Route::put('users/{user}', [UserController::class, 'update'])
-        ->middleware('permission:users.update')->name('users.update');
-    Route::delete('users/{user}', [UserController::class, 'destroy'])
-        ->middleware('permission:users.destroy')->name('users.destroy');
+    Route::get('/home', fn() => view('home'))->name('home');
 
     // --- Profile Routes ---
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
-    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [ProfileController::class, 'show'])->name('show');
+        Route::get('/edit', [ProfileController::class, 'edit'])->name('edit');
+        Route::put('/update', [ProfileController::class, 'update'])->name('update');
+        Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password');
+    });
 
-    // --- Role & Permission Management Individual Route Security ---
-    Route::get('roles/list', [RoleController::class, 'index'])
-        ->middleware('permission:roles.index')->name('roles.index');
-    Route::get('roles/create', [RoleController::class, 'create'])
-        ->middleware('permission:roles.create')->name('roles.create');
-    Route::post('roles', [RoleController::class, 'store'])
-        ->middleware('permission:roles.store')->name('roles.store');
-    Route::get('roles/{role}/edit', [RoleController::class, 'edit'])
-        ->middleware('permission:roles.edit')->name('roles.edit');
-    Route::put('roles/{role}', [RoleController::class, 'update'])
-        ->middleware('permission:roles.update')->name('roles.update');
-    Route::delete('roles/{role}', [RoleController::class, 'destroy'])
-        ->middleware('permission:roles.destroy')->name('roles.destroy');
+    // --- Quotations Module ---
+    Route::prefix('quotations')->name('quotations.')->group(function () {
+        Route::get('/', [QuotationController::class, 'dashboard'])
+            ->middleware('permission:quotations.dashboard')->name('dashboard');
+        Route::get('/archives', [QuotationController::class, 'archives'])
+            ->middleware('permission:quotations.archives')->name('archives');
+        Route::patch('/{id}/restore', [QuotationController::class, 'restore'])
+            ->middleware('permission:quotations.restore')->name('restore');
+        Route::delete('/{id}/force-delete', [QuotationController::class, 'forceDelete'])
+            ->middleware('permission:quotations.force-delete')->name('force-delete');
+
+        Route::get('/{quotation}/pdf', [QuotationController::class, 'generatePDF'])
+            ->middleware('permission:quotations.pdf')->name('pdf');
+        Route::post('/{quotation}/send', [QuotationController::class, 'sendEmail'])
+            ->middleware('permission:quotations.send')->name('send');
+
+        // Certificate of Completion (COC) Routes
+        Route::get('/{quotation}/coc', [QuotationController::class, 'createCoc'])
+            ->middleware('permission:quotations.coc')->name('coc.create');
+        Route::post('/{quotation}/coc/pdf', [QuotationController::class, 'generateCocPdf'])
+            ->middleware('permission:quotations.coc')->name('coc.pdf');
+
+        // Resource Actions
+        Route::get('/list', [QuotationController::class, 'index'])
+            ->middleware('permission:quotations.index')->name('index');
+        Route::get('/create', [QuotationController::class, 'create'])
+            ->middleware('permission:quotations.create')->name('create');
+        Route::post('/', [QuotationController::class, 'store'])
+            ->middleware('permission:quotations.store')->name('store');
+        Route::get('/{quotation}', [QuotationController::class, 'show'])
+            ->middleware('permission:quotations.show')->name('show');
+        Route::get('/{quotation}/edit', [QuotationController::class, 'edit'])
+            ->middleware('permission:quotations.edit')->name('edit');
+        Route::put('/{quotation}', [QuotationController::class, 'update'])
+            ->middleware('permission:quotations.update')->name('update');
+        Route::delete('/{quotation}', [QuotationController::class, 'destroy'])
+            ->middleware('permission:quotations.destroy')->name('destroy');
+    });
+
+    // --- User Management Module ---
+    Route::prefix('users')->name('users.')->group(function () {
+        Route::get('/', [UserController::class, 'dashboard'])
+            ->middleware('permission:users.dashboard')->name('dashboard');
+        Route::get('/list', [UserController::class, 'index'])
+            ->middleware('permission:users.index')->name('index');
+        Route::get('/archives', [UserController::class, 'archives'])
+            ->middleware('permission:users.archives')->name('archives');
+        Route::put('/{id}/restore', [UserController::class, 'restore'])
+            ->middleware('permission:users.restore')->name('restore');
+        Route::delete('/{id}/force-delete', [UserController::class, 'forceDelete'])
+            ->middleware('permission:users.force-delete')->name('force-delete');
+        Route::put('/{user}/reset-password', [UserController::class, 'sendTemporaryPassword'])
+            ->middleware('permission:users.reset-password')->name('reset-password');
+
+        // Resource Actions
+        Route::get('/create', [UserController::class, 'create'])
+            ->middleware('permission:users.create')->name('create');
+        Route::post('/', [UserController::class, 'store'])
+            ->middleware('permission:users.store')->name('store');
+        Route::get('/{user}', [UserController::class, 'show'])
+            ->middleware('permission:users.show')->name('show');
+        Route::get('/{user}/edit', [UserController::class, 'edit'])
+            ->middleware('permission:users.edit')->name('edit');
+        Route::put('/{user}', [UserController::class, 'update'])
+            ->middleware('permission:users.update')->name('update');
+        Route::delete('/{user}', [UserController::class, 'destroy'])
+            ->middleware('permission:users.destroy')->name('destroy');
+    });
+
+    // --- Role Management Module ---
+    Route::prefix('roles')->name('roles.')->group(function () {
+        Route::get('/list', [RoleController::class, 'index'])
+            ->middleware('permission:roles.index')->name('index');
+        Route::get('/create', [RoleController::class, 'create'])
+            ->middleware('permission:roles.create')->name('create');
+        Route::post('/', [RoleController::class, 'store'])
+            ->middleware('permission:roles.store')->name('store');
+        Route::get('/{role}/edit', [RoleController::class, 'edit'])
+            ->middleware('permission:roles.edit')->name('edit');
+        Route::put('/{role}', [RoleController::class, 'update'])
+            ->middleware('permission:roles.update')->name('update');
+        Route::delete('/{role}', [RoleController::class, 'destroy'])
+            ->middleware('permission:roles.destroy')->name('destroy');
+    });
+
+    // --- Permission Management Module ---
+    Route::prefix('permissions')->name('permissions.')->middleware('permission:permissions.manage')->group(function () {
+        Route::get('/', [PermissionController::class, 'index'])->name('index');
+        // Add this route for syncing permissions from routes
+        Route::post('/sync-routes', [PermissionController::class, 'syncFromRoutes'])->name('sync-routes');
+        Route::get('/{permission}/edit', [PermissionController::class, 'edit'])->name('edit');
+        Route::put('/{permission}', [PermissionController::class, 'update'])->name('update');
+        Route::delete('/{permission}', [PermissionController::class, 'destroy'])->name('destroy');
+    });
 });

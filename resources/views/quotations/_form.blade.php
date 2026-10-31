@@ -6,19 +6,21 @@
         ? $quotation->items
             ->map(
                 fn($item) => [
+                    'id' => $item->id,
+                    'parent_id' => $item->parent_id,
                     'description' => $item->description,
                     'unit_price' => (float) $item->unit_price,
                     'quantity' => (float) $item->quantity,
                 ],
             )
             ->all()
-        : [['description' => '', 'unit_price' => '', 'quantity' => 1]];
+        : [['id' => null, 'parent_id' => null, 'description' => '', 'unit_price' => '', 'quantity' => 1]];
 
     $oldItems = array_values(old('items', $savedItems));
 @endphp
 
 @if ($errors->any())
-    <div class="alert alert-danger border-0 shadow-sm">
+    <div class="alert alert-danger border-0 shadow-sm mb-4">
         <ul class="mb-0">
             @foreach ($errors->all() as $error)
                 <li>{{ $error }}</li>
@@ -79,14 +81,11 @@
         <div class="p-4">
             <h6 class="fw-semibold mb-3">Customer & Project Details</h6>
             <div class="row g-3">
-                {{-- Quote To / Client Name --}}
                 <div class="col-md-6">
                     <label for="quoted_to" class="form-label">Client Name (To)</label>
                     <input id="quoted_to" type="text" name="quoted_to"
                         value="{{ old('quoted_to', $quotation->quoted_to ?? '') }}" class="form-control" required>
                 </div>
-
-                {{-- Company / Business Name --}}
                 <div class="col-md-6">
                     <label for="client_company" class="form-label">Company Name <span
                             class="text-muted fw-normal">(optional)</span></label>
@@ -94,8 +93,6 @@
                         value="{{ old('client_company', $quotation->client_company ?? '') }}" class="form-control"
                         placeholder="Client's Company Name">
                 </div>
-
-                {{-- Client Address --}}
                 <div class="col-md-12">
                     <label for="client_address" class="form-label">Address <span
                             class="text-muted fw-normal">(optional)</span></label>
@@ -103,8 +100,6 @@
                         value="{{ old('client_address', $quotation->client_address ?? '') }}" class="form-control"
                         placeholder="Street, City, State, Zip">
                 </div>
-
-                {{-- Phone Number --}}
                 <div class="col-md-6">
                     <label for="client_phone" class="form-label">Phone Number <span
                             class="text-muted fw-normal">(optional)</span></label>
@@ -112,8 +107,6 @@
                         value="{{ old('client_phone', $quotation->client_phone ?? '') }}" class="form-control"
                         placeholder="(000) 000-0000">
                 </div>
-
-                {{-- Contact Email --}}
                 <div class="col-md-6">
                     <label for="contact_email" class="form-label">Email Address <span
                             class="text-muted fw-normal">(optional)</span></label>
@@ -121,8 +114,6 @@
                         value="{{ old('contact_email', $quotation->contact_email ?? '') }}" class="form-control"
                         placeholder="name@example.com">
                 </div>
-
-                {{-- Attention / Contact Person --}}
                 <div class="col-md-6">
                     <label for="attention" class="form-label">Contact Person (Attention) <span
                             class="text-muted fw-normal">(optional)</span></label>
@@ -130,8 +121,6 @@
                         value="{{ old('attention', $quotation->attention ?? '') }}" class="form-control"
                         placeholder="Person in charge">
                 </div>
-
-                {{-- Prepared By --}}
                 <div class="col-md-6">
                     <label for="prepared_by" class="form-label">Prepared By <span
                             class="text-muted fw-normal">(optional)</span></label>
@@ -139,16 +128,12 @@
                         value="{{ old('prepared_by', $quotation->prepared_by ?? '') }}" class="form-control"
                         placeholder="Your Name">
                 </div>
-
-                {{-- Quotation Date --}}
                 <div class="col-md-4">
                     <label for="quotation_date" class="form-label">Issue Date</label>
                     <input id="quotation_date" type="date" name="quotation_date"
                         value="{{ old('quotation_date', $isEdit ? $quotation->quotation_date->toDateString() : now()->toDateString()) }}"
                         class="form-control" required>
                 </div>
-
-                {{-- Valid Until --}}
                 <div class="col-md-4">
                     <label for="valid_until" class="form-label">Valid Until <span
                             class="text-muted fw-normal">(optional)</span></label>
@@ -156,8 +141,6 @@
                         value="{{ old('valid_until', $isEdit && $quotation->valid_until ? $quotation->valid_until->toDateString() : '') }}"
                         class="form-control">
                 </div>
-
-                {{-- Reference / Project --}}
                 <div class="col-md-4">
                     <label for="reference_project" class="form-label">Reference / Project <span
                             class="text-muted fw-normal">(optional)</span></label>
@@ -169,35 +152,56 @@
         </div>
     </div>
 
-    {{-- Scope of work --}}
+    {{-- Scope of work & Sub-items --}}
     <div class="panel mb-4">
         <div class="p-4 pb-3 d-flex justify-content-between align-items-center">
-            <h6 class="fw-semibold mb-0">Scope of Work</h6>
+            <div>
+                <h6 class="fw-semibold mb-1">Scope of Work & Items</h6>
+                <p class="text-muted small mb-0">Add main services and attach child sub-services as needed.</p>
+            </div>
             <button type="button" id="add-row" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-plus-lg me-1"></i> Add item
+                <i class="bi bi-plus-lg me-1"></i> Add Main Item
             </button>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-elegant" id="items-table">
+        <div class="table-responsive px-4 pb-4">
+            <table class="table table-elegant align-middle" id="items-table">
                 <thead>
                     <tr>
-                        <th style="min-width: 260px;">Service Description</th>
+                        <th style="min-width: 320px;">Service / Item Description</th>
                         <th style="width: 170px;">Unit Price ({{ $currency }})</th>
                         <th style="width: 130px;">Quantity</th>
-                        <th style="width: 160px;" class="text-end">Total</th>
-                        <th style="width: 60px;"></th>
+                        <th style="width: 150px;" class="text-end">Total</th>
+                        <th style="width: 110px;" class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="3" class="text-end fw-semibold">Grand Total</td>
-                        <td class="text-end fw-bold fs-5 text-brand" id="grand-total">{{ $currency }}0.00</td>
+                        <td colspan="3" class="text-end fw-semibold pt-3">Grand Total</td>
+                        <td class="text-end fw-bold fs-5 text-brand pt-3" id="grand-total">{{ $currency }}0.00
+                        </td>
                         <td></td>
                     </tr>
                 </tfoot>
             </table>
+        </div>
+    </div>
+
+    {{-- Other Information / Rich Text Editor Section --}}
+    <div class="panel mb-4">
+        <div class="p-4">
+            <h6 class="fw-semibold mb-2">Other Information / Notes <span
+                    class="text-muted fw-normal">(optional)</span></h6>
+            <p class="text-muted small mb-3">Add any notes, special instructions, or terms using bold text, bullets, or
+                headers.</p>
+
+            <div id="editor-container" style="height: 180px;">
+                {!! old('other_info', $quotation->other_info ?? '') !!}
+            </div>
+
+            <input type="hidden" name="other_info" id="other_info"
+                value="{{ old('other_info', $quotation->other_info ?? '') }}">
         </div>
     </div>
 
@@ -209,97 +213,202 @@
     </div>
 </form>
 
+<style>
+    .sub-item-row td {
+        background-color: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.02));
+    }
+</style>
+
 <script>
-    const oldItems = @json($oldItems);
-    const currency = @json($currency);
-    const tbody = document.querySelector('#items-table tbody');
-    let index = 0;
+    document.addEventListener("DOMContentLoaded", function() {
+        const editorEl = document.querySelector('#editor-container');
+        let quill = null;
+        if (typeof Quill !== 'undefined' && editorEl && !editorEl.classList.contains('ql-container')) {
+            quill = new Quill('#editor-container', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['blockquote'],
+                        [{
+                            'list': 'ordered'
+                        }, {
+                            'list': 'bullet'
+                        }],
+                        [{
+                            'header': [1, 2, 3, false]
+                        }],
+                        ['clean']
+                    ]
+                }
+            });
 
-    // Intercept form submission to show SweetAlert2 confirmation
-    document.getElementById('quotationForm').addEventListener('submit', function(e) {
-        e.preventDefault(); // Stop the form from submitting instantly
+            // Instant sync on change
+            const hiddenInput = document.querySelector('#other_info');
+            quill.on('text-change', function() {
+                const htmlContent = quill.root.innerHTML;
+                hiddenInput.value = (htmlContent === '<p><br></p>' || htmlContent.trim() === '') ? '' :
+                    htmlContent;
+            });
+        }
 
-        const isEdit = @json($isEdit);
-        const actionText = isEdit ? 'update this quotation' : 'save this new quotation';
+        const oldItems = @json($oldItems);
+        const currency = @json($currency);
+        const tbody = document.querySelector('#items-table tbody');
+        let globalIndex = 0;
 
-        Swal.fire({
-            title: 'Are you sure?',
-            text: `Do you want to ${actionText}?`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#2b3a67', // Matches your brand button theme
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, proceed!',
-            cancelButtonText: 'Cancel',
-            customClass: {
-                popup: 'rounded-4 shadow'
+        document.getElementById('quotationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (quill) {
+                const hiddenInput = document.querySelector('#other_info');
+                const htmlContent = quill.root.innerHTML;
+                hiddenInput.value = (htmlContent === '<p><br></p>' || htmlContent.trim() === '') ? '' :
+                    htmlContent;
             }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Show loading state while it submits
-                Swal.fire({
-                    title: 'Processing...',
-                    text: 'Please wait while we save your changes.',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    showConfirmButton: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    },
-                    customClass: {
-                        popup: 'rounded-4 shadow'
-                    }
-                });
 
-                // Submit the form programmatically
-                e.target.submit();
+            const isEdit = @json($isEdit);
+            const actionText = isEdit ? 'update this quotation' : 'save this new quotation';
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `Do you want to ${actionText}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#2b3a67',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, proceed!',
+                cancelButtonText: 'Cancel',
+                customClass: {
+                    popup: 'rounded-4 shadow'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Processing...',
+                        text: 'Please wait while we save your changes.',
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        customClass: {
+                            popup: 'rounded-4 shadow'
+                        }
+                    });
+                    e.target.submit();
+                }
+            });
+        });
+
+        function formatMoney(amount) {
+            return currency + amount.toLocaleString('en-PH', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            });
+        }
+
+        function renderRow(item = {}, isSubItem = false, insertAfterRow = null) {
+            const i = globalIndex++;
+            const tr = document.createElement('tr');
+            tr.className = isSubItem ? 'sub-item-row main-item-sub' : 'main-item-row';
+            tr.dataset.index = i;
+            if (isSubItem) {
+                tr.dataset.isSub = "1";
             }
-        });
-    });
 
-    function formatMoney(amount) {
-        return currency + amount.toLocaleString('en-PH', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        });
-    }
+            const paddingLeft = isSubItem ? 'ps-4' : '';
+            const badgeIcon = isSubItem ?
+                '<span class="text-muted small me-2"><i class="bi bi-arrow-return-right"></i> Sub:</span>' :
+                '<span class="badge bg-secondary me-2">Main</span>';
 
-    function addRow(item = {}) {
-        const i = index++;
-        const tr = document.createElement('tr');
-        tr.innerHTML =
-            `
-            <td class="p-2"><input type="text" name="items[${i}][description]" class="form-control" required></td>
-            <td class="p-2"><input type="number" step="0.01" min="0" name="items[${i}][unit_price]" class="form-control price" required></td>
-            <td class="p-2"><input type="number" step="0.01" min="0.01" name="items[${i}][quantity]" class="form-control qty" required></td>
-            <td class="text-end fw-medium line-total">${formatMoney(0)}</td>
-            <td class="p-2 text-end"><button type="button" class="btn btn-sm btn-outline-danger remove" aria-label="Remove item"><i class="bi bi-x-lg"></i></button></td>`;
-        tr.querySelector('[name$="[description]"]').value = item.description ?? '';
-        tr.querySelector('.price').value = item.unit_price ?? '';
-        tr.querySelector('.qty').value = item.quantity ?? 1;
-        tbody.appendChild(tr);
-        recalc();
-    }
+            // Safely escape description quotes to prevent truncation bugs (e.g. 8" PVC Pipes)
+            const safeDescription = (item.description ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
-    function recalc() {
-        let grand = 0;
-        tbody.querySelectorAll('tr').forEach(tr => {
-            const total = (parseFloat(tr.querySelector('.price').value) || 0) *
-                (parseFloat(tr.querySelector('.qty').value) || 0);
-            tr.querySelector('.line-total').textContent = formatMoney(total);
-            grand += total;
-        });
-        document.getElementById('grand-total').textContent = formatMoney(grand);
-    }
+            tr.innerHTML = `
+                <td class="p-2 ${paddingLeft}">
+                    <div class="d-flex align-items-center">
+                        ${badgeIcon}
+                        <input type="text" name="items[${i}][description]" class="form-control form-control-sm flex-grow-1" placeholder="${isSubItem ? 'Enter sub-service description...' : 'Enter main service description...'}" value="${safeDescription}" required>
+                        <input type="hidden" name="items[${i}][is_sub]" value="${isSubItem ? '1' : '0'}">
+                    </div>
+                </td>
+                <td class="p-2 align-middle">
+                    <input type="number" step="0.01" min="0" name="items[${i}][unit_price]" class="form-control form-control-sm price" value="${item.unit_price ?? ''}" placeholder="0.00" required>
+                </td>
+                <td class="p-2 align-middle">
+                    <input type="number" step="0.01" min="0.01" name="items[${i}][quantity]" class="form-control form-control-sm qty" value="${item.quantity ?? 1}" required>
+                </td>
+                <td class="text-end fw-medium line-total align-middle">${formatMoney(0)}</td>
+                <td class="p-2 text-end align-middle">
+                    <div class="btn-group" role="group">
+                        ${!isSubItem ? `<button type="button" class="btn btn-sm btn-outline-primary add-sub" title="Add Sub-item"><i class="bi bi-plus-lg"></i></button>` : ''}
+                        <button type="button" class="btn btn-sm btn-outline-danger remove" title="Remove row"><i class="bi bi-x-lg"></i></button>
+                    </div>
+                </td>
+            `;
 
-    tbody.addEventListener('input', recalc);
-    tbody.addEventListener('click', e => {
-        if (e.target.closest('.remove') && tbody.rows.length > 1) {
-            e.target.closest('tr').remove();
+            if (insertAfterRow && insertAfterRow.parentNode) {
+                insertAfterRow.parentNode.insertBefore(tr, insertAfterRow.nextSibling);
+            } else {
+                tbody.appendChild(tr);
+            }
             recalc();
         }
-    });
-    document.getElementById('add-row').addEventListener('click', () => addRow());
 
-    oldItems.forEach(addRow);
+        function recalc() {
+            let grand = 0;
+            tbody.querySelectorAll('tr').forEach(tr => {
+                const price = parseFloat(tr.querySelector('.price').value) || 0;
+                const qty = parseFloat(tr.querySelector('.qty').value) || 0;
+                const total = price * qty;
+                tr.querySelector('.line-total').textContent = formatMoney(total);
+                grand += total;
+            });
+            document.getElementById('grand-total').textContent = formatMoney(grand);
+        }
+
+        tbody.addEventListener('input', recalc);
+
+        tbody.addEventListener('click', e => {
+            if (e.target.closest('.remove')) {
+                const tr = e.target.closest('tr');
+                if (!tr.classList.contains('main-item-sub')) {
+                    let next = tr.nextElementSibling;
+                    while (next && next.classList.contains('main-item-sub')) {
+                        let toRemove = next;
+                        next = next.nextElementSibling;
+                        toRemove.remove();
+                    }
+                }
+                tr.remove();
+                recalc();
+            }
+            if (e.target.closest('.add-sub')) {
+                const mainTr = e.target.closest('tr');
+
+                let insertTarget = mainTr;
+                let nextRow = mainTr.nextElementSibling;
+                while (nextRow && nextRow.classList.contains('main-item-sub')) {
+                    insertTarget = nextRow;
+                    nextRow = nextRow.nextElementSibling;
+                }
+
+                renderRow({}, true, insertTarget);
+            }
+        });
+
+        document.getElementById('add-row').addEventListener('click', () => renderRow());
+
+        if (oldItems.length > 0) {
+            oldItems.forEach(item => {
+                const isSub = item.parent_id !== null && item.parent_id !== undefined && item
+                    .parent_id !== "";
+                renderRow(item, isSub, tbody.lastElementChild);
+            });
+        } else {
+            renderRow();
+        }
+    });
 </script>

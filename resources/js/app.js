@@ -1,5 +1,7 @@
 import * as bootstrap from 'bootstrap';
 import 'bootstrap-icons/font/bootstrap-icons.css';
+import Quill from 'quill';
+window.Quill = Quill;
 
 const setIcons = (theme) => {
     document.querySelectorAll('[data-theme-icon]').forEach((el) => {

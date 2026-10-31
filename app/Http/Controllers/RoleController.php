@@ -44,6 +44,11 @@ class RoleController extends Controller
 
     public function edit(Role $role)
     {
+        if ($role->id === 1) {
+            return redirect()->route('roles.index')
+                ->with('error', 'The Super Admin role cannot be edited.');
+        }
+
         $permissions = Permission::all()->groupBy('group');
         $rolePermissions = $role->permissions->pluck('id')->toArray();
 

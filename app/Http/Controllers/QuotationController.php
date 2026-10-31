@@ -28,8 +28,8 @@ class QuotationController extends Controller
                         ->orWhere('reference_project', 'like', "%{$search}%");
                 });
             })
-            ->when($dateFrom, fn ($q, $date) => $q->whereDate('quotation_date', '>=', $date))
-            ->when($dateTo, fn ($q, $date) => $q->whereDate('quotation_date', '<=', $date))
+            ->when($dateFrom, fn($q, $date) => $q->whereDate('quotation_date', '>=', $date))
+            ->when($dateTo, fn($q, $date) => $q->whereDate('quotation_date', '<=', $date))
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -39,14 +39,11 @@ class QuotationController extends Controller
 
     public function dashboard()
     {
-        // Gather summary statistics
         $totalQuotations = Quotation::count();
         $totalValue = Quotation::sum('total');
         $approvedCount = Quotation::where('status', 'approved')->count();
         $pendingCount = Quotation::whereIn('status', ['pending', 'revision', 'draft'])->count();
         $ongoingCount = Quotation::where('status', 'ongoing')->count();
-
-        // Fetch the 5 most recent quotations
         $recentQuotations = Quotation::with('items')->latest()->take(5)->get();
 
         return view('quotations.dashboard', compact(
@@ -77,16 +74,18 @@ class QuotationController extends Controller
             'quotation_date' => ['required', 'date'],
             'valid_until' => ['nullable', 'date', 'after_or_equal:quotation_date'],
             'reference_project' => ['nullable', 'string', 'max:255'],
+            'other_info' => ['nullable', 'string'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.description' => ['required', 'string', 'max:500'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],
             'items.*.quantity' => ['required', 'numeric', 'min:0.01'],
+            'items.*.is_sub' => ['nullable'],
         ]);
 
         DB::transaction(function () use ($validated) {
             $year = date('Y', strtotime($validated['quotation_date']));
             $latestId = Quotation::max('id') + 1;
-            $quotationNumber = 'QT-'.$year.'-'.str_pad($latestId, 4, '0', STR_PAD_LEFT);
+            $quotationNumber = 'QT-' . $year . '-' . str_pad($latestId, 4, '0', STR_PAD_LEFT);
 
             $quotation = Quotation::create([
                 'quotation_number' => $quotationNumber,
@@ -94,13 +93,14 @@ class QuotationController extends Controller
                 'valid_until' => $validated['valid_until'] ?? null,
                 'reference_project' => $validated['reference_project'] ?? null,
                 'prepared_by' => $validated['prepared_by'] ?? null,
+                'other_info' => $validated['other_info'] ?? null,
                 'quoted_to' => $validated['quoted_to'],
                 'client_company' => $validated['client_company'] ?? null,
                 'client_address' => $validated['client_address'] ?? null,
                 'client_phone' => $validated['client_phone'] ?? null,
                 'attention' => $validated['attention'] ?? null,
                 'contact_email' => $validated['contact_email'] ?? null,
-                'status' => 'draft', // Defaults to draft on creation[cite: 1]
+                'status' => 'draft',
                 'remarks' => null,
                 'status_modified_by' => auth()->user()->name ?? 'System',
                 'status_modified_at' => now(),
@@ -109,18 +109,27 @@ class QuotationController extends Controller
             ]);
 
             $grandTotal = 0;
+            $lastMainItemId = null;
 
+            // Sequential parsing: Assigns sub-items to the most recent main item automatically
             foreach ($validated['items'] as $item) {
                 $lineTotal = $item['unit_price'] * $item['quantity'];
                 $grandTotal += $lineTotal;
 
-                QuotationItem::create([
+                $isSub = !empty($item['is_sub']) && $item['is_sub'] == '1';
+
+                $createdItem = QuotationItem::create([
                     'quotation_id' => $quotation->id,
+                    'parent_id' => $isSub ? $lastMainItemId : null,
                     'description' => $item['description'],
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
                     'total' => $lineTotal,
                 ]);
+
+                if (!$isSub) {
+                    $lastMainItemId = $createdItem->id;
+                }
             }
 
             $quotation->update(['total' => $grandTotal]);
@@ -131,7 +140,9 @@ class QuotationController extends Controller
 
     public function show(Quotation $quotation)
     {
-        $quotation->load('items');
+        $quotation->load(['items' => function ($query) {
+            $query->orderBy('parent_id')->orderBy('id');
+        }]);
 
         return view('quotations.show', compact('quotation'));
     }
@@ -139,7 +150,6 @@ class QuotationController extends Controller
     public function edit(Quotation $quotation)
     {
         $quotation->load('items');
-
         return view('quotations.edit', compact('quotation'));
     }
 
@@ -156,20 +166,26 @@ class QuotationController extends Controller
             'quotation_date' => ['required', 'date'],
             'valid_until' => ['nullable', 'date', 'after_or_equal:quotation_date'],
             'reference_project' => ['nullable', 'string', 'max:255'],
+            'other_info' => ['nullable', 'string'],
             'remarks' => ['nullable', 'string', 'max:1000'],
             'status' => ['required', 'string', 'in:draft,pending,approved,rejected,emailed,ongoing,completed'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.description' => ['required', 'string', 'max:500'],
             'items.*.unit_price' => ['required', 'numeric', 'min:0'],
             'items.*.quantity' => ['required', 'numeric', 'min:0.01'],
+            'items.*.is_sub' => ['nullable'],
         ]);
 
         DB::transaction(function () use ($validated, $quotation) {
-            $updateData = [
+
+            $status_modified_by = auth()->user()->userInfo?->initials . " (" . auth()->user()->id . ")";
+
+            $quotation->update([
                 'quotation_date' => $validated['quotation_date'],
                 'valid_until' => $validated['valid_until'] ?? null,
                 'reference_project' => $validated['reference_project'] ?? null,
                 'prepared_by' => $validated['prepared_by'] ?? null,
+                'other_info' => $validated['other_info'] ?? null,
                 'quoted_to' => $validated['quoted_to'],
                 'client_company' => $validated['client_company'] ?? null,
                 'client_address' => $validated['client_address'] ?? null,
@@ -178,28 +194,33 @@ class QuotationController extends Controller
                 'contact_email' => $validated['contact_email'] ?? null,
                 'remarks' => $validated['remarks'] ?? null,
                 'status' => $validated['status'],
-                'status_modified_by' => auth()->user()->name ?? 'System',
+                'status_modified_by' => trim($status_modified_by) ?? 'System',
                 'status_modified_at' => now(),
-            ];
+            ]);
 
-            $quotation->update($updateData);
-
-            // Re-sync items
             $quotation->items()->delete();
 
             $grandTotal = 0;
+            $lastMainItemId = null;
 
             foreach ($validated['items'] as $item) {
                 $lineTotal = $item['unit_price'] * $item['quantity'];
                 $grandTotal += $lineTotal;
 
-                QuotationItem::create([
+                $isSub = !empty($item['is_sub']) && $item['is_sub'] == '1';
+
+                $createdItem = QuotationItem::create([
                     'quotation_id' => $quotation->id,
+                    'parent_id' => $isSub ? $lastMainItemId : null,
                     'description' => $item['description'],
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
                     'total' => $lineTotal,
                 ]);
+
+                if (!$isSub) {
+                    $lastMainItemId = $createdItem->id;
+                }
             }
 
             $quotation->update(['total' => $grandTotal]);
@@ -211,7 +232,6 @@ class QuotationController extends Controller
     public function destroy(Quotation $quotation)
     {
         $quotation->delete();
-
         return redirect()->route('quotations.index')->with('success', 'Quotation archived successfully.');
     }
 
@@ -230,8 +250,8 @@ class QuotationController extends Controller
                         ->orWhere('reference_project', 'like', "%{$search}%");
                 });
             })
-            ->when($dateFrom, fn ($q, $date) => $q->whereDate('quotation_date', '>=', $date))
-            ->when($dateTo, fn ($q, $date) => $q->whereDate('quotation_date', '<=', $date))
+            ->when($dateFrom, fn($q, $date) => $q->whereDate('quotation_date', '>=', $date))
+            ->when($dateTo, fn($q, $date) => $q->whereDate('quotation_date', '<=', $date))
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -264,7 +284,6 @@ class QuotationController extends Controller
 
         $signaturePath = null;
 
-        // Capture temporary signature uploaded via the email modal prompt
         if ($request->hasFile('email_signature')) {
             $signaturePath = $request->file('email_signature')->store('temp_signatures', 'public');
         }
@@ -272,31 +291,87 @@ class QuotationController extends Controller
         try {
             Mail::to($quotation->contact_email)->send(new QuotationMail($quotation, $signaturePath));
 
-            // Clean up temporary signature file from storage
             if ($signaturePath) {
                 Storage::disk('public')->delete($signaturePath);
             }
 
-            // Update status of quotation to emailed
             $quotation->update(['status' => 'emailed']);
 
-            return back()->with('success', 'Quotation successfully emailed to '.$quotation->contact_email);
+            return back()->with('success', 'Quotation successfully emailed to ' . $quotation->contact_email);
         } catch (\Exception $e) {
-            // Clean up even if it fails
             if ($signaturePath) {
                 Storage::disk('public')->delete($signaturePath);
             }
 
-            return back()->with('error', 'Failed to send email: '.$e->getMessage());
+            return back()->with('error', 'Failed to send email: ' . $e->getMessage());
         }
     }
 
     public function generatePDF(Quotation $quotation)
     {
         $quotation->load('items');
+        $pdf = Pdf::loadView('pdf.quotation-template', compact('quotation'));
+        $pdf->getDomPDF()->set_option('isPhpEnabled', true);
+        return $pdf->stream('Quotation-' . $quotation->quotation_number . '.pdf');
+    }
 
-        $pdf = Pdf::loadView('pdf.quotation', compact('quotation'));
+    // Show the CoC setup screen with quotation items
+    public function createCoc(Quotation $quotation)
+    {
+        $quotation->load(['items' => function ($query) {
+            $query->orderBy('parent_id')->orderBy('id');
+        }]);
 
-        return $pdf->stream('Quotation-'.$quotation->quotation_number.'.pdf');
+        return view('quotations.coc-setup', compact('quotation'));
+    }
+
+    public function generateCocPdf(Request $request, Quotation $quotation)
+    {
+        $validated = $request->validate([
+            'items' => ['nullable', 'array'],
+            'general_remarks' => ['nullable', 'string', 'max:1000'],
+            'executed_by' => ['nullable', 'string', 'max:255'],
+            'signature_file' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+        ]);
+
+        $quotation->load('items');
+        $submittedItems = $request->input('items', []);
+
+        $processedItems = [];
+        foreach ($quotation->items as $item) {
+            $itemData = $submittedItems[$item->id] ?? [];
+            $isIncluded = isset($itemData['included']) && $itemData['included'] == '1';
+
+            $processedItems[] = [
+                'item' => $item,
+                'included' => $isIncluded,
+                'remarks' => $itemData['remarks'] ?? null,
+            ];
+        }
+
+        $generalRemarks = $request->input('general_remarks');
+        $executedBy = trim($request->input('executed_by')) ?: ($quotation->prepared_by ?? config('company.name'));
+
+        // Handle uploaded eSignature image
+        $tempSignaturePath = null;
+        if ($request->hasFile('signature_file')) {
+            $file = $request->file('signature_file');
+            $filename = 'sig_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            // Store temporarily in public storage
+            $path = $file->storeAs('temp-signatures', $filename, 'public');
+            $tempSignaturePath = storage_path('app/public/' . $path);
+        }
+
+        $pdf = Pdf::loadView('pdf.coc-template', compact(
+            'quotation',
+            'processedItems',
+            'generalRemarks',
+            'executedBy',
+            'tempSignaturePath'
+        ));
+
+        $pdf->getDomPDF()->set_option('isPhpEnabled', true);
+
+        return $pdf->stream('Certificate-of-Completion-' . $quotation->quotation_number . '.pdf');
     }
 }
