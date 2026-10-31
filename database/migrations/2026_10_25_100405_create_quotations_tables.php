@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('quotations', function (Blueprint $table) {
@@ -15,6 +14,9 @@ return new class extends Migration
             $table->date('valid_until')->nullable();
             $table->string('reference_project')->nullable();
             $table->string('prepared_by')->nullable();
+
+            // Other information / rich text notes (Quill editor content)
+            $table->text('other_info')->nullable();
 
             // Approval Details Remarks
             $table->text('remarks')->nullable();
@@ -40,10 +42,15 @@ return new class extends Migration
         Schema::create('quotation_items', function (Blueprint $table) {
             $table->id();
             $table->foreignId('quotation_id')->constrained()->cascadeOnDelete();
-            $table->string('description');              // Product / Service description
-            $table->decimal('quantity', 10, 2);         // Quantity
-            $table->decimal('unit_price', 12, 2);       // Unit Price
-            $table->decimal('total', 12, 2);            // Amount
+
+            // Self-referencing parent_id for sub-items support
+            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->foreign('parent_id')->references('id')->on('quotation_items')->cascadeOnDelete();
+
+            $table->string('description');                      // Product / Service description or Section Header
+            $table->decimal('quantity', 10, 2)->nullable();     // Quantity (nullable if main item acts as a header)
+            $table->decimal('unit_price', 12, 2)->nullable();   // Unit Price (nullable if main item acts as a header)
+            $table->decimal('total', 12, 2)->default(0);        // Line Total
             $table->timestamps();
         });
     }

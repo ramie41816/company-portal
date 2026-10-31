@@ -31,14 +31,16 @@
                             <td class="fw-semibold" style="color: var(--ink);">{{ $role->display_name }}</td>
                             <td class="text-muted">{{ $role->description ?? '—' }}</td>
                             <td><span class="badge bg-secondary">{{ $role->users_count }} users</span></td>
-                            <td><span class="badge bg-info text-dark">{{ $role->permissions_count }} permissions</span></td>
+                            <td><span
+                                    class="badge bg-info text-dark">{{ $role->id == 1 ? 'All' : $role->permissions_count }}
+                                    permissions</span></td>
                             <td class="text-end">
                                 <div class="gap-2">
-                                    <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-sm btn-outline-warning"
-                                        title="Edit Role">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    @if ($role->users_count === 0 && $role->name !== 'admin')
+                                    @if ($role->users_count === 0 && $role->id != 1)
+                                        <a href="{{ route('roles.edit', $role->id) }}"
+                                            class="btn btn-sm btn-outline-warning" title="Edit Role">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
                                         <form action="{{ route('roles.destroy', $role->id) }}" method="POST"
                                             class="d-inline delete-role-form">
                                             @csrf
@@ -48,6 +50,8 @@
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
+                                    @else
+                                        <span class="badge badge-secondary">No Action</span>
                                     @endif
                                 </div>
                             </td>

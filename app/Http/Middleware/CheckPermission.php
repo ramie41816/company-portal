@@ -15,7 +15,7 @@ class CheckPermission
                 ->view('errors.403', [
                     'message' => 'You do not have permission to access that page.',
                 ], 403)
-                ->header('Refresh', '5;url='.route('home')); // Automatically redirects to home after 5 seconds
+                ->header('Refresh', '5;url=' . route('home'));
         }
 
         return $next($request);

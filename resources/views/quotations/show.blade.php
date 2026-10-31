@@ -1,66 +1,34 @@
 @extends('layouts.quotation')
 
 @section('quotation_content')
-    {{-- When printing: hide menus, always use light colors --}}
-    <style>
-        @media print {
-            html[data-bs-theme] {
-                --card: #ffffff;
-                --surface: #ffffff;
-                --ink: #111111;
-                --muted: #555555;
-                --line: #dddddd;
-                --brand-text: var(--brand);
-            }
-
-            body {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-
-            .topbar,
-            .d-print-none {
-                display: none !important;
-            }
-
-            .col-md-3 {
-                display: none !important;
-            }
-
-            .col-md-9 {
-                flex: 0 0 100% !important;
-                max-width: 100% !important;
-                width: 100% !important;
-            }
-
-            .panel {
-                box-shadow: none !important;
-                border: 0 !important;
-            }
-        }
-    </style>
-
     <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
         <a href="{{ route('quotations.index') }}" class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-arrow-left me-1"></i> Back to list
         </a>
         <div class="d-flex align-items-center">
-            {{-- Edit Button --}}
             <a href="{{ route('quotations.edit', $quotation->id) }}" class="btn btn-warning btn-sm me-2">
                 <i class="bi bi-pencil-square me-1"></i> Edit Quotation
             </a>
-            <div>
+            <div class="g-3">
                 @if (strtolower($quotation->status) === 'pending' && auth()->user()->hasPermission('quotations.send'))
                     <button type="button" class="btn btn-primary btn-sm me-2" data-bs-toggle="modal"
                         data-bs-target="#emailSignatureModal">
                         <i class="bi bi-envelope me-1"></i> Email Quotation
                     </button>
                 @endif
-                @if (auth()->user()->hasPermission('quotations.pdf'))
-                    <a href="{{ route('quotations.pdf', $quotation->id) }}" class="btn btn-brand btn-sm" target="_blank">
-                        <i class="bi bi-file-earmark-pdf me-1"></i> Generate PDF
-                    </a>
-                @endif
+                <div class="btn-group">
+                    @if (auth()->user()->hasPermission('quotations.pdf'))
+                        <a href="{{ route('quotations.pdf', $quotation->id) }}" class="btn btn-brand btn-sm"
+                            target="_blank">
+                            <i class="bi bi-file-earmark-pdf me-1"></i> Generate PDF
+                        </a>
+                    @endif
+                    @if (auth()->user()->hasPermission('quotations.coc') && $quotation->status === 'completed')
+                        <a href="{{ route('quotations.coc.create', $quotation->id) }}" class="btn btn-sm btn-success">
+                            <i class="bi bi-file-earmark-check me-1"></i> Setup Certificate of Completion
+                        </a>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
@@ -106,7 +74,7 @@
                                 'pending' => 'bg-warning text-dark',
                                 'emailed' => 'bg-info text-white',
                                 'ongoing' => 'bg-primary text-white',
-                                'completed' => 'bg-secondary text-white',
+                                'completed' => 'bg-success text-white',
                                 default => 'bg-secondary text-white',
                             };
                         @endphp
@@ -178,10 +146,10 @@
                 </div>
             </div>
 
-            {{-- Scope of work --}}
+            {{-- Scope of work & Hierarchical Sub-items --}}
             <div class="text-uppercase small text-muted mb-2" style="letter-spacing: .08em;">Scope of Work & Services</div>
 
-            <div class="table-responsive">
+            <div class="table-responsive mb-4">
                 <table class="table table-elegant align-middle">
                     <thead>
                         <tr>
@@ -193,28 +161,86 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($quotation->items as $item)
+                        @php
+                            $mainItems = $quotation->items->whereNull('parent_id');
+                            $counter = 1;
+                        @endphp
+                        @foreach ($mainItems as $item)
                             <tr>
-                                <td class="text-muted">{{ $loop->iteration }}</td>
-                                <td class="fw-medium">{{ $item->description }}</td>
-                                <td class="text-end">@money($item->unit_price)</td>
-                                <td class="text-end">{{ rtrim(rtrim(number_format($item->quantity, 2), '0'), '.') }}</td>
-                                <td class="text-end fw-semibold">@money($item->total)</td>
+                                <td class="text-muted">{{ $counter++ }}</td>
+                                <td class="fw-semibold">{{ $item->description }}</td>
+                                <td class="text-end">
+                                    @if ($item->unit_price > 0)
+                                        @money($item->unit_price)
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                                <td class="text-end">
+                                    @if ($item->unit_price > 0 || $item->quantity > 0)
+                                        {{ rtrim(rtrim(number_format($item->quantity, 2), '0'), '.') }}
+                                    @endif
+                                </td>
+                                <td class="text-end fw-semibold">
+                                    @if ($item->total > 0)
+                                        @money($item->total)
+                                    @else
+                                        —
+                                    @endif
+                                </td>
                             </tr>
+                            {{-- Render Sub-items nested underneath with theme-aware sub-item row class --}}
+                            @php $subCounter = 1; @endphp
+                            @foreach ($quotation->items->where('parent_id', $item->id) as $subItem)
+                                <tr class="sub-item-row">
+                                    <td></td>
+                                    <td class="ps-4" style="padding-left: 2rem !important;">
+                                        <span class="text-muted me-1"><i class="bi bi-arrow-return-right"></i></span>
+                                        <span class="text-muted">{{ $subItem->description }}</span>
+                                    </td>
+                                    <td class="text-end text-muted">
+                                        @if ($subItem->unit_price > 0)
+                                            @money($subItem->unit_price)
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
+                                    <td class="text-end text-muted">
+                                        @if ($subItem->unit_price > 0 || $subItem->quantity > 0)
+                                            {{ rtrim(rtrim(number_format($subItem->quantity, 2), '0'), '.') }}
+                                        @endif
+                                    </td>
+                                    <td class="text-end text-muted fw-medium">
+                                        @if ($subItem->total > 0)
+                                            @money($subItem->total)
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
+                                </tr>
+                                @php $subCounter++; @endphp
+                            @endforeach
                         @endforeach
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="4" class="text-end fw-semibold">Subtotal</td>
-                            <td class="text-end fw-semibold">@money($quotation->total)</td>
-                        </tr>
-                        <tr>
-                            <td colspan="4" class="text-end fw-bold fs-6">Grand Total</td>
+                            <td colspan="4" class="text-end fw-semibold">Grand Total</td>
                             <td class="text-end fw-bold fs-5 text-brand">@money($quotation->total)</td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
+
+            {{-- Other Information / Notes Section (Rich Text Output) --}}
+            @if (!empty($quotation->other_info))
+                <div class="mt-4 pt-3 border-top">
+                    <div class="text-uppercase small text-muted mb-2" style="letter-spacing: .08em;">Other Information /
+                        Terms & Notes</div>
+                    <div class="p-3 bg-light rounded-3 text-secondary small" style="line-height: 1.6;">
+                        {!! $quotation->other_info !!}
+                    </div>
+                </div>
+            @endif
 
         </div>
     </div>
@@ -234,9 +260,7 @@
                     </div>
                     <div class="modal-body">
                         <p class="text-muted small">Please upload your eSignature to bind it to the PDF before emailing
-                            this
-                            quotation to <strong>{{ $quotation->contact_email }}</strong>.</p>
-
+                            this quotation to <strong>{{ $quotation->contact_email }}</strong>.</p>
                         <div class="mb-3">
                             <label for="email_signature" class="form-label">eSignature Image (PNG/JPG)</label>
                             <input type="file" class="form-control" id="email_signature" name="email_signature"
@@ -272,7 +296,6 @@
                     return;
                 }
 
-                // 1. Hide the Bootstrap modal cleanly via pure DOM manipulation
                 const modalEl = document.getElementById('emailSignatureModal');
                 modalEl.classList.remove('show');
                 modalEl.style.display = 'none';
@@ -280,7 +303,6 @@
                 const backdrop = document.querySelector('.modal-backdrop');
                 if (backdrop) backdrop.remove();
 
-                // 2. Trigger SweetAlert loading spinner
                 Swal.fire({
                     title: 'Sending Email...',
                     text: 'Binding signature, generating PDF, and transmitting message. Please wait.',
@@ -295,7 +317,6 @@
                     }
                 });
 
-                // 3. Submit the form slightly delayed so the spinner renders cleanly
                 setTimeout(() => {
                     document.getElementById('emailSignatureForm').submit();
                 }, 300);

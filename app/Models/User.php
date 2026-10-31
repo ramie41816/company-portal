@@ -37,27 +37,31 @@ class User extends Authenticatable
         return $this->belongsTo(UserInfo::class, 'info_id');
     }
 
-    /**
-     * Relationship with Roles (Many-to-Many via role_user pivot table)[cite: 2]
-     */
+    // Relationship with Roles
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'role_user');
     }
 
-    /**
-     * Helper check to verify if the user has a specific role
-     */
+    // Check if user has a specific role
     public function hasRole($roleName)
     {
         return $this->roles()->where('name', $roleName)->exists();
     }
 
-    /**
-     * Helper check to verify if the user has a specific permission via their roles
-     */
+    // Check if user is super admin or ID 1
+    public function isSuperAdmin()
+    {
+        return $this->id === 1 || $this->hasRole('admin') || $this->hasRole('super admin');
+    }
+
+    // Check if user has permission, bypassing if super admin or ID 1
     public function hasPermission($permissionName)
     {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
         return $this->roles()->whereHas('permissions', function ($query) use ($permissionName) {
             $query->where('name', $permissionName);
         })->exists();

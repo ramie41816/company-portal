@@ -16,18 +16,19 @@ class Quotation extends Model
         'valid_until',
         'reference_project',
         'prepared_by',
-        'remarks',
-        'status_modified_by',
-        'status_modified_at',
-        'status',
+        'other_info',
         'quoted_to',
         'client_company',
         'client_address',
         'client_phone',
         'attention',
         'contact_email',
-        'total',
+        'status',
+        'remarks',
+        'status_modified_by',
+        'status_modified_at',
         'created_by',
+        'total',
     ];
 
     protected function casts(): array
@@ -38,6 +39,7 @@ class Quotation extends Model
         ];
     }
 
+    // A quotation has many items
     public function items(): HasMany
     {
         return $this->hasMany(QuotationItem::class);
