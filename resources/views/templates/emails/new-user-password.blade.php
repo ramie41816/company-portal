@@ -1,10 +1,23 @@
+@php
+    // Self-contained fallback defaults for empty data / template viewer preview
+    $isReset = $isReset ?? false;
+    $user =
+        $user ??
+        (object) [
+            'name' => 'Sample User',
+            'email' => 'sample@example.com',
+            'userInfo' => (object) ['first_name' => 'Sample'],
+        ];
+    $tempPassword = $tempPassword ?? 'TempPass123!';
+@endphp
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $isReset ? 'Password Reset' : 'Welcome' }} - {{ config('company.name') }}</title>
+    <title>{{ $isReset ? 'Password Reset' : 'Welcome' }} - {{ config('company.name', 'Company Portal') }}</title>
     <style>
         body {
             background-color: #f8fafc;
@@ -131,7 +144,7 @@
 
             {{-- Header --}}
             <div class="email-header">
-                <h1>{{ config('company.name') }}</h1>
+                <h1>{{ config('company.name', 'Company Portal') }}</h1>
                 @if (config('company.tagline'))
                     <p>{{ config('company.tagline') }}</p>
                 @else
@@ -146,7 +159,7 @@
                 @if ($isReset)
                     <p>
                         An administrator has issued a password reset for your account on
-                        <strong>{{ config('company.name') }}</strong>.
+                        <strong>{{ config('company.name', 'Company Portal') }}</strong>.
                     </p>
                     <p>
                         Your previous password has been invalidated. Please use the temporary password below to sign in
@@ -154,11 +167,13 @@
                     </p>
                 @else
                     <p>
-                        Welcome to <strong>{{ config('company.name') }}</strong>! Your user account has been
+                        Welcome to <strong>{{ config('company.name', 'Company Portal') }}</strong>! Your user account
+                        has been
                         successfully created by an administrator.
                     </p>
                     <p>
-                        You can now log in to the portal using your email address (<strong>{{ $user->email }}</strong>)
+                        You can now log in to the portal using your email address
+                        (<strong>{{ $user->email ?? 'sample@example.com' }}</strong>)
                         and the temporary password provided below.
                     </p>
                 @endif
@@ -183,7 +198,7 @@
 
                 {{-- Action Button --}}
                 <div class="btn-container">
-                    <a href="{{ route('login') }}" class="btn">
+                    <a href="{{ Route::has('login') ? route('login') : '#' }}" class="btn">
                         Sign In to Portal
                     </a>
                 </div>
@@ -193,7 +208,8 @@
             <div class="footer">
                 <p style="margin: 0 0 6px 0;">If you did not request or expect this account update, please contact your
                     system administrator immediately.</p>
-                <p style="margin: 0;">&copy; {{ date('Y') }} {{ config('company.name') }}. All rights reserved.
+                <p style="margin: 0;">&copy; {{ date('Y') }} {{ config('company.name', 'Company Portal') }}. All
+                    rights reserved.
                 </p>
             </div>
 

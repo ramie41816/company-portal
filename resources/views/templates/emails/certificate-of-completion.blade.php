@@ -1,10 +1,23 @@
+@php
+    // Self-contained fallback defaults so this template handles empty data gracefully
+    $quotation =
+        $quotation ??
+        (object) [
+            'quotation_number' => 'QT-SAMPLE-000',
+            'quoted_to' => 'Valued Client',
+            'reference_project' => 'Sample Project Name',
+        ];
+    $executedBy = $executedBy ?? 'System Administrator';
+    $generalRemarks = $generalRemarks ?? null;
+@endphp
+
 <!DOCTYPE html>
 <html>
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Certificate of Completion - {{ $quotation->quotation_number }}</title>
+    <title>Certificate of Completion - {{ $quotation->quotation_number ?? 'SAMPLE' }}</title>
     <style>
         body {
             background-color: #f8fafc;
@@ -153,12 +166,12 @@
             <!-- Header -->
             <div class="email-header">
                 <h1>Certificate of Completion</h1>
-                <p>{{ config('company.name') }}</p>
+                <p>{{ config('company.name', 'Company Portal') }}</p>
             </div>
 
             <!-- Body -->
             <div class="email-body">
-                <p>Dear <strong>{{ $quotation->quoted_to }}</strong>,</p>
+                <p>Dear <strong>{{ $quotation->quoted_to ?? 'Valued Client' }}</strong>,</p>
 
                 <p>We are pleased to inform you that the project services associated with your quotation have been
                     successfully executed and completed.</p>
@@ -168,7 +181,7 @@
                     <table>
                         <tr>
                             <td class="label">Quotation No:</td>
-                            <td class="value" style="color: #0f3460;">{{ $quotation->quotation_number }}</td>
+                            <td class="value" style="color: #0f3460;">{{ $quotation->quotation_number ?? '—' }}</td>
                         </tr>
                         <tr>
                             <td class="label">Project / Ref:</td>
@@ -176,7 +189,7 @@
                         </tr>
                         <tr>
                             <td class="label">Executed By:</td>
-                            <td class="value">{{ $executedBy }}</td>
+                            <td class="value">{{ $executedBy ?? 'System Administrator' }}</td>
                         </tr>
                     </table>
                 </div>
@@ -196,8 +209,8 @@
                 <!-- Signature -->
                 <div class="signature-section">
                     <p style="margin: 0 0 4px 0;">Best regards,</p>
-                    <div class="signature-name">{{ $executedBy }}</div>
-                    <div>{{ config('company.name') }}</div>
+                    <div class="signature-name">{{ $executedBy ?? 'System Administrator' }}</div>
+                    <div>{{ config('company.name', 'Company Portal') }}</div>
                     @if (config('company.phone'))
                         <div>Phone: {{ config('company.phone') }}</div>
                     @endif
@@ -206,7 +219,7 @@
 
             <!-- Footer -->
             <div class="footer">
-                This is an automated email from {{ config('company.name') }}.
+                This is an automated email from {{ config('company.name', 'Company Portal') }}.
             </div>
 
         </div>

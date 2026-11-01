@@ -1,9 +1,50 @@
+@php
+    // Self-contained fallback defaults for empty data / template viewer preview
+    $quotation =
+        $quotation ??
+        (object) [
+            'quotation_number' => 'QT-SAMPLE-000',
+            'quoted_to' => 'Valued Client Name',
+            'client_company' => 'Sample Client Corporation',
+            'client_address' => '123 Business Rd, Metro Manila',
+            'client_phone' => '+63 912 345 6789',
+            'contact_email' => 'client@example.com',
+            'attention' => 'Jane Doe',
+            'quotation_date' => now(),
+            'valid_until' => now()->addDays(30),
+            'reference_project' => 'Sample Enterprise System Implementation',
+            'prepared_by' => 'System Administrator',
+            'total' => 150000.0,
+            'items' => collect([
+                (object) [
+                    'id' => 1,
+                    'parent_id' => null,
+                    'description' => 'System Analysis & Requirements Gathering',
+                    'quantity' => 1,
+                    'unit_price' => 50000.0,
+                    'total' => 50000.0,
+                ],
+                (object) [
+                    'id' => 2,
+                    'parent_id' => null,
+                    'description' => 'Core Module Development & Integration',
+                    'quantity' => 1,
+                    'unit_price' => 100000.0,
+                    'total' => 100000.0,
+                ],
+            ]),
+            'other_info' => 'Notes: Standard implementation timeline applies.',
+        ];
+
+    $signatureDataUri = $signatureDataUri ?? null;
+    $tempSignaturePath = $tempSignaturePath ?? null;
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8">
-    <title>Quotation {{ $quotation->quotation_number }}</title>
+    <title>Quotation {{ $quotation->quotation_number ?? 'SAMPLE' }}</title>
     <style>
         @page {
             size: A4 portrait;
@@ -330,9 +371,9 @@
                     <div class="company-tagline">{{ config('company.tagline') }}</div>
                 @endif
                 <div class="company-meta-box">
-                    <div><strong>{{ strtoupper(config('company.name')) }}</strong></div>
-                    <div>{{ config('company.address') }}</div>
-                    <div>Phone: {{ config('company.phone') }} | Email: {{ config('company.email') }}</div>
+                    <div><strong>{{ strtoupper(config('company.name', 'COMPANY PORTAL')) }}</strong></div>
+                    <div>{{ config('company.address', '123 Business Street') }}</div>
+                    <div>Phone: {{ config('company.phone', '—') }} | Email: {{ config('company.email', '—') }}</div>
                     @if (config('company.website'))
                         <div>Website: {{ config('company.website') }}</div>
                     @endif
@@ -354,10 +395,10 @@
                 <td style="padding-right: 10px;">
                     <div class="section-subtitle">Quote To</div>
                     <table class="field-table">
-                        @if ($quotation->quoted_to !== $quotation->client_company)
+                        @if (($quotation->quoted_to ?? '') !== ($quotation->client_company ?? ''))
                             <tr>
                                 <td class="field-label">Client Name:</td>
-                                <td class="field-val">{{ $quotation->quoted_to }}</td>
+                                <td class="field-val">{{ $quotation->quoted_to ?? '—' }}</td>
                             </tr>
                         @endif
                         <tr>
@@ -388,16 +429,24 @@
                         <tr>
                             <td class="field-label-right">Quotation Number:</td>
                             <td class="field-val" style="font-weight: bold; color: #0f3460;">
-                                {{ $quotation->quotation_number }}</td>
+                                {{ $quotation->quotation_number ?? '—' }}</td>
                         </tr>
                         <tr>
                             <td class="field-label-right">Issue Date:</td>
-                            <td class="field-val">{{ $quotation->quotation_date->format('d/m/Y') }}</td>
+                            <td class="field-val">
+                                {{ isset($quotation->quotation_date) ? \Carbon\Carbon::parse($quotation->quotation_date)->format('d/m/Y') : now()->format('d/m/Y') }}
+                            </td>
                         </tr>
                         <tr>
                             <td class="field-label-right">Valid Until:</td>
                             <td class="field-val">
-                                {{ $quotation->valid_until ? $quotation->valid_until->format('d/m/Y') : $quotation->quotation_date->copy()->addDays(30)->format('d/m/Y') }}
+                                @if (isset($quotation->valid_until) && $quotation->valid_until)
+                                    {{ \Carbon\Carbon::parse($quotation->valid_until)->format('d/m/Y') }}
+                                @elseif(isset($quotation->quotation_date))
+                                    {{ \Carbon\Carbon::parse($quotation->quotation_date)->copy()->addDays(30)->format('d/m/Y') }}
+                                @else
+                                    {{ now()->addDays(30)->format('d/m/Y') }}
+                                @endif
                             </td>
                         </tr>
                         <tr>
@@ -415,9 +464,9 @@
     </div>
 
     <p class="greeting-text">
-        Dear <strong>{{ $quotation->attention ?? $quotation->quoted_to }}</strong>,<br><br>
+        Dear <strong>{{ $quotation->attention ?? ($quotation->quoted_to ?? 'Valued Client') }}</strong>,<br><br>
         Thank you for the opportunity to quote
-        @if ($quotation->reference_project)
+        @if (!empty($quotation->reference_project))
             for <strong>{{ $quotation->reference_project }}</strong>.
         @else
             for your project.
@@ -438,35 +487,36 @@
         </thead>
         <tbody>
             @php
-                $mainItems = $quotation->items->whereNull('parent_id');
+                $itemsCollection = collect($quotation->items ?? []);
+                $mainItems = $itemsCollection->whereNull('parent_id');
                 $x = 1;
             @endphp
             @foreach ($mainItems as $item)
                 @php
-                    $subItems = $quotation->items->where('parent_id', $item->id);
+                    $subItems = $itemsCollection->where('parent_id', $item->id);
                     $y = 1;
                 @endphp
                 <tr class="main-item-row">
                     <td>{{ $x }}</td>
                     <td>
-                        <div>{{ $item->description }}</div>
+                        <div>{{ $item->description ?? 'Item description' }}</div>
                     </td>
                     <td class="text-center">
-                        @if ($item->unit_price > 0 && $item->quantity > 0)
+                        @if (($item->unit_price ?? 0) > 0 && ($item->quantity ?? 0) > 0)
                             {{ rtrim(rtrim(number_format($item->quantity, 2), '0'), '.') }}
                         @else
                             -
                         @endif
                     </td>
                     <td class="text-end">
-                        @if ($item->unit_price > 0)
+                        @if (($item->unit_price ?? 0) > 0)
                             {!! 'PHP ' . number_format($item->unit_price, 2) !!}
                         @else
                             -
                         @endif
                     </td>
                     <td class="text-end" style="color: #0f3460;">
-                        @if ($item->total > 0)
+                        @if (($item->total ?? 0) > 0)
                             {!! 'PHP ' . number_format($item->total, 2) !!}
                         @else
                             -
@@ -481,22 +531,22 @@
                         <td style="padding-left: 15px;">
                             <span
                                 style="color: #166534; font-weight: bold; margin-right: 5px;">{{ "$x.$y" }}</span>
-                            {{ $subItem->description }}
+                            {{ $subItem->description ?? 'Sub-item description' }}
                         </td>
                         <td class="text-center">
-                            @if ($subItem->unit_price > 0 || $subItem->quantity > 0)
+                            @if (($subItem->unit_price ?? 0) > 0 || ($subItem->quantity ?? 0) > 0)
                                 {{ rtrim(rtrim(number_format($subItem->quantity, 2), '0'), '.') }}
                             @endif
                         </td>
                         <td class="text-end">
-                            @if ($subItem->unit_price > 0)
+                            @if (($subItem->unit_price ?? 0) > 0)
                                 {!! 'PHP ' . number_format($subItem->unit_price, 2) !!}
                             @else
                                 —
                             @endif
                         </td>
                         <td class="text-end" style="font-weight: 600;">
-                            @if ($subItem->total > 0)
+                            @if (($subItem->total ?? 0) > 0)
                                 {!! 'PHP ' . number_format($subItem->total, 2) !!}
                             @else
                                 —
@@ -523,7 +573,7 @@
         <tr class="grand-total-row">
             <td class="label">TOTAL QUOTATION</td>
             <td class="value">
-                {!! 'PHP ' . number_format($quotation->total, 2) !!}
+                {!! 'PHP ' . number_format($quotation->total ?? 0, 2) !!}
             </td>
         </tr>
     </table>
@@ -560,7 +610,7 @@
                     </div>
 
                     <div style="font-weight: bold; color: #1a202c;">
-                        {{ $quotation->prepared_by ?? config('company.name') }}
+                        {{ $quotation->prepared_by ?? config('company.name', 'Company Representative') }}
                     </div>
                     <div style="color: #4a5568; font-size: 9.5px;">Authorized Representative</div>
                 </div>
@@ -576,7 +626,7 @@
                     </div>
 
                     <div style="font-weight: bold; color: #1a202c;">
-                        {{ $quotation->attention ?? $quotation->quoted_to }}
+                        {{ $quotation->attention ?? ($quotation->quoted_to ?? 'Client Name') }}
                     </div>
                     <div style="color: #4a5568; font-size: 9.5px;">Date: ________________________</div>
                 </div>
@@ -608,11 +658,12 @@
             $color = array(0, 0, 0, 0);
             
             /* Left side: Company Name */
-            $companyText = "{{ config('company.name') }}";
+            $companyText = "{{ config('company.name', 'Company Portal') }}";
             $pdf->page_text(25, 795, $companyText, $font, $size, $color);
             
             /* Right side: Page Number */
-            $pageText = "Page {PAGE_NUM} of {PAGE_COUNT} | {{ $quotation->quotation_number }}";
+            $quotationNumber = "{{ $quotation->quotation_number ?? 'SAMPLE' }}";
+            $pageText = "Page {PAGE_NUM} of {PAGE_COUNT} | " . $quotationNumber;
             $pdf->page_text(455, 795, $pageText, $font, $size, $color);
         }
     </script>
