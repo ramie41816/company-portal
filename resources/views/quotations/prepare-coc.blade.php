@@ -142,15 +142,14 @@
                                     @php
                                         $numbering = $x . '.' . $y;
                                     @endphp
-                                    <tr class="table-light">
+                                    <tr class="sub-item-row">
                                         <td class="text-center align-middle">
                                             <input type="checkbox" name="items[{{ $subItem->id }}][included]"
                                                 value="1" class="form-check-input item-checkbox shadow-none" checked
                                                 style="width: 1.25rem; height: 1.25rem; cursor: pointer;">
                                         </td>
                                         <td class="align-middle" style="padding-left: 2rem !important;">
-                                            <span
-                                                style="color: #166534; font-weight: bold; margin-right: 5px;">{{ $numbering }}</span>
+                                            <span style="font-weight: bold; margin-right: 5px;">{{ $numbering }}</span>
                                             <span class="text-muted">{{ $subItem->description }}</span>
                                         </td>
                                         <td class="text-center text-muted align-middle">

@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuotationController;
@@ -15,6 +17,20 @@ Route::middleware('guest')->group(function () {
     $loginRoute = Route::post('/login', [LoginController::class, 'login']);
     if (app()->environment('production')) {
         $loginRoute->middleware('throttle:5,1');
+    }
+
+    // Show Forgot Password Form
+    Route::get('forgot-password', [ForgotPasswordController::class, 'create'])->name('password.request');
+    $forgotRoute = Route::post('forgot-password', [ForgotPasswordController::class, 'store'])->name('password.email');
+    if (app()->environment('production')) {
+        $forgotRoute->middleware('throttle:3,1');
+    }
+
+    // Show Reset Password Form
+    Route::get('reset-password/{token}', [ResetPasswordController::class, 'create'])->name('password.reset');
+    $resetRoute = Route::post('reset-password', [ResetPasswordController::class, 'store'])->name('password.update');
+    if (app()->environment('production')) {
+        $resetRoute->middleware('throttle:5,1');
     }
 });
 

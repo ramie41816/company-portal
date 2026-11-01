@@ -26,7 +26,7 @@ class NewUserTemporaryPasswordMail extends Mailable
 
     public function build()
     {
-        return $this->subject($this->isReset ? 'Your Password Has Been Reset' : 'Welcome to '.config('company.name'))
-            ->view('emails.new-user-password');
+        return $this->subject($this->isReset ? 'Your Password Has Been Reset' : 'Welcome to ' . config('company.name'))
+            ->view('templates.emails.new-user-password');
     }
 }

@@ -23,7 +23,7 @@ class QuotationMail extends Mailable
 
     public function build()
     {
-        $pdf = Pdf::loadView('pdf.quotation-template', [
+        $pdf = Pdf::loadView('templates.pdf.quotation-template', [
             'quotation' => $this->quotation,
             'signatureDataUri' => $this->signatureDataUri,
         ]);
@@ -38,7 +38,7 @@ class QuotationMail extends Mailable
         );
 
         return $this->subject($subject)
-            ->view('emails.quotation')
+            ->view('templates.emails.quotation')
             ->attachData($pdf->output(), "Quotation-{$this->quotation->quotation_number}.pdf", [
                 'mime' => 'application/pdf',
             ]);
