@@ -15,7 +15,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('login') }}">
+    <form method="POST" action="{{ route('login') }}" id="loginForm">
         @csrf
 
         {{-- Email Field --}}
@@ -34,7 +34,7 @@
             @enderror
         </div>
 
-        {{-- Password Field --}}
+        {{-- Password Field with Forgot Password Link --}}
         <div class="mb-3">
             <div class="d-flex justify-content-between align-items-center mb-1">
                 <label for="password" class="form-label mb-0">Password</label>
@@ -68,8 +68,30 @@
             </div>
         </div>
 
-        <button type="submit" class="btn btn-brand w-100 py-2 fw-semibold">
-            <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+        {{-- Submit Button with Loading State --}}
+        <button type="submit" id="submitBtn" class="btn btn-brand w-100 py-2 fw-semibold position-relative">
+            <span id="btnText">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+            </span>
+            <span id="btnSpinner" class="d-none">
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Signing in...
+            </span>
         </button>
     </form>
+
+    @push('scripts')
+        <script>
+            document.getElementById('loginForm').addEventListener('submit', function() {
+                const btn = document.getElementById('submitBtn');
+                const btnText = document.getElementById('btnText');
+                const btnSpinner = document.getElementById('btnSpinner');
+
+                // Disable button and swap text with spinner
+                btn.disabled = true;
+                btnText.classList.add('d-none');
+                btnSpinner.classList.remove('d-none');
+            });
+        </script>
+    @endpush
 @endsection

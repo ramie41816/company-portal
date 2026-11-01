@@ -81,7 +81,8 @@
         </div>
     </div>
 
-    {{-- Script for Password Visibility Toggle --}}
+    @stack('scripts')
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const toggleBtn = document.getElementById('togglePassword');

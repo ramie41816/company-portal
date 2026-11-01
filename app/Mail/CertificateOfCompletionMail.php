@@ -29,7 +29,7 @@ class CertificateOfCompletionMail extends Mailable
 
     public function build()
     {
-        $pdf = Pdf::loadView('pdf.coc-template', [
+        $pdf = Pdf::loadView('templates.pdf.coc-template', [
             'quotation' => $this->quotation,
             'processedItems' => $this->processedItems,
             'generalRemarks' => $this->generalRemarks,
@@ -50,7 +50,7 @@ class CertificateOfCompletionMail extends Mailable
         );
 
         return $this->subject($subject)
-            ->view('emails.certificate-of-completion')
+            ->view('templates.emails.certificate-of-completion')
             ->attachData($pdfOutput, 'Certificate-of-Completion-' . $this->quotation->quotation_number . '.pdf', [
                 'mime' => 'application/pdf',
             ]);

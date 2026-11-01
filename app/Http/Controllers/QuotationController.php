@@ -349,7 +349,7 @@ class QuotationController extends Controller
             $signatureDataUri = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
         }
 
-        $pdf = Pdf::loadView('pdf.quotation-template', compact('quotation', 'signatureDataUri'));
+        $pdf = Pdf::loadView('templates.pdf.quotation-template', compact('quotation', 'signatureDataUri'));
         $pdf->getDomPDF()->set_option('isPhpEnabled', true);
 
         return $pdf->stream('Quotation-' . $quotation->quotation_number . '.pdf');
@@ -442,7 +442,7 @@ class QuotationController extends Controller
             $signatureDataUri = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
         }
 
-        $pdf = Pdf::loadView('pdf.coc-template', compact(
+        $pdf = Pdf::loadView('templates.pdf.coc-template', compact(
             'quotation',
             'processedItems',
             'generalRemarks',
