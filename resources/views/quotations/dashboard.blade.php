@@ -8,12 +8,12 @@
             <p class="text-muted small mb-0">Overview of your business pipelines, quotations, and active statuses.</p>
         </div>
         <div class="d-flex gap-2">
-            @if (auth()->user()->hasPermission('quotations.index'))
+            @if (auth()->user()->isModuleAdmin('quotation'))
                 <a href="{{ route('quotations.index') }}" class="btn btn-outline-secondary btn-sm">
                     <i class="bi bi-list-ul me-1"></i> All Quotations
                 </a>
             @endif
-            @if (auth()->user()->hasPermission('quotations.create'))
+            @if (auth()->user()->hasPermission('quotations.add'))
                 <a href="{{ route('quotations.create') }}" class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-lg me-1"></i> New Quotation
                 </a>
@@ -131,14 +131,18 @@
                             <td class="text-end fw-semibold">@money($quotation->total)</td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
-                                    <a href="{{ route('quotations.show', $quotation->id) }}"
-                                        class="btn btn-outline-secondary" title="View">
-                                        <i class="bi bi-eye"></i>
-                                    </a>
-                                    <a href="{{ route('quotations.edit', $quotation->id) }}"
-                                        class="btn btn-outline-secondary" title="Edit">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
+                                    @if (auth()->user()->hasPermission('quotations.view'))
+                                        <a href="{{ route('quotations.show', $quotation->id) }}"
+                                            class="btn btn-outline-secondary" title="View">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    @endif
+                                    @if (auth()->user()->hasPermission('quotations.update'))
+                                        <a href="{{ route('quotations.edit', $quotation->id) }}"
+                                            class="btn btn-outline-secondary" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

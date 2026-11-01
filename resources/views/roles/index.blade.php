@@ -36,20 +36,22 @@
                                     permissions</span></td>
                             <td class="text-end">
                                 <div class="gap-2">
-                                    @if ($role->users_count === 0 && $role->id != 1)
+                                    @if ($role->id !== 1)
                                         <a href="{{ route('roles.edit', $role->id) }}"
                                             class="btn btn-sm btn-outline-warning" title="Edit Role">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <form action="{{ route('roles.destroy', $role->id) }}" method="POST"
-                                            class="d-inline delete-role-form">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                title="Delete Role">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
+                                        @if ($role->users_count === 0)
+                                            <form action="{{ route('roles.destroy', $role->id) }}" method="POST"
+                                                class="d-inline delete-role-form">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                    title="Delete Role">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        @endif
                                     @else
                                         <span class="badge badge-secondary">No Action</span>
                                     @endif

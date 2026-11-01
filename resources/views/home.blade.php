@@ -12,7 +12,7 @@
         @php
             $services = [];
 
-            if (auth()->user()->hasPermission('quotations.index')) {
+            if (auth()->user()->hasPermission('quotations.view')) {
                 $services[] = [
                     'title' => 'Quotation',
                     'desc' => 'Create, manage and send customer quotations.',
@@ -22,7 +22,7 @@
                 ];
             }
 
-            if (auth()->user()->hasPermission('users.index')) {
+            if (auth()->user()->hasPermission('users.view')) {
                 $services[] = [
                     'title' => 'User Management',
                     'desc' => 'Manage staff accounts and their access.',

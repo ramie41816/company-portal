@@ -204,8 +204,8 @@
         .sub-item-row td {
             background-color: #f8fafc;
             color: #4a5568;
-            font-size: 10px;
-            padding: 5px 10px !important;
+            font-size: 8.5px;
+            padding: 4px 9px !important;
             border-bottom: 1px solid #edf2f7;
         }
 
@@ -452,22 +452,24 @@
                         <div>{{ $item->description }}</div>
                     </td>
                     <td class="text-center">
-                        @if ($item->unit_price > 0 || $item->quantity > 0)
+                        @if ($item->unit_price > 0 && $item->quantity > 0)
                             {{ rtrim(rtrim(number_format($item->quantity, 2), '0'), '.') }}
+                        @else
+                            -
                         @endif
                     </td>
                     <td class="text-end">
                         @if ($item->unit_price > 0)
                             {!! 'PHP ' . number_format($item->unit_price, 2) !!}
                         @else
-                            —
+                            -
                         @endif
                     </td>
                     <td class="text-end" style="color: #0f3460;">
                         @if ($item->total > 0)
                             {!! 'PHP ' . number_format($item->total, 2) !!}
                         @else
-                            —
+                            -
                         @endif
                     </td>
                 </tr>
@@ -503,7 +505,6 @@
                     </tr>
                     @php $y += 1; @endphp
                 @endforeach
-
                 @php $x += 1; @endphp
             @endforeach
         </tbody>
@@ -543,8 +544,14 @@
                     <strong style="color: #0f3460;">Prepared By:</strong>
 
                     <div style="width: 180px; height: 55px; text-align: center; margin: 4px auto 0 auto;">
-                        @if (!empty($tempSignaturePath) && file_exists(storage_path('app/public/' . $tempSignaturePath)))
-                            <img src="{{ storage_path('app/public/' . $tempSignaturePath) }}" alt="eSignature"
+                        @if (!empty($signatureDataUri))
+                            {{-- Case A: Rendered via Base64 Data URI --}}
+                            <img src="{{ $signatureDataUri }}" alt="eSignature"
+                                style="max-height: 53px; max-width: 180px; width: auto; display: inline-block;">
+                        @elseif (!empty($tempSignaturePath))
+                            {{-- Case B: Rendered via Local Storage Path --}}
+                            <img src="{{ Str::startsWith($tempSignaturePath, 'data:') ? $tempSignaturePath : storage_path('app/public/' . str_replace('storage/', '', $tempSignaturePath)) }}"
+                                alt="eSignature"
                                 style="max-height: 53px; max-width: 180px; width: auto; display: inline-block;">
                         @endif
                     </div>
@@ -558,7 +565,6 @@
                     <div style="color: #4a5568; font-size: 9.5px;">Authorized Representative</div>
                 </div>
             </td>
-
             <!-- Right Side: Conforme (Client Acceptance) -->
             <td>
                 <div class="signatory-box">

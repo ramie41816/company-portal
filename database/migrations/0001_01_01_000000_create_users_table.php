@@ -8,6 +8,52 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+
+    private function seeder()
+    {
+        $adminRoleId = DB::table('roles')->insertGetId([
+            'name' => 'admin',
+            'display_name' => 'Administrator',
+            'description' => 'Has full unrestricted access to all system modules and permissions.',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('roles')->insert([
+            [
+                'name' => 'staff',
+                'display_name' => 'Staff',
+                'description' => 'Standard user access level for day-to-day tasks.',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+
+        $infoId = DB::table('user_infos')->insertGetId([
+            'first_name' => 'Admin',
+            'last_name' => 'User',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $userId = DB::table('users')->insertGetId([
+            'email' => 'admin@example.com',
+            'password' => Hash::make('password123'),
+            'access_level' => 'admin',
+            'status' => 'active',
+            'info_id' => $infoId,
+            'email_verified_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Attach Admin role to admin user
+        DB::table('role_user')->insert([
+            'user_id' => $userId,
+            'role_id' => $adminRoleId,
+        ]);
+    }
+
     public function up(): void
     {
         // 1. Create user_infos table
@@ -68,50 +114,6 @@ return new class extends Migration
             $table->primary(['user_id', 'role_id']);
         });
 
-        // --- SEED DEFAULT ROLES & INITIAL ADMIN ---
-
-        $adminRoleId = DB::table('roles')->insertGetId([
-            'name' => 'admin',
-            'display_name' => 'Administrator',
-            'description' => 'Has full unrestricted access to all system modules and permissions.',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('roles')->insert([
-            [
-                'name' => 'staff',
-                'display_name' => 'Staff',
-                'description' => 'Standard user access level for day-to-day tasks.',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
-
-        $infoId = DB::table('user_infos')->insertGetId([
-            'first_name' => 'Admin',
-            'last_name' => 'User',
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        $userId = DB::table('users')->insertGetId([
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password123'),
-            'access_level' => 'admin',
-            'status' => 'active',
-            'info_id' => $infoId,
-            'email_verified_at' => now(),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        // Attach Admin role to admin user
-        DB::table('role_user')->insert([
-            'user_id' => $userId,
-            'role_id' => $adminRoleId,
-        ]);
-
         // Other tables
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
@@ -127,6 +129,9 @@ return new class extends Migration
             $table->longText('payload');
             $table->integer('last_activity')->index();
         });
+
+        // Call Function Create Initial Users
+        $this->seeder();
     }
 
     public function down(): void

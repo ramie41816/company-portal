@@ -13,27 +13,19 @@ class QuotationMail extends Mailable
     use Queueable, SerializesModels;
 
     public $quotation;
+    public $signatureDataUri;
 
-    public $tempSignaturePath;
-
-    /**
-     * Create a new message instance.
-     */
-    public function __construct(Quotation $quotation, $tempSignaturePath = null)
+    public function __construct(Quotation $quotation, $signatureDataUri = null)
     {
         $this->quotation = $quotation;
-        $this->tempSignaturePath = $tempSignaturePath;
+        $this->signatureDataUri = $signatureDataUri;
     }
 
-    /**
-     * Build the message.
-     */
     public function build()
     {
-        // Generate the PDF content on the fly, passing the temporary signature path to the view
-        $pdf = Pdf::loadView('pdf.quotation', [
+        $pdf = Pdf::loadView('pdf.quotation-template', [
             'quotation' => $this->quotation,
-            'tempSignaturePath' => $this->tempSignaturePath,
+            'signatureDataUri' => $this->signatureDataUri,
         ]);
 
         $clientIdentifier = $this->quotation->client_company ?? $this->quotation->quoted_to;

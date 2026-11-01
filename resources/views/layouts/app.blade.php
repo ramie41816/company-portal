@@ -78,8 +78,9 @@
                 showConfirmButton: false,
                 timer: 4000,
                 timerProgressBar: true,
+                width: '450px',
                 customClass: {
-                    popup: 'rounded-4 shadow'
+                    popup: 'rounded-4 shadow px-3 py-2'
                 },
                 didOpen: (toast) => {
                     toast.onmouseenter = Swal.stopTimer;
@@ -99,8 +100,9 @@
                 showConfirmButton: false,
                 timer: 5000,
                 timerProgressBar: true,
+                width: '450px',
                 customClass: {
-                    popup: 'rounded-4 shadow'
+                    popup: 'rounded-4 shadow px-3 py-2'
                 },
                 didOpen: (toast) => {
                     toast.onmouseenter = Swal.stopTimer;

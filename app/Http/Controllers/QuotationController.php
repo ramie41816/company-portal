@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\QuotationMail;
+use App\Mail\CertificateOfCompletionMail;
 use App\Models\Quotation;
 use App\Models\QuotationItem;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -19,15 +20,20 @@ class QuotationController extends Controller
         $dateFrom = $request->input('date_from');
         $dateTo = $request->input('date_to');
 
-        $quotations = Quotation::query()
-            ->when($search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('quotation_number', 'like', "%{$search}%")
-                        ->orWhere('quoted_to', 'like', "%{$search}%")
-                        ->orWhere('client_company', 'like', "%{$search}%")
-                        ->orWhere('reference_project', 'like', "%{$search}%");
-                });
-            })
+        $query = Quotation::query();
+
+        if (!auth()->user()->isModuleAdmin('quotation')) {
+            $query->where('created_by', auth()->id());
+        }
+
+        $quotations = $query->when($search, function ($query, $search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('quotation_number', 'like', "%{$search}%")
+                    ->orWhere('quoted_to', 'like', "%{$search}%")
+                    ->orWhere('client_company', 'like', "%{$search}%")
+                    ->orWhere('reference_project', 'like', "%{$search}%");
+            });
+        })
             ->when($dateFrom, fn($q, $date) => $q->whereDate('quotation_date', '>=', $date))
             ->when($dateTo, fn($q, $date) => $q->whereDate('quotation_date', '<=', $date))
             ->latest()
@@ -39,12 +45,18 @@ class QuotationController extends Controller
 
     public function dashboard()
     {
-        $totalQuotations = Quotation::count();
-        $totalValue = Quotation::sum('total');
-        $approvedCount = Quotation::where('status', 'approved')->count();
-        $pendingCount = Quotation::whereIn('status', ['pending', 'revision', 'draft'])->count();
-        $ongoingCount = Quotation::where('status', 'ongoing')->count();
-        $recentQuotations = Quotation::with('items')->latest()->take(5)->get();
+        $query = Quotation::query();
+
+        if (!auth()->user()->isModuleAdmin('quotation')) {
+            $query->where('created_by', auth()->id());
+        }
+
+        $totalQuotations = (clone $query)->count();
+        $totalValue = (clone $query)->sum('total');
+        $approvedCount = (clone $query)->where('status', 'approved')->count();
+        $pendingCount = (clone $query)->whereIn('status', ['pending', 'revision', 'draft'])->count();
+        $ongoingCount = (clone $query)->where('status', 'ongoing')->count();
+        $recentQuotations = (clone $query)->with('items')->latest()->take(5)->get();
 
         return view('quotations.dashboard', compact(
             'totalQuotations',
@@ -111,7 +123,6 @@ class QuotationController extends Controller
             $grandTotal = 0;
             $lastMainItemId = null;
 
-            // Sequential parsing: Assigns sub-items to the most recent main item automatically
             foreach ($validated['items'] as $item) {
                 $lineTotal = $item['unit_price'] * $item['quantity'];
                 $grandTotal += $lineTotal;
@@ -140,6 +151,10 @@ class QuotationController extends Controller
 
     public function show(Quotation $quotation)
     {
+        if (!auth()->user()->isModuleAdmin('quotation') && $quotation->created_by !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $quotation->load(['items' => function ($query) {
             $query->orderBy('parent_id')->orderBy('id');
         }]);
@@ -149,12 +164,20 @@ class QuotationController extends Controller
 
     public function edit(Quotation $quotation)
     {
+        if (!auth()->user()->isModuleAdmin('quotation') && $quotation->created_by !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $quotation->load('items');
         return view('quotations.edit', compact('quotation'));
     }
 
     public function update(Request $request, Quotation $quotation)
     {
+        if (!auth()->user()->isModuleAdmin('quotation') && $quotation->created_by !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $validated = $request->validate([
             'quoted_to' => ['required', 'string', 'max:255'],
             'client_company' => ['nullable', 'string', 'max:255'],
@@ -177,7 +200,6 @@ class QuotationController extends Controller
         ]);
 
         DB::transaction(function () use ($validated, $quotation) {
-
             $status_modified_by = auth()->user()->userInfo?->initials . " (" . auth()->user()->id . ")";
 
             $quotation->update([
@@ -231,6 +253,10 @@ class QuotationController extends Controller
 
     public function destroy(Quotation $quotation)
     {
+        if (!auth()->user()->isModuleAdmin('quotation') && $quotation->created_by !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $quotation->delete();
         return redirect()->route('quotations.index')->with('success', 'Quotation archived successfully.');
     }
@@ -241,15 +267,20 @@ class QuotationController extends Controller
         $dateFrom = $request->input('date_from');
         $dateTo = $request->input('date_to');
 
-        $quotations = Quotation::onlyTrashed()
-            ->when($search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('quotation_number', 'like', "%{$search}%")
-                        ->orWhere('quoted_to', 'like', "%{$search}%")
-                        ->orWhere('client_company', 'like', "%{$search}%")
-                        ->orWhere('reference_project', 'like', "%{$search}%");
-                });
-            })
+        $query = Quotation::onlyTrashed();
+
+        if (!auth()->user()->isModuleAdmin('quotation')) {
+            $query->where('created_by', auth()->id());
+        }
+
+        $quotations = $query->when($search, function ($query, $search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('quotation_number', 'like', "%{$search}%")
+                    ->orWhere('quoted_to', 'like', "%{$search}%")
+                    ->orWhere('client_company', 'like', "%{$search}%")
+                    ->orWhere('reference_project', 'like', "%{$search}%");
+            });
+        })
             ->when($dateFrom, fn($q, $date) => $q->whereDate('quotation_date', '>=', $date))
             ->when($dateTo, fn($q, $date) => $q->whereDate('quotation_date', '<=', $date))
             ->latest()
@@ -262,6 +293,11 @@ class QuotationController extends Controller
     public function restore($id)
     {
         $quotation = Quotation::onlyTrashed()->findOrFail($id);
+
+        if (!auth()->user()->isModuleAdmin('quotation') && $quotation->created_by !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $quotation->restore();
 
         return redirect()->route('quotations.archives')->with('success', 'Quotation restored successfully.');
@@ -270,63 +306,111 @@ class QuotationController extends Controller
     public function forceDelete($id)
     {
         $quotation = Quotation::onlyTrashed()->findOrFail($id);
+
+        if (!auth()->user()->isModuleAdmin('quotation') && $quotation->created_by !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $quotation->items()->delete();
         $quotation->forceDelete();
 
         return redirect()->route('quotations.archives')->with('success', 'Quotation permanently deleted.');
     }
 
-    public function sendEmail(Request $request, Quotation $quotation)
+    // --- Prepare Quotation Module Methods ---
+    public function prepareQuotation(Quotation $quotation)
     {
-        if (empty($quotation->contact_email)) {
-            return back()->with('error', 'This client does not have a valid email address on file.');
+        if (!auth()->user()->isModuleAdmin('quotation') && $quotation->created_by !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
         }
 
-        $signaturePath = null;
-
-        if ($request->hasFile('email_signature')) {
-            $signaturePath = $request->file('email_signature')->store('temp_signatures', 'public');
-        }
-
-        try {
-            Mail::to($quotation->contact_email)->send(new QuotationMail($quotation, $signaturePath));
-
-            if ($signaturePath) {
-                Storage::disk('public')->delete($signaturePath);
-            }
-
-            $quotation->update(['status' => 'emailed']);
-
-            return back()->with('success', 'Quotation successfully emailed to ' . $quotation->contact_email);
-        } catch (\Exception $e) {
-            if ($signaturePath) {
-                Storage::disk('public')->delete($signaturePath);
-            }
-
-            return back()->with('error', 'Failed to send email: ' . $e->getMessage());
-        }
-    }
-
-    public function generatePDF(Quotation $quotation)
-    {
-        $quotation->load('items');
-        $pdf = Pdf::loadView('pdf.quotation-template', compact('quotation'));
-        $pdf->getDomPDF()->set_option('isPhpEnabled', true);
-        return $pdf->stream('Quotation-' . $quotation->quotation_number . '.pdf');
-    }
-
-    // Show the CoC setup screen with quotation items
-    public function createCoc(Quotation $quotation)
-    {
         $quotation->load(['items' => function ($query) {
             $query->orderBy('parent_id')->orderBy('id');
         }]);
 
-        return view('quotations.coc-setup', compact('quotation'));
+        return view('quotations.prepare-quotation', compact('quotation'));
+    }
+
+    public function generateQuotationPdf(Request $request, Quotation $quotation)
+    {
+        if (!auth()->user()->isModuleAdmin('quotation') && $quotation->created_by !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'signature_file' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+        ]);
+
+        $quotation->load('items');
+
+        $signatureDataUri = null;
+        if ($request->hasFile('signature_file')) {
+            $file = $request->file('signature_file');
+            $signatureDataUri = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
+        }
+
+        $pdf = Pdf::loadView('pdf.quotation-template', compact('quotation', 'signatureDataUri'));
+        $pdf->getDomPDF()->set_option('isPhpEnabled', true);
+
+        return $pdf->stream('Quotation-' . $quotation->quotation_number . '.pdf');
+    }
+
+    public function sendQuotationEmail(Request $request, Quotation $quotation)
+    {
+        if (!auth()->user()->isModuleAdmin('quotation') && $quotation->created_by !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'recipient_email' => ['required', 'email', 'max:255'],
+            'other_info' => ['nullable', 'string', 'max:1000'],
+            'signature_file' => ['required', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+        ]);
+
+        $quotation->load('items');
+        $recipientEmail = $validated['recipient_email'];
+
+        if ($request->filled('other_info')) {
+            $quotation->other_info = $request->input('other_info');
+        }
+
+        $signatureDataUri = null;
+        if ($request->hasFile('signature_file')) {
+            $file = $request->file('signature_file');
+            $signatureDataUri = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
+        }
+
+        try {
+            Mail::to($recipientEmail)->send(new QuotationMail($quotation, $signatureDataUri));
+
+            $quotation->update(['status' => 'emailed']);
+
+            return back()->with('success', 'Quotation successfully emailed to ' . $recipientEmail);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to send email: ' . $e->getMessage());
+        }
+    }
+
+    // --- Certificate of Completion (CoC) Module Methods ---
+    public function prepareCoc(Quotation $quotation)
+    {
+        if (!auth()->user()->isModuleAdmin('quotation') && $quotation->created_by !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $quotation->load(['items' => function ($query) {
+            $query->orderBy('parent_id')->orderBy('id');
+        }]);
+
+        return view('quotations.prepare-coc', compact('quotation'));
     }
 
     public function generateCocPdf(Request $request, Quotation $quotation)
     {
+        if (!auth()->user()->isModuleAdmin('quotation') && $quotation->created_by !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $validated = $request->validate([
             'items' => ['nullable', 'array'],
             'general_remarks' => ['nullable', 'string', 'max:1000'],
@@ -352,14 +436,10 @@ class QuotationController extends Controller
         $generalRemarks = $request->input('general_remarks');
         $executedBy = trim($request->input('executed_by')) ?: ($quotation->prepared_by ?? config('company.name'));
 
-        // Handle uploaded eSignature image
-        $tempSignaturePath = null;
+        $signatureDataUri = null;
         if ($request->hasFile('signature_file')) {
             $file = $request->file('signature_file');
-            $filename = 'sig_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            // Store temporarily in public storage
-            $path = $file->storeAs('temp-signatures', $filename, 'public');
-            $tempSignaturePath = storage_path('app/public/' . $path);
+            $signatureDataUri = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
         }
 
         $pdf = Pdf::loadView('pdf.coc-template', compact(
@@ -367,11 +447,65 @@ class QuotationController extends Controller
             'processedItems',
             'generalRemarks',
             'executedBy',
-            'tempSignaturePath'
+            'signatureDataUri'
         ));
 
         $pdf->getDomPDF()->set_option('isPhpEnabled', true);
 
         return $pdf->stream('Certificate-of-Completion-' . $quotation->quotation_number . '.pdf');
+    }
+
+    public function sendCocEmail(Request $request, Quotation $quotation)
+    {
+        if (!auth()->user()->isModuleAdmin('quotation') && $quotation->created_by !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'recipient_email' => ['required', 'email', 'max:255'],
+            'items' => ['nullable', 'array'],
+            'general_remarks' => ['nullable', 'string', 'max:1000'],
+            'executed_by' => ['nullable', 'string', 'max:255'],
+            'signature_file' => ['required', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+        ]);
+
+        $quotation->load('items');
+        $submittedItems = $request->input('items', []);
+
+        $processedItems = [];
+        foreach ($quotation->items as $item) {
+            $itemData = $submittedItems[$item->id] ?? [];
+            $isIncluded = isset($itemData['included']) && $itemData['included'] == '1';
+
+            $processedItems[] = [
+                'item' => $item,
+                'included' => $isIncluded,
+                'remarks' => $itemData['remarks'] ?? null,
+            ];
+        }
+
+        $generalRemarks = $request->input('general_remarks');
+        $executedBy = trim($request->input('executed_by')) ?: ($quotation->prepared_by ?? config('company.name'));
+        $recipientEmail = $validated['recipient_email'];
+
+        $signatureDataUri = null;
+        if ($request->hasFile('signature_file')) {
+            $file = $request->file('signature_file');
+            $signatureDataUri = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
+        }
+
+        try {
+            Mail::to($recipientEmail)->send(new CertificateOfCompletionMail(
+                $quotation,
+                $processedItems,
+                $generalRemarks,
+                $executedBy,
+                $signatureDataUri
+            ));
+
+            return back()->with('success', 'Certificate of Completion successfully emailed to ' . $recipientEmail);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to send email: ' . $e->getMessage());
+        }
     }
 }

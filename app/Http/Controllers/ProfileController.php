@@ -41,8 +41,18 @@ class ProfileController extends Controller
             'last_name' => ['required', 'string', 'max:255'],
             'suffix' => ['nullable', 'string', 'max:50'],
             'gender' => ['nullable', 'string', 'in:Male,Female,Other'],
-            'birthday' => ['nullable', 'date', 'before_or_equal:today'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
+            'birthday' => [
+                'nullable',
+                'date',
+                'after_or_equal:1900-01-01',
+                'before_or_equal:today',
+                function ($attribute, $value, $fail) {
+                    if ($value && (date('Y', strtotime($value)) > 9999 || strlen(explode('-', $value)[0]) > 4)) {
+                        $fail('The birthday year must not be greater than 9999.');
+                    }
+                }
+            ],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
         ]);
 
         // Update profile information

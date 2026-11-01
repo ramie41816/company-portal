@@ -31,7 +31,7 @@
 
 <form method="POST" action="{{ $action }}" id="quotationForm">
     @csrf
-    @if ($isEdit)
+    @if ($isEdit && auth()->user()->hasPermission('quotations.update'))
         @method('PUT')
         {{-- Status & Approval Remarks --}}
         <div class="panel mb-4">
@@ -205,11 +205,11 @@
         </div>
     </div>
 
-    <div class="d-flex gap-2">
+    <div class="d-flex justify-content-end gap-2 mb-4">
+        <a href="{{ route('quotations.index') }}" class="btn btn-outline-secondary">Cancel</a>
         <button type="submit" class="btn btn-brand">
             <i class="bi bi-check2-circle me-1"></i> {{ $isEdit ? 'Update Quotation' : 'Save Quotation' }}
         </button>
-        <a href="{{ route('quotations.index') }}" class="btn btn-outline-secondary">Cancel</a>
     </div>
 </form>
 

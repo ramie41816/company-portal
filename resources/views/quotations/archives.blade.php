@@ -65,18 +65,23 @@
                             <td class="text-end fw-semibold">@money($q->total)</td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm">
-                                    <button type="button" class="btn btn-sm btn-outline-success" title="Restore Quotation"
-                                        data-bs-toggle="modal" data-bs-target="#restoreModal"
-                                        data-action="{{ route('quotations.restore', $q->id) }}"
-                                        data-name="{{ $q->quotation_number }} &ndash; {{ $q->quoted_to }}">
-                                        <i class="bi bi-arrow-counterclockwise"></i> Restore
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Delete Permanently"
-                                        data-bs-toggle="modal" data-bs-target="#forceDeleteModal"
-                                        data-action="{{ route('quotations.force-delete', $q->id) }}"
-                                        data-name="{{ $q->quotation_number }} &ndash; {{ $q->quoted_to }}">
-                                        <i class="bi bi-x-circle"></i>
-                                    </button>
+                                    @if (auth()->user()->hasPermission('quotations.update'))
+                                        <button type="button" class="btn btn-sm btn-outline-success"
+                                            title="Restore Quotation" data-bs-toggle="modal" data-bs-target="#restoreModal"
+                                            data-action="{{ route('quotations.restore', $q->id) }}"
+                                            data-name="{{ $q->quotation_number }} &ndash; {{ $q->quoted_to }}">
+                                            <i class="bi bi-arrow-counterclockwise"></i> Restore
+                                        </button>
+                                    @endif
+                                    @if (auth()->user()->hasPermission('quotations.delete'))
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                            title="Delete Permanently" data-bs-toggle="modal"
+                                            data-bs-target="#forceDeleteModal"
+                                            data-action="{{ route('quotations.force-delete', $q->id) }}"
+                                            data-name="{{ $q->quotation_number }} &ndash; {{ $q->quoted_to }}">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -144,7 +149,8 @@
                     <h5 class="fw-semibold mb-2" id="forceDeleteModalLabel">Permanently delete quotation?</h5>
                     <div class="fw-medium mb-2" id="forceDeleteName"></div>
                     <p class="text-muted small mb-4">
-                        This action cannot be undone. The quotation record and its items will be permanently erased from the
+                        This action cannot be undone. The quotation record and its items will be permanently erased from
+                        the
                         database.
                     </p>
                     <div class="d-flex justify-content-center gap-2">

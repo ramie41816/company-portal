@@ -6,30 +6,23 @@
             <i class="bi bi-arrow-left me-1"></i> Back to list
         </a>
         <div class="d-flex align-items-center">
-            <a href="{{ route('quotations.edit', $quotation->id) }}" class="btn btn-warning btn-sm me-2">
-                <i class="bi bi-pencil-square me-1"></i> Edit Quotation
-            </a>
-            <div class="g-3">
-                @if (strtolower($quotation->status) === 'pending' && auth()->user()->hasPermission('quotations.send'))
-                    <button type="button" class="btn btn-primary btn-sm me-2" data-bs-toggle="modal"
-                        data-bs-target="#emailSignatureModal">
-                        <i class="bi bi-envelope me-1"></i> Email Quotation
-                    </button>
-                @endif
+            @if (auth()->user()->hasPermission('quotations.update'))
+                <a href="{{ route('quotations.edit', $quotation->id) }}" class="btn btn-warning btn-sm me-2">
+                    <i class="bi bi-pencil-square me-1"></i> Edit Quotation
+                </a>
                 <div class="btn-group">
-                    @if (auth()->user()->hasPermission('quotations.pdf'))
-                        <a href="{{ route('quotations.pdf', $quotation->id) }}" class="btn btn-brand btn-sm"
-                            target="_blank">
-                            <i class="bi bi-file-earmark-pdf me-1"></i> Generate PDF
+                    @if (auth()->user()->hasPermission('quotations.generate.pdf'))
+                        <a href="{{ route('quotations.prepare', $quotation->id) }}" class="btn btn-sm btn-primary">
+                            <i class="bi bi-file-earmark-pdf me-1"></i> Prepare Quote
                         </a>
                     @endif
-                    @if (auth()->user()->hasPermission('quotations.coc') && $quotation->status === 'completed')
-                        <a href="{{ route('quotations.coc.create', $quotation->id) }}" class="btn btn-sm btn-success">
-                            <i class="bi bi-file-earmark-check me-1"></i> Setup Certificate of Completion
+                    @if (auth()->user()->hasPermission('quotations.coc.generate.pdf') && $quotation->status === 'completed')
+                        <a href="{{ route('quotations.coc', $quotation->id) }}" class="btn btn-sm btn-success">
+                            <i class="bi bi-file-earmark-check me-1"></i> Prepare CoC/CoT
                         </a>
                     @endif
                 </div>
-            </div>
+            @endif
         </div>
     </div>
 
@@ -163,63 +156,76 @@
                     <tbody>
                         @php
                             $mainItems = $quotation->items->whereNull('parent_id');
-                            $counter = 1;
+                            $x = 1;
                         @endphp
                         @foreach ($mainItems as $item)
-                            <tr>
-                                <td class="text-muted">{{ $counter++ }}</td>
-                                <td class="fw-semibold">{{ $item->description }}</td>
+                            @php
+                                $subItems = $quotation->items->where('parent_id', $item->id);
+                                $y = 1;
+                            @endphp
+                            <tr class="main-item-row">
+                                <td>{{ $x }}</td>
+                                <td>
+                                    <div>{{ $item->description }}</div>
+                                </td>
+                                <td class="text-center">
+                                    @if ($item->unit_price > 0 && $item->quantity > 0)
+                                        {{ rtrim(rtrim(number_format($item->quantity, 2), '0'), '.') }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td class="text-end">
                                     @if ($item->unit_price > 0)
-                                        @money($item->unit_price)
+                                        {!! 'PHP ' . number_format($item->unit_price, 2) !!}
                                     @else
-                                        —
+                                        -
                                     @endif
                                 </td>
-                                <td class="text-end">
-                                    @if ($item->unit_price > 0 || $item->quantity > 0)
-                                        {{ rtrim(rtrim(number_format($item->quantity, 2), '0'), '.') }}
-                                    @endif
-                                </td>
-                                <td class="text-end fw-semibold">
+                                <td class="text-end" style="color: #0f3460;">
                                     @if ($item->total > 0)
-                                        @money($item->total)
+                                        {!! 'PHP ' . number_format($item->total, 2) !!}
                                     @else
-                                        —
+                                        -
                                     @endif
                                 </td>
                             </tr>
-                            {{-- Render Sub-items nested underneath with theme-aware sub-item row class --}}
-                            @php $subCounter = 1; @endphp
-                            @foreach ($quotation->items->where('parent_id', $item->id) as $subItem)
+
+                            {{-- Sub-items rows --}}
+                            @foreach ($subItems as $subItem)
+                                @php
+                                    $numbering = $x . '.' . $y;
+                                @endphp
                                 <tr class="sub-item-row">
                                     <td></td>
-                                    <td class="ps-4" style="padding-left: 2rem !important;">
-                                        <span class="text-muted me-1"><i class="bi bi-arrow-return-right"></i></span>
-                                        <span class="text-muted">{{ $subItem->description }}</span>
+                                    <td style="padding-left: 15px;">
+                                        <span
+                                            style="color: #166534; font-weight: bold; margin-right: 5px;">{{ $numbering }}</span>
+                                        {{ $subItem->description }}
                                     </td>
-                                    <td class="text-end text-muted">
-                                        @if ($subItem->unit_price > 0)
-                                            @money($subItem->unit_price)
-                                        @else
-                                            —
-                                        @endif
-                                    </td>
-                                    <td class="text-end text-muted">
+                                    <td class="text-center">
                                         @if ($subItem->unit_price > 0 || $subItem->quantity > 0)
                                             {{ rtrim(rtrim(number_format($subItem->quantity, 2), '0'), '.') }}
                                         @endif
                                     </td>
-                                    <td class="text-end text-muted fw-medium">
+                                    <td class="text-end">
+                                        @if ($subItem->unit_price > 0)
+                                            {!! 'PHP ' . number_format($subItem->unit_price, 2) !!}
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
+                                    <td class="text-end" style="font-weight: 600;">
                                         @if ($subItem->total > 0)
-                                            @money($subItem->total)
+                                            {!! 'PHP ' . number_format($subItem->total, 2) !!}
                                         @else
                                             —
                                         @endif
                                     </td>
                                 </tr>
-                                @php $subCounter++; @endphp
+                                @php $y += 1; @endphp
                             @endforeach
+                            @php $x += 1; @endphp
                         @endforeach
                     </tbody>
                     <tfoot>
@@ -244,83 +250,4 @@
 
         </div>
     </div>
-
-    <!-- Email Signature Prompt Modal -->
-    <div class="modal fade" id="emailSignatureModal" tabindex="-1" aria-labelledby="emailSignatureModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <form action="{{ route('quotations.send', $quotation->id) }}" method="POST" enctype="multipart/form-data"
-                id="emailSignatureForm">
-                @csrf
-                <div class="modal-content rounded-4 shadow">
-                    <div class="modal-header border-0 pb-0">
-                        <h5 class="modal-title fw-bold text-brand" id="emailSignatureModalLabel">Authorize & Send Email
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p class="text-muted small">Please upload your eSignature to bind it to the PDF before emailing
-                            this quotation to <strong>{{ $quotation->contact_email }}</strong>.</p>
-                        <div class="mb-3">
-                            <label for="email_signature" class="form-label">eSignature Image (PNG/JPG)</label>
-                            <input type="file" class="form-control" id="email_signature" name="email_signature"
-                                accept="image/png, image/jpeg" required>
-                        </div>
-                    </div>
-                    <div class="modal-footer border-0 pt-0">
-                        <button type="button" class="btn btn-outline-secondary btn-sm"
-                            data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary btn-sm" onclick="handleEmailSubmission()">
-                            <i class="bi bi-send me-1"></i> Confirm & Send Email
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    @push('scripts')
-        <script>
-            function handleEmailSubmission() {
-                const fileInput = document.getElementById('email_signature');
-                if (!fileInput.files.length) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Signature Required',
-                        text: 'Please upload your eSignature image before sending.',
-                        confirmButtonColor: '#2b3a67',
-                        customClass: {
-                            popup: 'rounded-4 shadow'
-                        }
-                    });
-                    return;
-                }
-
-                const modalEl = document.getElementById('emailSignatureModal');
-                modalEl.classList.remove('show');
-                modalEl.style.display = 'none';
-                document.body.classList.remove('modal-open');
-                const backdrop = document.querySelector('.modal-backdrop');
-                if (backdrop) backdrop.remove();
-
-                Swal.fire({
-                    title: 'Sending Email...',
-                    text: 'Binding signature, generating PDF, and transmitting message. Please wait.',
-                    allowOutsideClick: false,
-                    allowEscapeKey: false,
-                    showConfirmButton: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    },
-                    customClass: {
-                        popup: 'rounded-4 shadow'
-                    }
-                });
-
-                setTimeout(() => {
-                    document.getElementById('emailSignatureForm').submit();
-                }, 300);
-            }
-        </script>
-    @endpush
 @endsection
