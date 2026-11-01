@@ -7,13 +7,6 @@
         <p class="text-muted small mb-0">Enter your email address and we'll send you a password reset link.</p>
     </div>
 
-    {{-- Session Status Alert --}}
-    @if (session('status'))
-        <div class="alert alert-success alert-dismissible fade show small py-2" role="alert">
-            {{ session('status') }}
-        </div>
-    @endif
-
     <form method="POST" action="{{ route('password.email') }}" id="forgotForm">
         @csrf
 

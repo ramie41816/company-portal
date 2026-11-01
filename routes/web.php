@@ -8,6 +8,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\TemplateManagerController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => redirect()->route(auth()->check() ? 'home' : 'login'));
@@ -166,5 +167,12 @@ Route::middleware('auth')->group(function () {
             Route::put('/{permission}', [PermissionController::class, 'update'])->name('update');
             Route::delete('/{permission}', [PermissionController::class, 'destroy'])->name('destroy');
         });
+    });
+
+    // Template Management Module
+    Route::prefix('templates')->name('templates.')->middleware('permission:templates.manage')->group(function () {
+        Route::get('/render', [TemplateManagerController::class, 'render'])->name('render');
+        Route::get('/stream-pdf', [TemplateManagerController::class, 'streamPdf'])->name('stream.pdf');
+        Route::get('/', [TemplateManagerController::class, 'index'])->name('index');
     });
 });

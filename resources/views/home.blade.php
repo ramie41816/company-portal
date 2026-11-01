@@ -32,6 +32,16 @@
                 ];
             }
 
+            if (auth()->user()->hasPermission('templates.manage')) {
+                $services[] = [
+                    'title' => 'Template Manager',
+                    'desc' => 'Preview and Render System Templates.',
+                    'icon' => 'bi-file-earmark-code',
+                    'url' => route('templates.index'),
+                    'available' => true,
+                ];
+            }
+
             // Added My Profile service card
             $services[] = [
                 'title' => 'My Profile',

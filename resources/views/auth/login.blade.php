@@ -7,14 +7,6 @@
         <p class="text-muted small mb-0">Please sign in to access your dashboard.</p>
     </div>
 
-    {{-- Session Status Alert (e.g., after password reset) --}}
-    @if (session('status'))
-        <div class="alert alert-success alert-dismissible fade show small py-2" role="alert">
-            {{ session('status') }}
-            <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
     <form method="POST" action="{{ route('login') }}" id="loginForm">
         @csrf
 

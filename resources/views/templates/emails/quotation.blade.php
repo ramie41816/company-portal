@@ -1,10 +1,25 @@
+@php
+    // Self-contained fallback defaults for empty data / template viewer preview
+    $quotation =
+        $quotation ??
+        (object) [
+            'quotation_number' => 'QT-SAMPLE-000',
+            'quoted_to' => 'Valued Client',
+            'attention' => 'Jane Doe',
+            'reference_project' => 'Sample Project Implementation',
+            'total' => 150000.0,
+            'valid_until' => now()->addDays(30),
+            'prepared_by' => 'System Administrator',
+        ];
+@endphp
+
 <!DOCTYPE html>
 <html>
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quotation {{ $quotation->quotation_number }}</title>
+    <title>Quotation {{ $quotation->quotation_number ?? 'SAMPLE' }}</title>
     <style>
         body {
             background-color: #f8fafc;
@@ -141,7 +156,7 @@
 
             <!-- Header -->
             <div class="email-header">
-                <h1>{{ config('company.name') }}</h1>
+                <h1>{{ config('company.name', 'Company Portal') }}</h1>
                 @if (config('company.tagline'))
                     <p>{{ config('company.tagline') }}</p>
                 @endif
@@ -149,7 +164,7 @@
 
             <!-- Body -->
             <div class="email-body">
-                <p>Dear <strong>{{ $quotation->attention ?? $quotation->quoted_to }}</strong>,</p>
+                <p>Dear <strong>{{ $quotation->attention ?? ($quotation->quoted_to ?? 'Valued Client') }}</strong>,</p>
 
                 <p>Thank you for the opportunity. Please find attached our official quotation summary for your review
                     and evaluation.</p>
@@ -159,9 +174,9 @@
                     <table>
                         <tr>
                             <td class="label">Quotation No:</td>
-                            <td class="value" style="color: #0f3460;">{{ $quotation->quotation_number }}</td>
+                            <td class="value" style="color: #0f3460;">{{ $quotation->quotation_number ?? '—' }}</td>
                         </tr>
-                        @if ($quotation->reference_project)
+                        @if (!empty($quotation->reference_project))
                             <tr>
                                 <td class="label">Project Title:</td>
                                 <td class="value">{{ $quotation->reference_project }}</td>
@@ -169,12 +184,22 @@
                         @endif
                         <tr>
                             <td class="label">Total Amount:</td>
-                            <td class="value" style="color: #166534;">@money($quotation->total)</td>
+                            <td class="value" style="color: #166534;">
+                                @if (isset($quotation->total))
+                                    @money($quotation->total)
+                                @else
+                                    $0.00
+                                @endif
+                            </td>
                         </tr>
                         <tr>
                             <td class="label">Valid Until:</td>
                             <td class="value">
-                                {{ $quotation->valid_until ? $quotation->valid_until->format('F d, Y') : '30 days from issue' }}
+                                @if (isset($quotation->valid_until) && $quotation->valid_until)
+                                    {{ \Carbon\Carbon::parse($quotation->valid_until)->format('F d, Y') }}
+                                @else
+                                    30 days from issue
+                                @endif
                             </td>
                         </tr>
                     </table>
@@ -186,8 +211,9 @@
                 <!-- Signature -->
                 <div class="signature-section">
                     <p style="margin: 0 0 4px 0;">Best regards,</p>
-                    <div class="signature-name">{{ $quotation->prepared_by ?? config('company.name') }}</div>
-                    <div>{{ config('company.name') }}</div>
+                    <div class="signature-name">
+                        {{ $quotation->prepared_by ?? config('company.name', 'Company Portal') }}</div>
+                    <div>{{ config('company.name', 'Company Portal') }}</div>
                     @if (config('company.phone'))
                         <div>Phone: {{ config('company.phone') }}</div>
                     @endif
@@ -196,7 +222,7 @@
 
             <!-- Footer -->
             <div class="footer">
-                This is an automated email from {{ config('company.name') }}.
+                This is an automated email from {{ config('company.name', 'Company Portal') }}.
             </div>
 
         </div>

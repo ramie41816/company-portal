@@ -1,9 +1,52 @@
+@php
+    // Self-contained fallback defaults for empty data / template viewer preview
+    $quotation =
+        $quotation ??
+        (object) [
+            'quotation_number' => 'QT-SAMPLE-000',
+            'quoted_to' => 'Valued Client Name',
+            'client_company' => 'Sample Client Corporation',
+            'client_address' => '123 Business Rd, Metro Manila',
+            'client_phone' => '+63 912 345 6789',
+            'contact_email' => 'client@example.com',
+            'quotation_date' => now(),
+            'reference_project' => 'Sample Enterprise System Implementation',
+            'total' => 150000.0,
+            'items' => collect([
+                (object) [
+                    'id' => 1,
+                    'parent_id' => null,
+                    'description' => 'System Analysis & Requirements Gathering',
+                    'quantity' => 1,
+                    'unit_price' => 50000.0,
+                ],
+                (object) [
+                    'id' => 2,
+                    'parent_id' => null,
+                    'description' => 'Core Module Development & Integration',
+                    'quantity' => 1,
+                    'unit_price' => 100000.0,
+                ],
+            ]),
+            'attention' => 'Jane Doe',
+        ];
+
+    $processedItems = $processedItems ?? [
+        ['item' => (object) ['id' => 1], 'included' => true, 'remarks' => 'Completed on schedule.'],
+        ['item' => (object) ['id' => 2], 'included' => true, 'remarks' => 'Tested and deployed successfully.'],
+    ];
+
+    $executedBy = $executedBy ?? 'System Administrator';
+    $generalRemarks =
+        $generalRemarks ?? 'All project milestones have been met successfully with full client acceptance.';
+    $signatureDataUri = $signatureDataUri ?? null;
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8">
-    <title>Certificate of Completion - {{ $quotation->quotation_number }}</title>
+    <title>Certificate of Completion - {{ $quotation->quotation_number ?? 'SAMPLE' }}</title>
     <style>
         @page {
             size: A4 portrait;
@@ -264,10 +307,10 @@
                 <td style="padding-right: 10px;">
                     <div class="section-subtitle">Quote To (Client)</div>
                     <table class="field-table">
-                        @if ($quotation->quoted_to !== $quotation->client_company)
+                        @if (($quotation->quoted_to ?? '') !== ($quotation->client_company ?? ''))
                             <tr>
                                 <td class="field-label">Client Name:</td>
-                                <td class="field-val">{{ $quotation->quoted_to }}</td>
+                                <td class="field-val">{{ $quotation->quoted_to ?? '—' }}</td>
                             </tr>
                         @endif
                         <tr>
@@ -294,11 +337,13 @@
                         <tr>
                             <td class="field-label-right">Quotation Number:</td>
                             <td class="field-val" style="font-weight: bold; color: #0f3460;">
-                                {{ $quotation->quotation_number }}</td>
+                                {{ $quotation->quotation_number ?? '—' }}</td>
                         </tr>
                         <tr>
                             <td class="field-label-right">Issue Date:</td>
-                            <td class="field-val">{{ $quotation->quotation_date->format('d/m/Y') }}</td>
+                            <td class="field-val">
+                                {{ isset($quotation->quotation_date) ? \Carbon\Carbon::parse($quotation->quotation_date)->format('d/m/Y') : now()->format('d/m/Y') }}
+                            </td>
                         </tr>
                         <tr>
                             <td class="field-label-right">Project Reference:</td>
@@ -307,7 +352,7 @@
                         <tr>
                             <td class="field-label-right">Total Amount:</td>
                             <td class="field-val" style="font-weight: bold; color: #0f3460;">PHP
-                                {{ number_format($quotation->total, 2) }}</td>
+                                {{ number_format($quotation->total ?? 0, 2) }}</td>
                         </tr>
                     </table>
                 </td>
@@ -317,7 +362,8 @@
 
     <div class="completion-statement">
         This is to certify that the services and scope of work outlined under quotation reference
-        <strong>{{ $quotation->quotation_number }}</strong> have been inspected, reviewed, and executed in accordance
+        <strong>{{ $quotation->quotation_number ?? '—' }}</strong> have been inspected, reviewed, and executed in
+        accordance
         with the specified agreements. Below is the itemized completion status and corresponding remarks:
     </div>
 
@@ -334,24 +380,25 @@
         </thead>
         <tbody>
             @php
-                $mainItems = $quotation->items->whereNull('parent_id');
+                $itemsCollection = collect($quotation->items ?? []);
+                $mainItems = $itemsCollection->whereNull('parent_id');
                 $x = 1;
             @endphp
             @foreach ($mainItems as $item)
                 @php
-                    $subItems = $quotation->items->where('parent_id', $item->id);
+                    $subItems = $itemsCollection->where('parent_id', $item->id);
                     $y = 1;
                     $mainData = collect($processedItems)->firstWhere('item.id', $item->id);
                 @endphp
                 {{-- Main Item Row --}}
                 <tr>
                     <td style="font-weight: bold;">{{ $x }}</td>
-                    <td style="font-weight: bold;">{{ $item->description }}</td>
+                    <td style="font-weight: bold;">{{ $item->description ?? 'Item description' }}</td>
                     <td class="text-center">
-                        {{ $item->unit_price > 0 && $item->quantity > 0 ? rtrim(rtrim(number_format($item->quantity, 2), '0'), '.') : '-' }}
+                        {{ ($item->unit_price ?? 0) > 0 && ($item->quantity ?? 0) > 0 ? rtrim(rtrim(number_format($item->quantity, 2), '0'), '.') : '-' }}
                     </td>
                     <td class="text-center">
-                        @if ($mainData && $mainData['included'])
+                        @if ($mainData && ($mainData['included'] ?? false))
                             <span class="badge-pill badge-completed">COMPLETED</span>
                         @else
                             <span class="badge-pill badge-skipped">NOT EXECUTED</span>
@@ -371,13 +418,13 @@
                         <td style="padding-left: 15px;">
                             <span
                                 style="color: #166534; font-weight: bold; margin-right: 5px;">{{ $numbering }}</span>
-                            <span style="color: #4a5568;">{{ $subItem->description }}</span>
+                            <span style="color: #4a5568;">{{ $subItem->description ?? 'Sub-item description' }}</span>
                         </td>
                         <td class="text-center">
-                            {{ $subItem->unit_price > 0 || $subItem->quantity > 0 ? rtrim(rtrim(number_format($subItem->quantity, 2), '0'), '.') : '—' }}
+                            {{ ($subItem->unit_price ?? 0) > 0 || ($subItem->quantity ?? 0) > 0 ? rtrim(rtrim(number_format($subItem->quantity, 2), '0'), '.') : '—' }}
                         </td>
                         <td class="text-center">
-                            @if ($subData && $subData['included'])
+                            @if ($subData && ($subData['included'] ?? false))
                                 <span class="badge-pill badge-completed">COMPLETED</span>
                             @else
                                 <span class="badge-pill badge-skipped">NOT EXECUTED</span>
@@ -440,7 +487,7 @@
                     </div>
 
                     <div style="font-weight: bold; color: #1a202c;">
-                        {{ $quotation->attention ?? $quotation->quoted_to }}
+                        {{ $quotation->attention ?? ($quotation->quoted_to ?? 'Client Name') }}
                     </div>
                     <div style="color: #4a5568; font-size: 9.5px;">Date: ________________________</div>
                 </div>
@@ -458,7 +505,8 @@
             $companyText = "{{ config('company.name') }}";
             $pdf->page_text(25, 795, $companyText, $font, $size, $color);
             
-            $pageText = "Page {PAGE_NUM} of {PAGE_COUNT} | {{ $quotation->quotation_number }}";
+            $quotationNumber = "{{ $quotation->quotation_number ?? 'SAMPLE' }}";
+            $pageText = "Page {PAGE_NUM} of {PAGE_COUNT} | " . $quotationNumber;
             $pdf->page_text(455, 795, $pageText, $font, $size, $color);
         }
     </script>

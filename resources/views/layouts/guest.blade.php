@@ -55,9 +55,27 @@
 
             {{-- Form panel --}}
             <div class="col-lg-6 d-flex align-items-center justify-content-center p-4 auth-form-side">
-                {{-- Increased max-width from 420px to 480px to give the form more breathing room --}}
                 <div class="w-100" style="max-width: 480px;">
-
+                    @if (session('success'))
+                        <div class="alert alert-success alert-dismissible fade show small p-3 pe-5 mb-3" role="alert">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-check-circle-fill me-2 flex-shrink-0"></i>
+                                <span>{{ session('success') }}</span>
+                            </div>
+                            <button type="button" class="btn-close py-2" data-bs-dismiss="alert"
+                                aria-label="Close"></button>
+                        </div>
+                    @endif
+                    @if (session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show small p-3 pe-5 mb-3" role="alert">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-exclamation-triangle-fill me-2 flex-shrink-0"></i>
+                                <span>{{ session('error') }}</span>
+                            </div>
+                            <button type="button" class="btn-close py-2" data-bs-dismiss="alert"
+                                aria-label="Close"></button>
+                        </div>
+                    @endif
                     <div class="d-lg-none text-center mb-4">
                         @if (config('company.logo'))
                             <img src="{{ asset(config('company.logo')) }}" alt="{{ config('company.name') }}"

@@ -7,14 +7,6 @@
         <p class="text-muted small mb-0">Please enter your new password below.</p>
     </div>
 
-    {{-- Session Status / Error Alerts --}}
-    @if (session('status'))
-        <div class="alert alert-success alert-dismissible fade show small py-2" role="alert">
-            {{ session('status') }}
-            <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
     <form method="POST" action="{{ route('password.update') }}" id="resetForm">
         @csrf
 
