@@ -7,12 +7,9 @@
                 <h2 class="mb-1 fw-bold" style="color: var(--ink);">User Profile Overview</h2>
                 <div class="text-muted">Viewing personal details and account access configuration.</div>
             </div>
-
-            @if (auth()->user()->hasPermission('profile.edit'))
-                <a href="{{ route('profile.edit') }}" class="btn btn-outline-warning">
-                    <i class="bi bi-pencil me-1"></i> Edit Profile
-                </a>
-            @endif
+            <a href="{{ route('profile.edit') }}" class="btn btn-outline-warning">
+                <i class="bi bi-pencil me-1"></i> Edit Profile
+            </a>
         </div>
 
         {{-- Profile Details Card --}}

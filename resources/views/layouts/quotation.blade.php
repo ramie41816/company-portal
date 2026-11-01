@@ -9,7 +9,7 @@
                 <nav class="side-nav">
                     <div class="side-title">Quotation</div>
 
-                    @if (auth()->user()->hasPermission('quotations.dashboard'))
+                    @if (auth()->user()->hasPermission('quotations.view'))
                         {{-- Dashboard Link --}}
                         <a href="{{ route('quotations.dashboard') }}"
                             class="{{ request()->routeIs('quotations.dashboard') ? 'active' : '' }}">
@@ -17,7 +17,7 @@
                         </a>
                     @endif
 
-                    @if (auth()->user()->hasPermission('quotations.create'))
+                    @if (auth()->user()->hasPermission('quotations.add'))
                         {{-- Create Quotation Link --}}
                         <a href="{{ route('quotations.create') }}"
                             class="{{ request()->routeIs('quotations.create') ? 'active' : '' }}">
@@ -25,7 +25,7 @@
                         </a>
                     @endif
 
-                    @if (auth()->user()->hasPermission('quotations.index'))
+                    @if (auth()->user()->hasPermission('quotations.view'))
                         {{-- Quotation List Link --}}
                         <a href="{{ route('quotations.index') }}"
                             class="{{ request()->routeIs('quotations.index', 'quotations.show', 'quotations.edit') ? 'active' : '' }}">
@@ -33,7 +33,7 @@
                         </a>
                     @endif
 
-                    @if (auth()->user()->hasPermission('quotations.archives'))
+                    @if (auth()->user()->hasPermission('quotations.view'))
                         {{-- Archived Quotations Link --}}
                         <a href="{{ route('quotations.archives') }}"
                             class="{{ request()->routeIs('quotations.archives') ? 'active' : '' }}">

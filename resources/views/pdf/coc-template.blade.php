@@ -325,7 +325,7 @@
     <table class="items-table">
         <thead>
             <tr>
-                <th style="width: 25px;">#</th>
+                <th style="width: 35px;">#</th>
                 <th>Description</th>
                 <th class="text-center" style="width: 55px;">Qty</th>
                 <th style="width: 90px; text-align: center;">Status</th>
@@ -333,24 +333,62 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($processedItems as $index => $data)
+            @php
+                $mainItems = $quotation->items->whereNull('parent_id');
+                $x = 1;
+            @endphp
+            @foreach ($mainItems as $item)
                 @php
-                    $item = $data['item'];
-                    $num = $index + 1;
+                    $subItems = $quotation->items->where('parent_id', $item->id);
+                    $y = 1;
+                    $mainData = collect($processedItems)->firstWhere('item.id', $item->id);
                 @endphp
+                {{-- Main Item Row --}}
                 <tr>
-                    <td>{{ $num }}</td>
-                    <td>{{ $item->description }}</td>
-                    <td class="text-center">{{ rtrim(rtrim(number_format($item->quantity, 2), '0'), '.') }}</td>
+                    <td style="font-weight: bold;">{{ $x }}</td>
+                    <td style="font-weight: bold;">{{ $item->description }}</td>
                     <td class="text-center">
-                        @if ($data['included'])
+                        {{ $item->unit_price > 0 && $item->quantity > 0 ? rtrim(rtrim(number_format($item->quantity, 2), '0'), '.') : '-' }}
+                    </td>
+                    <td class="text-center">
+                        @if ($mainData && $mainData['included'])
                             <span class="badge-pill badge-completed">COMPLETED</span>
                         @else
                             <span class="badge-pill badge-skipped">NOT EXECUTED</span>
                         @endif
                     </td>
-                    <td>{{ $data['remarks'] ?: '—' }}</td>
+                    <td>{{ $mainData['remarks'] ?? '—' }}</td>
                 </tr>
+
+                {{-- Sub-items Rows --}}
+                @foreach ($subItems as $subItem)
+                    @php
+                        $subData = collect($processedItems)->firstWhere('item.id', $subItem->id);
+                        $numbering = $x . '.' . $y;
+                    @endphp
+                    <tr>
+                        <td></td>
+                        <td style="padding-left: 15px;">
+                            <span
+                                style="color: #166534; font-weight: bold; margin-right: 5px;">{{ $numbering }}</span>
+                            <span style="color: #4a5568;">{{ $subItem->description }}</span>
+                        </td>
+                        <td class="text-center">
+                            {{ $subItem->unit_price > 0 || $subItem->quantity > 0 ? rtrim(rtrim(number_format($subItem->quantity, 2), '0'), '.') : '—' }}
+                        </td>
+                        <td class="text-center">
+                            @if ($subData && $subData['included'])
+                                <span class="badge-pill badge-completed">COMPLETED</span>
+                            @else
+                                <span class="badge-pill badge-skipped">NOT EXECUTED</span>
+                            @endif
+                        </td>
+                        <td>{{ $subData['remarks'] ?? '—' }}</td>
+                    </tr>
+                    @php $y++; @endphp
+                @endforeach
+
+                @php $x++; @endphp
             @endforeach
         </tbody>
     </table>
@@ -364,33 +402,46 @@
         </div>
     @endif
 
-    {{-- Signatory Section with E-Signature Binding --}}
-    <table class="signatory-section">
+    <!-- Signatory Section -->
+    <table class="signatory-section"
+        style="width: 100%; border-collapse: collapse; margin-top: 20px; page-break-inside: avoid;">
         <tr>
-            <td>
-                <div class="signatory-box">
-                    <strong style="color: #0f3460;">Prepared / Executed By:</strong>
+            <td style="width: 50%; vertical-align: top; padding: 0 10px;">
+                <div class="signatory-box"
+                    style="background: #ffffff; border: 1px solid #e2e8f0; padding: 10px; border-radius: 4px;">
+                    <strong style="color: #0f3460;">Executed By:</strong>
 
-                    <div style="width: 180px; height: 45px; text-align: center; margin: 4px auto 0 auto;">
-                        @if (!empty($tempSignaturePath) && file_exists($tempSignaturePath))
-                            <img src="{{ $tempSignaturePath }}" alt="eSignature"
-                                style="max-height: 43px; max-width: 180px; width: auto; display: inline-block;">
+                    <div style="width: 180px; height: 55px; text-align: center; margin: 4px auto 0 auto;">
+                        @if (!empty($signatureDataUri))
+                            {{-- Rendered via Base64 Data URI in memory --}}
+                            <img src="{{ $signatureDataUri }}" alt="eSignature"
+                                style="max-height: 53px; max-width: 180px; width: auto; display: inline-block;">
                         @endif
                     </div>
 
-                    <div style="border-bottom: 1px solid #4a5568; width: 100%; margin-bottom: 4px;"></div>
+                    <div style="border-bottom: 1px solid #4a5568; width: 100%; margin-bottom: 4px; margin-top: 2px;">
+                    </div>
+
                     <div style="font-weight: bold; color: #1a202c;">
-                        {{ $executedBy }}</div>
+                        {{ $executedBy ?? config('company.name') }}
+                    </div>
                     <div style="color: #4a5568; font-size: 9.5px;">Authorized Representative</div>
                 </div>
             </td>
-            <td>
-                <div class="signatory-box">
-                    <strong style="color: #0f3460;">Received & Accepted By (Client):</strong>
-                    <div style="width: 180px; height: 45px; margin: 4px auto 0 auto;"></div>
-                    <div style="border-bottom: 1px solid #4a5568; width: 100%; margin-bottom: 4px;"></div>
+
+            <td style="width: 50%; vertical-align: top; padding: 0 10px;">
+                <div class="signatory-box"
+                    style="background: #ffffff; border: 1px solid #e2e8f0; padding: 10px; border-radius: 4px;">
+                    <strong style="color: #0f3460;">Conforme (Client Acceptance):</strong>
+
+                    <div style="width: 180px; height: 55px; margin: 4px auto 0 auto;"></div>
+
+                    <div style="border-bottom: 1px solid #4a5568; width: 100%; margin-bottom: 4px; margin-top: 2px;">
+                    </div>
+
                     <div style="font-weight: bold; color: #1a202c;">
-                        {{ $quotation->attention ?? $quotation->quoted_to }}</div>
+                        {{ $quotation->attention ?? $quotation->quoted_to }}
+                    </div>
                     <div style="color: #4a5568; font-size: 9.5px;">Date: ________________________</div>
                 </div>
             </td>
@@ -408,7 +459,7 @@
             $pdf->page_text(25, 795, $companyText, $font, $size, $color);
             
             $pageText = "Page {PAGE_NUM} of {PAGE_COUNT} | {{ $quotation->quotation_number }}";
-            $pdf->page_text(420, 795, $pageText, $font, $size, $color);
+            $pdf->page_text(455, 795, $pageText, $font, $size, $color);
         }
     </script>
 </body>

@@ -55,6 +55,18 @@ class User extends Authenticatable
         return $this->id === 1 || $this->hasRole('admin') || $this->hasRole('super admin');
     }
 
+    public function isModuleAdmin($module)
+    {
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        return $this->roles()->where(function ($query) use ($module) {
+            $query->where('name', 'like', '%admin%')
+                ->orWhere('name', 'like', '%' . $module . '%admin%');
+        })->exists();
+    }
+
     // Check if user has permission, bypassing if super admin or ID 1
     public function hasPermission($permissionName)
     {

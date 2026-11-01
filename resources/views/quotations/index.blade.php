@@ -87,19 +87,19 @@
                             <td class="text-end fw-semibold">@money($q->total)</td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm">
-                                    @if (auth()->user()->hasPermission('quotations.show'))
+                                    @if (auth()->user()->hasPermission('quotations.view'))
                                         <a href="{{ route('quotations.show', $q) }}"
                                             class="btn btn-sm btn-outline-secondary" title="View">
                                             <i class="bi bi-eye"></i>
                                         </a>
                                     @endif
-                                    @if (auth()->user()->hasPermission('quotations.edit'))
+                                    @if (auth()->user()->hasPermission('quotations.update'))
                                         <a href="{{ route('quotations.edit', $q) }}"
                                             class="btn btn-sm btn-outline-secondary" title="Update">
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
                                     @endif
-                                    @if (auth()->user()->hasPermission('quotations.destroy'))
+                                    @if (auth()->user()->hasPermission('quotations.update'))
                                         <button type="button" class="btn btn-sm btn-outline-warning" title="Delete"
                                             data-bs-toggle="modal" data-bs-target="#archiveModal"
                                             data-action="{{ route('quotations.destroy', $q) }}"
