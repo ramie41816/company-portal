@@ -295,8 +295,17 @@
                         // Check if signature file is provided
                         if (signatureInput && signatureInput.files.length === 0) {
                             e.preventDefault();
-                            alert('Please upload an eSignature image before proceeding.');
-                            signatureInput.focus();
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Missing eSignature',
+                                text: 'Please upload an eSignature image before proceeding.',
+                                confirmButtonColor: '#2b3a67',
+                                customClass: {
+                                    popup: 'rounded-4 shadow'
+                                }
+                            }).then(() => {
+                                signatureInput.focus();
+                            });
                             return;
                         }
 
@@ -359,55 +368,88 @@
                     });
                 });
 
-                // Standard Form Submission for Email with SweetAlert2 Loading State
+                // Standard Form Submission for Email with SweetAlert2 Confirmation & Loading State
                 const sendEmailBtn = document.getElementById('sendEmailBtn');
                 if (sendEmailBtn) {
                     sendEmailBtn.addEventListener('click', function() {
                         // Check signature validation first
                         if (signatureInput && signatureInput.files.length === 0) {
-                            alert('Please upload an eSignature image before sending the email.');
-                            document.querySelector('[data-bs-dismiss="modal"]').click();
-                            signatureInput.focus();
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Missing eSignature',
+                                text: 'Please upload an eSignature image before sending the email.',
+                                confirmButtonColor: '#2b3a67',
+                                customClass: {
+                                    popup: 'rounded-4 shadow'
+                                }
+                            }).then(() => {
+                                document.querySelector('[data-bs-dismiss="modal"]').click();
+                                signatureInput.focus();
+                            });
                             return;
                         }
 
                         const emailInput = document.getElementById('recipientEmail');
-                        const email = emailInput ? emailInput.value : '';
+                        const email = emailInput ? emailInput.value.trim() : '';
                         if (!email) {
-                            alert('Please enter a valid email address.');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Email Required',
+                                text: 'Please enter a valid email address.',
+                                confirmButtonColor: '#2b3a67',
+                                customClass: {
+                                    popup: 'rounded-4 shadow'
+                                }
+                            });
                             return;
                         }
 
-                        // Trigger SweetAlert2 Loading Dialog
-                        if (typeof Swal !== 'undefined') {
-                            Swal.fire({
-                                title: 'Sending Email...',
-                                text: 'Please wait while we generate and dispatch the Certificate of Completion.',
-                                allowOutsideClick: false,
-                                allowEscapeKey: false,
-                                showConfirmButton: false,
-                                didOpen: () => {
-                                    Swal.showLoading();
+                        // --- Added Confirmation Step ---
+                        Swal.fire({
+                            title: 'Are you sure?',
+                            text: `Do you want to send this Certificate of Completion to ${email}?`,
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonColor: '#2b3a67',
+                            cancelButtonColor: '#6c757d',
+                            confirmButtonText: 'Yes, send it!',
+                            cancelButtonText: 'Cancel',
+                            customClass: {
+                                popup: 'rounded-4 shadow'
+                            }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Trigger SweetAlert2 Loading Dialog
+                                Swal.fire({
+                                    title: 'Sending Email...',
+                                    text: 'Please wait while we generate and dispatch the Certificate of Completion.',
+                                    allowOutsideClick: false,
+                                    allowEscapeKey: false,
+                                    showConfirmButton: false,
+                                    target: 'body',
+                                    didOpen: () => {
+                                        Swal.showLoading();
+                                    }
+                                });
+
+                                // Dynamically append or update recipient email field inside the main form
+                                let emailField = cocForm.querySelector('input[name="recipient_email"]');
+                                if (!emailField) {
+                                    emailField = document.createElement('input');
+                                    emailField.type = 'hidden';
+                                    emailField.name = 'recipient_email';
+                                    cocForm.appendChild(emailField);
                                 }
-                            });
-                        }
+                                emailField.value = email;
 
-                        // Dynamically append or update recipient email field inside the main form
-                        let emailField = cocForm.querySelector('input[name="recipient_email"]');
-                        if (!emailField) {
-                            emailField = document.createElement('input');
-                            emailField.type = 'hidden';
-                            emailField.name = 'recipient_email';
-                            cocForm.appendChild(emailField);
-                        }
-                        emailField.value = email;
+                                // Switch form action to the email route and remove target
+                                cocForm.action = "{{ route('quotations.coc-email', $quotation->id) }}";
+                                cocForm.removeAttribute('target');
 
-                        // Switch form action to the email route and remove target
-                        cocForm.action = "{{ route('quotations.coc-email', $quotation->id) }}";
-                        cocForm.removeAttribute('target');
-
-                        // Submit form normally
-                        cocForm.submit();
+                                // Submit form normally
+                                cocForm.submit();
+                            }
+                        });
                     });
                 }
             })();

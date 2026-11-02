@@ -146,8 +146,17 @@
                         quotationForm.addEventListener('submit', function(e) {
                             if (signatureInput && signatureInput.files.length === 0) {
                                 e.preventDefault();
-                                alert('Please upload an eSignature image before proceeding.');
-                                signatureInput.focus();
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Missing eSignature',
+                                    text: 'Please upload an eSignature image before proceeding.',
+                                    confirmButtonColor: '#2b3a67',
+                                    customClass: {
+                                        popup: 'rounded-4 shadow'
+                                    }
+                                }).then(() => {
+                                    signatureInput.focus();
+                                });
                                 return;
                             }
 
@@ -208,45 +217,79 @@
                     if (sendEmailBtn) {
                         sendEmailBtn.addEventListener('click', function() {
                             if (signatureInput && signatureInput.files.length === 0) {
-                                alert('Please upload an eSignature image before sending the email.');
-                                document.querySelector('[data-bs-dismiss="modal"]').click();
-                                signatureInput.focus();
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Missing eSignature',
+                                    text: 'Please upload an eSignature image before sending the email.',
+                                    confirmButtonColor: '#2b3a67',
+                                    customClass: {
+                                        popup: 'rounded-4 shadow'
+                                    }
+                                }).then(() => {
+                                    document.querySelector('[data-bs-dismiss="modal"]').click();
+                                    signatureInput.focus();
+                                });
                                 return;
                             }
 
                             const emailInput = document.getElementById('recipientEmail');
-                            const email = emailInput ? emailInput.value : '';
+                            const email = emailInput ? emailInput.value.trim() : '';
                             if (!email) {
-                                alert('Please enter a valid email address.');
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Email Required',
+                                    text: 'Please enter a valid email address.',
+                                    confirmButtonColor: '#2b3a67',
+                                    customClass: {
+                                        popup: 'rounded-4 shadow'
+                                    }
+                                });
                                 return;
                             }
 
-                            if (typeof Swal !== 'undefined') {
-                                Swal.fire({
-                                    title: 'Sending Email...',
-                                    text: 'Please wait while we generate and dispatch the Quotation.',
-                                    allowOutsideClick: false,
-                                    allowEscapeKey: false,
-                                    showConfirmButton: false,
-                                    target: 'body',
-                                    didOpen: () => {
-                                        Swal.showLoading();
+                            // --- Added Confirmation Step ---
+                            Swal.fire({
+                                title: 'Are you sure?',
+                                text: `Do you want to send this quotation to ${email}?`,
+                                icon: 'question',
+                                showCancelButton: true,
+                                confirmButtonColor: '#2b3a67',
+                                cancelButtonColor: '#6c757d',
+                                confirmButtonText: 'Yes, send it!',
+                                cancelButtonText: 'Cancel',
+                                customClass: {
+                                    popup: 'rounded-4 shadow'
+                                }
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    // Show loading indicator
+                                    Swal.fire({
+                                        title: 'Sending Email...',
+                                        text: 'Please wait while we generate and dispatch the Quotation.',
+                                        allowOutsideClick: false,
+                                        allowEscapeKey: false,
+                                        showConfirmButton: false,
+                                        target: 'body',
+                                        didOpen: () => {
+                                            Swal.showLoading();
+                                        }
+                                    });
+
+                                    let emailField = quotationForm.querySelector(
+                                        'input[name="recipient_email"]');
+                                    if (!emailField) {
+                                        emailField = document.createElement('input');
+                                        emailField.type = 'hidden';
+                                        emailField.name = 'recipient_email';
+                                        quotationForm.appendChild(emailField);
                                     }
-                                });
-                            }
+                                    emailField.value = email;
 
-                            let emailField = quotationForm.querySelector('input[name="recipient_email"]');
-                            if (!emailField) {
-                                emailField = document.createElement('input');
-                                emailField.type = 'hidden';
-                                emailField.name = 'recipient_email';
-                                quotationForm.appendChild(emailField);
-                            }
-                            emailField.value = email;
-
-                            quotationForm.action = "{{ route('quotations.email', $quotation->id) }}";
-                            quotationForm.removeAttribute('target');
-                            quotationForm.submit();
+                                    quotationForm.action = "{{ route('quotations.email', $quotation->id) }}";
+                                    quotationForm.removeAttribute('target');
+                                    quotationForm.submit();
+                                }
+                            });
                         });
                     }
                 })();

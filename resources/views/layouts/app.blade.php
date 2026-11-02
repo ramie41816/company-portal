@@ -9,7 +9,7 @@
     <nav class="topbar navbar py-3 mb-4">
         <div class="container-fluid px-4">
             <a class="navbar-brand d-flex align-items-center gap-2 font-serif text-brand fw-semibold"
-                href="{{ route('home') }}">
+                href="{{ route('home') }}" wire:navigate>
                 @if (config('company.logo'))
                     <img src="{{ asset(config('company.logo')) }}" alt="{{ config('company.name') }}" height="36"
                         class="brand-logo">
@@ -44,7 +44,7 @@
                             <hr class="dropdown-divider" style="border-color: var(--line);">
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{ route('profile.show') }}">
+                            <a class="dropdown-item" href="{{ route('profile.show') }}" wire:navigate>
                                 <i class="bi bi-person-gear me-2"></i>My Profile
                             </a>
                         </li>
@@ -67,6 +67,13 @@
     </main>
 
     @stack('scripts')
+
+    <script>
+        document.addEventListener('livewire:navigated', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', savedTheme); // For Bootstrap 5.3+
+        });
+    </script>
 
     @if (session('success'))
         <script>
@@ -111,6 +118,7 @@
             });
         </script>
     @endif
+    @livewireScripts
 </body>
 
 </html>

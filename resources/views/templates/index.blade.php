@@ -4,7 +4,7 @@
     <div class="card shadow-sm border-0 rounded-4 p-4" style="background: var(--card); color: var(--ink);">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                <h3 class="fw-bold mb-0">Template Viewer Dashboard</h3>
+                <h3 class="fw-bold mb-0">Template Viewer</h3>
                 <p class="text-muted small mb-0">Select a template from the left sidebar to preview it live.</p>
             </div>
         </div>
@@ -42,7 +42,7 @@
 
     @push('scripts')
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('livewire:navigated', function() {
                 const iframe = document.getElementById('template-iframe');
                 const loader = document.getElementById('iframe-loader');
 

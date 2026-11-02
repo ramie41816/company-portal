@@ -50,7 +50,7 @@
                                     <td class="font-monospace text-muted small"><code>{{ $permission->name }}</code></td>
                                     <td class="text-end">
                                         <div class="d-flex justify-content-end gap-2">
-                                            <a href="{{ route('permissions.edit', $permission->id) }}"
+                                            <a href="{{ route('permissions.edit', $permission->id) }}" wire:navigate
                                                 class="btn btn-sm btn-outline-warning" title="Edit Permission">
                                                 <i class="bi bi-pencil"></i>
                                             </a>

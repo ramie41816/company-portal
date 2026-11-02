@@ -1,10 +1,22 @@
+@php
+    // Self-contained fallback defaults for empty data / template viewer preview
+    $user =
+        $user ??
+        (object) [
+            'name' => 'Sample User',
+            'email' => 'sample@example.com',
+            'userInfo' => (object) ['first_name' => 'Sample'],
+        ];
+    $plainPassword = $plainPassword ?? 'NewPass123!';
+@endphp
+
 <!DOCTYPE html>
 <html>
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Password Updated - {{ config('company.name') }}</title>
+    <title>Password Updated - {{ config('company.name', 'Company Portal') }}</title>
     <style>
         body {
             background-color: #f8fafc;
@@ -111,7 +123,7 @@
 
             <!-- Header -->
             <div class="email-header">
-                <h1>{{ config('company.name') }}</h1>
+                <h1>{{ config('company.name', 'Company Portal') }}</h1>
                 <p>Security & Account Management</p>
             </div>
 
@@ -119,7 +131,8 @@
             <div class="email-body">
                 <p>Hello <strong>{{ $user->userInfo?->first_name ?? ($user->name ?? 'User') }}</strong>,</p>
 
-                <p>Your password for <strong>{{ config('company.name') }}</strong> has been successfully updated.</p>
+                <p>Your password for <strong>{{ config('company.name', 'Company Portal') }}</strong> has been
+                    successfully updated.</p>
                 <p>For your records and safekeeping, your new account credentials are provided below:</p>
 
                 <!-- Password Box -->
@@ -142,7 +155,7 @@
 
                 <!-- Action Button -->
                 <div class="btn-container">
-                    <a href="{{ route('login') }}" class="btn">
+                    <a href="{{ Route::has('login') ? route('login') : '#' }}" class="btn">
                         Sign In Now
                     </a>
                 </div>
@@ -154,7 +167,7 @@
 
             <!-- Footer -->
             <div class="footer">
-                This is an automated email from {{ config('company.name') }}. All rights reserved.
+                This is an automated email from {{ config('company.name', 'Company Portal') }}. All rights reserved.
             </div>
 
         </div>

@@ -34,7 +34,7 @@
             </form>
             @if (request()->anyFilled(['search', 'date_from', 'date_to']))
                 <div class="mt-2">
-                    <a href="{{ route('quotations.index') }}" class="small text-decoration-none text-danger">
+                    <a href="{{ route('quotations.index') }}" wire:navigate class="small text-decoration-none text-danger">
                         <i class="bi bi-x-circle me-1"></i> Clear filters
                     </a>
                 </div>
@@ -88,19 +88,19 @@
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm">
                                     @if (auth()->user()->hasPermission('quotations.view'))
-                                        <a href="{{ route('quotations.show', $q) }}"
-                                            class="btn btn-sm btn-outline-secondary" title="View">
+                                        <a href="{{ route('quotations.show', $q) }}" wire:navigate
+                                            class="btn btn-sm btn-primary" title="View">
                                             <i class="bi bi-eye"></i>
                                         </a>
                                     @endif
                                     @if (auth()->user()->hasPermission('quotations.update'))
-                                        <a href="{{ route('quotations.edit', $q) }}"
-                                            class="btn btn-sm btn-outline-secondary" title="Update">
+                                        <a href="{{ route('quotations.edit', $q) }}" wire:navigate
+                                            class="btn btn-sm btn-warning" title="Update">
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
                                     @endif
                                     @if (auth()->user()->hasPermission('quotations.update'))
-                                        <button type="button" class="btn btn-sm btn-outline-warning" title="Delete"
+                                        <button type="button" class="btn btn-sm btn-danger" title="Delete"
                                             data-bs-toggle="modal" data-bs-target="#archiveModal"
                                             data-action="{{ route('quotations.destroy', $q) }}"
                                             data-name="{{ $q->quotation_number }} &ndash; {{ $q->quoted_to }}">
@@ -150,7 +150,7 @@
                     </p>
 
                     <div class="d-flex justify-content-center gap-2">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         {{-- Changed from btn-danger to warning/amber to indicate archiving instead of permanent deletion --}}
                         <button type="submit" class="btn btn-warning text-dark fw-medium">
                             <i class="bi bi-archive me-1"></i> Yes, Archive

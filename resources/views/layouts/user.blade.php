@@ -14,30 +14,30 @@
                         <div class="side-title text-uppercase small fw-bold text-muted mb-2 px-2">User Management</div>
 
                         @if (auth()->user()->hasPermission('users.dashboard'))
-                            <a href="{{ route('users.dashboard') }}"
+                            <a href="{{ route('users.dashboard') }}" wire:navigate
                                 class="nav-link {{ request()->routeIs('users.dashboard') ? 'active' : '' }}">
                                 <i class="bi bi-speedometer2 me-2"></i> Dashboard
                             </a>
                         @endif
 
                         @if (auth()->user()->hasPermission('users.create'))
-                            <a href="{{ route('users.create') }}"
+                            <a href="{{ route('users.create') }}" wire:navigate
                                 class="nav-link {{ request()->routeIs('users.create') ? 'active' : '' }}">
                                 <i class="bi bi-person-plus me-2"></i> Create User
                             </a>
                         @endif
 
                         @if (auth()->user()->hasPermission('users.index'))
-                            <a href="{{ route('users.index') }}"
+                            <a href="{{ route('users.index') }}" wire:navigate
                                 class="nav-link {{ request()->routeIs('users.index') ? 'active' : '' }}">
                                 <i class="bi bi-people me-2"></i> Users List
                             </a>
                         @endif
 
                         @if (auth()->user()->hasPermission('users.archives'))
-                            <a href="{{ route('users.archives') }}"
+                            <a href="{{ route('users.archives') }}" wire:navigate
                                 class="nav-link {{ request()->routeIs('users.archives') ? 'active' : '' }}">
-                                <i class="bi bi-archive me-2"></i> Archived Users
+                                <i class="bi bi-person-x me-2"></i> Deactivated Users
                             </a>
                         @endif
                     </nav>
@@ -45,18 +45,18 @@
 
                 {{-- Card 2: Access Control & Permissions Registry --}}
                 @if (auth()->user()->hasPermission('roles.index') || auth()->user()->hasPermission('permissions.manage'))
-                    <nav class="side-nav mb-4">
+                    <nav class="side-nav">
                         <div class="side-title text-uppercase small fw-bold text-muted mb-2 px-2">Access Control</div>
 
                         @if (auth()->user()->hasPermission('roles.index'))
-                            <a href="{{ route('roles.index') }}"
+                            <a href="{{ route('roles.index') }}" wire:navigate
                                 class="nav-link {{ request()->routeIs('roles.*') ? 'active' : '' }}">
                                 <i class="bi bi-shield-lock me-2"></i> Roles Management
                             </a>
                         @endif
 
                         @if (auth()->user()->hasPermission('permissions.manage'))
-                            <a href="{{ route('permissions.index') }}"
+                            <a href="{{ route('permissions.index') }}" wire:navigate
                                 class="nav-link {{ request()->routeIs('permissions.*') ? 'active' : '' }}">
                                 <i class="bi bi-shield-check me-2"></i> Permissions Registry
                             </a>
@@ -64,7 +64,7 @@
                     </nav>
                 @endif
 
-                <a href="{{ route('home') }}" class="btn btn-link text-muted ps-1 mt-2 text-decoration-none">
+                <a href="{{ route('home') }}" wire:navigate class="btn btn-link text-muted ps-1 mt-2 text-decoration-none">
                     <i class="bi bi-arrow-left me-1"></i> All services
                 </a>
             </div>

@@ -11,7 +11,7 @@
 
                     @if (auth()->user()->hasPermission('quotations.view'))
                         {{-- Dashboard Link --}}
-                        <a href="{{ route('quotations.dashboard') }}"
+                        <a href="{{ route('quotations.dashboard') }}" wire:navigate
                             class="{{ request()->routeIs('quotations.dashboard') ? 'active' : '' }}">
                             <i class="bi bi-speedometer2"></i> Dashboard
                         </a>
@@ -19,7 +19,7 @@
 
                     @if (auth()->user()->hasPermission('quotations.add'))
                         {{-- Create Quotation Link --}}
-                        <a href="{{ route('quotations.create') }}"
+                        <a href="{{ route('quotations.create') }}" wire:navigate
                             class="{{ request()->routeIs('quotations.create') ? 'active' : '' }}">
                             <i class="bi bi-plus-circle"></i> Create Quotation
                         </a>
@@ -27,7 +27,7 @@
 
                     @if (auth()->user()->hasPermission('quotations.view'))
                         {{-- Quotation List Link --}}
-                        <a href="{{ route('quotations.index') }}"
+                        <a href="{{ route('quotations.index') }}" wire:navigate
                             class="{{ request()->routeIs('quotations.index', 'quotations.show', 'quotations.edit') ? 'active' : '' }}">
                             <i class="bi bi-list-ul"></i> Quotation List
                         </a>
@@ -35,13 +35,13 @@
 
                     @if (auth()->user()->hasPermission('quotations.view'))
                         {{-- Archived Quotations Link --}}
-                        <a href="{{ route('quotations.archives') }}"
+                        <a href="{{ route('quotations.archives') }}" wire:navigate
                             class="{{ request()->routeIs('quotations.archives') ? 'active' : '' }}">
                             <i class="bi bi-archive"></i> Archived Quotations
                         </a>
                     @endif
                 </nav>
-                <a href="{{ route('home') }}" class="btn btn-link text-muted ps-1 mt-2 text-decoration-none">
+                <a href="{{ route('home') }}" wire:navigate class="btn btn-link text-muted ps-1 mt-2 text-decoration-none">
                     <i class="bi bi-arrow-left me-1"></i> All services
                 </a>
             </div>

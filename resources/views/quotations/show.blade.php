@@ -7,17 +7,19 @@
         </a>
         <div class="d-flex align-items-center">
             @if (auth()->user()->hasPermission('quotations.update'))
-                <a href="{{ route('quotations.edit', $quotation->id) }}" class="btn btn-warning btn-sm me-2">
+                <a href="{{ route('quotations.edit', $quotation->id) }}" wire:navigate class="btn btn-warning btn-sm me-2">
                     <i class="bi bi-pencil-square me-1"></i> Edit Quotation
                 </a>
                 <div class="btn-group">
                     @if (auth()->user()->hasPermission('quotations.generate.pdf'))
-                        <a href="{{ route('quotations.prepare', $quotation->id) }}" class="btn btn-sm btn-primary">
+                        <a href="{{ route('quotations.prepare', $quotation->id) }}" wire:navigate
+                            class="btn btn-sm btn-primary">
                             <i class="bi bi-file-earmark-pdf me-1"></i> Prepare Quote
                         </a>
                     @endif
                     @if (auth()->user()->hasPermission('quotations.coc.generate.pdf') && $quotation->status === 'completed')
-                        <a href="{{ route('quotations.coc', $quotation->id) }}" class="btn btn-sm btn-success">
+                        <a href="{{ route('quotations.coc', $quotation->id) }}" wire:navigate
+                            class="btn btn-sm btn-success">
                             <i class="bi bi-file-earmark-check me-1"></i> Prepare CoC/CoT
                         </a>
                     @endif

@@ -9,10 +9,10 @@
                 <div class="text-muted">Manage your personal details and account security settings.</div>
             </div>
             <div class="btn-group">
-                <a href="{{ route('home') }}" class="btn btn-outline-primary px-4">
+                <a href="{{ route('home') }}" wire:navigate class="btn btn-outline-primary px-4">
                     <i class="bi bi-arrow-left me-1"></i> Back to Service List
                 </a>
-                <a href="{{ route('profile.show') }}" class="btn btn-outline-info px-4">
+                <a href="{{ route('profile.show') }}" wire:navigate class="btn btn-outline-info px-4">
                     <i class="bi bi-eye me-1"></i> Back to View
                 </a>
             </div>

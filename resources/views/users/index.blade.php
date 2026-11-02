@@ -45,7 +45,7 @@
             </form>
             @if (request()->anyFilled(['search', 'status', 'access_level']))
                 <div class="mt-2">
-                    <a href="{{ route('users.index') }}" class="small text-decoration-none text-danger">
+                    <a href="{{ route('users.index') }}" wire:navigate class="small text-decoration-none text-danger">
                         <i class="bi bi-x-circle me-1"></i> Clear filters
                     </a>
                 </div>
@@ -95,19 +95,19 @@
                             </td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm">
-                                    <a href="{{ route('users.show', $user) }}" class="btn btn-sm btn-outline-primary"
+                                    <a href="{{ route('users.show', $user) }}" wire:navigate class="btn btn-sm btn-primary"
                                         title="View Profile">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <a href="{{ route('users.edit', $user) }}" class="btn btn-sm btn-outline-warning"
+                                    <a href="{{ route('users.edit', $user) }}" wire:navigate class="btn btn-sm btn-warning"
                                         title="Edit User">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Archive User"
-                                        data-bs-toggle="modal" data-bs-target="#archiveModal"
+                                    <button type="button" class="btn btn-sm btn-danger" title="Deactivate User"
+                                        data-bs-toggle="modal" data-bs-target="#deactivateModal"
                                         data-action="{{ route('users.destroy', $user) }}"
                                         data-name="{{ $user->userInfo?->full_name ?? $user->email }}">
-                                        <i class="bi bi-archive"></i> Archive
+                                        <i class="bi bi-person-x"></i>
                                     </button>
                                 </div>
                             </td>
@@ -127,11 +127,10 @@
     </div>
 
     <div class="mt-3">{{ $users->links() }}</div>
-
-    {{-- Archive / Deactivate confirmation modal --}}
-    <div class="modal fade" id="archiveModal" tabindex="-1" aria-labelledby="archiveModalLabel" aria-hidden="true">
+    {{-- Deactivate confirmation modal --}}
+    <div class="modal fade" id="deactivateModal" tabindex="-1" aria-labelledby="deactivateModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <form method="POST" id="archiveForm" class="modal-content shadow"
+            <form method="POST" id="deactivateForm" class="modal-content shadow"
                 style="background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 1rem;">
                 @csrf
                 @method('DELETE')
@@ -140,18 +139,18 @@
                     <div class="mx-auto mb-3"
                         style="width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center;
                                 font-size: 1.6rem; background: rgba(255, 193, 7, .15); color: #ffc107;">
-                        <i class="bi bi-archive"></i>
+                        <i class="bi bi-person-x"></i>
                     </div>
-                    <h5 class="fw-semibold mb-2" id="archiveModalLabel">Archive this user account?</h5>
+                    <h5 class="fw-semibold mb-2" id="deactivateModalLabel">Deactivate this user account?</h5>
                     <div class="fw-medium mb-2 text-muted" id="deleteName"></div>
                     <p class="text-muted small mb-4">
-                        This user will be moved to the archives and restricted from accessing the system. You can restore
+                        This user will be deactivated and restricted from accessing the system. You can restore
                         them anytime.
                     </p>
                     <div class="d-flex justify-content-center gap-2">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-warning text-dark fw-medium">
-                            <i class="bi bi-archive me-1"></i> Yes, Archive
+                            <i class="bi bi-person-x me-1"></i> Yes, Deactivate User
                         </button>
                     </div>
                 </div>
@@ -160,11 +159,11 @@
     </div>
 
     <script>
-        const archiveModal = document.getElementById('archiveModal');
-        if (archiveModal) {
-            archiveModal.addEventListener('show.bs.modal', function(event) {
+        const deactivateModal = document.getElementById('deactivateModal');
+        if (deactivateModal) {
+            deactivateModal.addEventListener('show.bs.modal', function(event) {
                 const button = event.relatedTarget;
-                document.getElementById('archiveForm').action = button.dataset.action;
+                document.getElementById('deactivateForm').action = button.dataset.action;
                 document.getElementById('deleteName').textContent = button.dataset.name;
             });
         }

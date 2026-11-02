@@ -37,7 +37,7 @@
                             <td class="text-end">
                                 <div class="gap-2">
                                     @if ($role->id !== 1)
-                                        <a href="{{ route('roles.edit', $role->id) }}"
+                                        <a href="{{ route('roles.edit', $role->id) }}" wire:navigate
                                             class="btn btn-sm btn-outline-warning" title="Edit Role">
                                             <i class="bi bi-pencil"></i>
                                         </a>
@@ -53,7 +53,7 @@
                                             </form>
                                         @endif
                                     @else
-                                        <span class="badge badge-secondary">No Action</span>
+                                        <span class="badge badge-secondary" style="color: var(--ink);">No Action</span>
                                     @endif
                                 </div>
                             </td>

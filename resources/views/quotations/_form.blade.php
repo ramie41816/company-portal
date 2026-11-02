@@ -206,7 +206,7 @@
     </div>
 
     <div class="d-flex justify-content-end gap-2 mb-4">
-        <a href="{{ route('quotations.index') }}" class="btn btn-outline-secondary">Cancel</a>
+        <a href="{{ route('quotations.index') }}" wire:navigate class="btn btn-outline-secondary">Cancel</a>
         <button type="submit" class="btn btn-brand">
             <i class="bi bi-check2-circle me-1"></i> {{ $isEdit ? 'Update Quotation' : 'Save Quotation' }}
         </button>
@@ -220,9 +220,20 @@
 </style>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("livewire:navigated", () => {
+        const form = document.getElementById('quotationForm');
+        if (!form) return;
+
+        // Clean up or prevent duplicate table body rendering on navigation
+        const tbody = document.querySelector('#items-table tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        let globalIndex = 0;
+
         const editorEl = document.querySelector('#editor-container');
         let quill = null;
+
+        // Initialize Quill only if not already initialized on this element
         if (typeof Quill !== 'undefined' && editorEl && !editorEl.classList.contains('ql-container')) {
             quill = new Quill('#editor-container', {
                 theme: 'snow',
@@ -243,7 +254,6 @@
                 }
             });
 
-            // Instant sync on change
             const hiddenInput = document.querySelector('#other_info');
             quill.on('text-change', function() {
                 const htmlContent = quill.root.innerHTML;
@@ -254,10 +264,10 @@
 
         const oldItems = @json($oldItems);
         const currency = @json($currency);
-        const tbody = document.querySelector('#items-table tbody');
-        let globalIndex = 0;
+        const isEdit = @json($isEdit);
 
-        document.getElementById('quotationForm').addEventListener('submit', function(e) {
+        // Form submission handler
+        form.addEventListener('submit', function(e) {
             e.preventDefault();
 
             if (quill) {
@@ -267,7 +277,6 @@
                     htmlContent;
             }
 
-            const isEdit = @json($isEdit);
             const actionText = isEdit ? 'update this quotation' : 'save this new quotation';
 
             Swal.fire({
@@ -297,7 +306,7 @@
                             popup: 'rounded-4 shadow'
                         }
                     });
-                    e.target.submit();
+                    e.target.submit(); // Submits the standard HTTP form post to your controller
                 }
             });
         });
@@ -323,7 +332,6 @@
                 '<span class="text-muted small me-2"><i class="bi bi-arrow-return-right"></i> Sub:</span>' :
                 '<span class="badge bg-secondary me-2">Main</span>';
 
-            // Safely escape description quotes to prevent truncation bugs (e.g. 8" PVC Pipes)
             const safeDescription = (item.description ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
             tr.innerHTML = `
@@ -350,7 +358,7 @@
             `;
 
             if (insertAfterRow && insertAfterRow.parentNode) {
-                insertAfterRow.parentNode.insertBefore(tr, insertAfterRow.nextSibling);
+                insertAfterRow.parentNode.insertBefore(tr, insertAfterRow.nextElementSibling);
             } else {
                 tbody.appendChild(tr);
             }
@@ -387,14 +395,12 @@
             }
             if (e.target.closest('.add-sub')) {
                 const mainTr = e.target.closest('tr');
-
                 let insertTarget = mainTr;
                 let nextRow = mainTr.nextElementSibling;
                 while (nextRow && nextRow.classList.contains('main-item-sub')) {
                     insertTarget = nextRow;
                     nextRow = nextRow.nextElementSibling;
                 }
-
                 renderRow({}, true, insertTarget);
             }
         });
@@ -407,8 +413,6 @@
                     .parent_id !== "";
                 renderRow(item, isSub, tbody.lastElementChild);
             });
-        } else {
-            renderRow();
         }
     });
 </script>

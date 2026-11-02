@@ -90,7 +90,6 @@ Route::middleware('auth')->group(function () {
             Route::post('/{quotation}/coc/email', [QuotationController::class, 'sendCocEmail'])->name('coc-email');
         });
 
-
         // Delete (Hard-Delete)
         Route::middleware('permission:quotations.delete')->group(function () {
             Route::delete('/{id}/force-delete', [QuotationController::class, 'forceDelete'])->name('force-delete');

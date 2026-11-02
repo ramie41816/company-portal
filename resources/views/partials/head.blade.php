@@ -28,7 +28,7 @@
 <!-- SweetAlert2 CSS & JS CDN -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @vite(['resources/sass/app.scss', 'resources/js/app.js'])
-
+@livewireStyles
 <style>
     /* Light mode (default) */
     :root {

@@ -7,7 +7,7 @@
                 <h2 class="mb-1 fw-bold" style="color: var(--ink);">User Profile Overview</h2>
                 <div class="text-muted">Viewing personal details and account access configuration.</div>
             </div>
-            <a href="{{ route('profile.edit') }}" class="btn btn-outline-warning">
+            <a href="{{ route('profile.edit') }}" wire:navigate class="btn btn-outline-warning">
                 <i class="bi bi-pencil me-1"></i> Edit Profile
             </a>
         </div>
@@ -97,7 +97,7 @@
         </div>
 
         <div class="d-flex justify-content-start">
-            <a href="{{ route('home') }}" class="btn btn-outline-secondary px-4">
+            <a href="{{ route('home') }}" wire:navigate class="btn btn-outline-secondary px-4">
                 <i class="bi bi-arrow-left me-1"></i> Back to Service List
             </a>
         </div>

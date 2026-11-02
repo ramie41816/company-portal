@@ -10,10 +10,10 @@
                 registrations.</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('users.index') }}" class="btn btn-outline-secondary btn-sm">
+            <a href="{{ route('users.index') }}" wire:navigate class="btn btn-secondary btn-sm">
                 <i class="bi bi-list-ul me-1"></i> All Users
             </a>
-            <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm">
+            <a href="{{ route('users.create') }}" wire:navigate class="btn btn-primary btn-sm">
                 <i class="bi bi-person-plus me-1"></i> New User
             </a>
         </div>
@@ -87,7 +87,8 @@
         <div class="p-4 border-bottom d-flex justify-content-between align-items-center"
             style="border-color: var(--line) !important;">
             <h6 class="fw-semibold mb-0" style="color: var(--ink);">Recently Registered Users</h6>
-            <a href="{{ route('users.index') }}" class="small text-decoration-none fw-semibold">View All &rarr;</a>
+            <a href="{{ route('users.index') }}" wire:navigate class="small text-decoration-none fw-semibold">View All
+                &rarr;</a>
         </div>
         <div class="table-responsive">
             <table class="table table-elegant align-middle mb-0" style="color: var(--ink);">
@@ -131,11 +132,11 @@
                             <td class="text-muted small">{{ $user->created_at->format('M d, Y') }}</td>
                             <td class="text-end px-3">
                                 <div class="btn-group btn-group-sm">
-                                    <a href="{{ route('users.show', $user->id) }}" class="btn btn-outline-primary"
+                                    <a href="{{ route('users.show', $user->id) }}" wire:navigate class="btn btn-primary"
                                         title="View">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <a href="{{ route('users.edit', $user->id) }}" class="btn btn-outline-warning"
+                                    <a href="{{ route('users.edit', $user->id) }}" wire:navigate class="btn btn-warning"
                                         title="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </a>

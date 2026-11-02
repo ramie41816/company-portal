@@ -54,31 +54,41 @@
 
         <h5 class="fw-semibold mb-3">Our Services</h5>
 
-        <div class="row g-4">
+        <div class="row g-3">
             @forelse ($services as $service)
-                <div class="col-md-6 col-lg-4 d-flex">
+                <div class="col-md-6 col-lg-3 d-flex">
                     <div class="service-card p-4 p-lg-5 d-flex flex-column text-center justify-content-between shadow-sm w-100 h-100"
                         style="background: var(--card); border: 1px solid var(--line); border-radius: 1rem;">
 
                         <div>
                             <div class="service-icon mx-auto mb-4 d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle shadow-sm"
-                                style="width: 90px; height: 90px; font-size: 2.75rem;">
+                                style="width: 100px; height: 100px; font-size: 2.5rem;">
                                 <i class="bi {{ $service['icon'] }}"></i>
                             </div>
-                            <h5 class="fw-bold mb-2 fs-4" style="color: var(--ink);">{{ $service['title'] }}</h5>
+                            <h5 class="fw-bold mb-2 fs-5" style="color: var(--ink);">{{ $service['title'] }}</h5>
                             <p class="text-muted small px-2 mb-0">{{ $service['desc'] }}</p>
                         </div>
 
-                        <div class="mt-4 pt-3">
+                        <div class="mt-2 pt-3" x-data="{ loading: false }">
                             @if ($service['available'])
-                                <a href="{{ $service['url'] }}" class="btn btn-primary w-100 py-2">
-                                    Open Module <i class="bi bi-arrow-right ms-1"></i>
+                                <a href="{{ $service['url'] }}" wire:navigate @click="loading = true"
+                                    class="btn btn-primary w-100 py-2 position-relative">
+
+                                    <span :class="{ 'd-none': loading }">
+                                        Open Module <i class="bi bi-arrow-right ms-1"></i>
+                                    </span>
+
+                                    <span :class="{ 'd-none': !loading }"
+                                        class="d-flex align-items-center justify-content-center">
+                                        <span class="spinner-border spinner-border-sm me-2" role="status"
+                                            aria-hidden="true"></span>
+                                        Loading Module...
+                                    </span>
                                 </a>
                             @else
                                 <span class="badge rounded-pill bg-secondary w-100 py-2">Coming soon</span>
                             @endif
                         </div>
-
                     </div>
                 </div>
             @empty

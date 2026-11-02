@@ -9,12 +9,12 @@
         </div>
         <div class="d-flex gap-2">
             @if (auth()->user()->isModuleAdmin('quotation'))
-                <a href="{{ route('quotations.index') }}" class="btn btn-outline-secondary btn-sm">
+                <a href="{{ route('quotations.index') }}" wire:navigate class="btn btn-secondary btn-sm">
                     <i class="bi bi-list-ul me-1"></i> All Quotations
                 </a>
             @endif
             @if (auth()->user()->hasPermission('quotations.add'))
-                <a href="{{ route('quotations.create') }}" class="btn btn-primary btn-sm">
+                <a href="{{ route('quotations.create') }}" wire:navigate class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-lg me-1"></i> New Quotation
                 </a>
             @endif
@@ -84,7 +84,8 @@
         <div class="p-4 border-bottom d-flex justify-content-between align-items-center"
             style="border-color: var(--line) !important;">
             <h6 class="fw-semibold mb-0" style="color: var(--ink);">Recent Quotations</h6>
-            <a href="{{ route('quotations.index') }}" class="small text-decoration-none fw-semibold">View All &rarr;</a>
+            <a href="{{ route('quotations.index') }}" wire:navigate class="small text-decoration-none fw-semibold">View All
+                &rarr;</a>
         </div>
         <div class="table-responsive">
             <table class="table table-elegant align-middle mb-0">
@@ -132,14 +133,14 @@
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
                                     @if (auth()->user()->hasPermission('quotations.view'))
-                                        <a href="{{ route('quotations.show', $quotation->id) }}"
-                                            class="btn btn-outline-secondary" title="View">
+                                        <a href="{{ route('quotations.show', $quotation->id) }}" wire:navigate
+                                            class="btn btn-primary" title="View">
                                             <i class="bi bi-eye"></i>
                                         </a>
                                     @endif
                                     @if (auth()->user()->hasPermission('quotations.update'))
-                                        <a href="{{ route('quotations.edit', $quotation->id) }}"
-                                            class="btn btn-outline-secondary" title="Edit">
+                                        <a href="{{ route('quotations.edit', $quotation->id) }}" wire:navigate
+                                            class="btn btn-warning" title="Edit">
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                     @endif
