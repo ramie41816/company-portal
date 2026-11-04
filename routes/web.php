@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
@@ -94,6 +95,37 @@ Route::middleware('auth')->group(function () {
         // Delete (Hard-Delete)
         Route::middleware('permission:quotations.delete')->group(function () {
             Route::delete('/{id}/force-delete', [QuotationController::class, 'forceDelete'])->name('force-delete');
+        });
+    });
+
+    // Schedules Module
+    Route::prefix('schedules')->name('schedules.')->group(function () {
+        // Create / Store
+        Route::middleware('permission:schedules.add')->group(function () {
+            Route::get('/create', [ScheduleController::class, 'create'])->name('create');
+            Route::get('/create-from-quote/{quotation}', [ScheduleController::class, 'createFromQuotation'])->name('from-quote');
+            Route::post('/', [ScheduleController::class, 'store'])->name('store');
+        });
+
+        // Read / View
+        Route::middleware('permission:schedules.view')->group(function () {
+            Route::get('/', [ScheduleController::class, 'dashboard'])->name('dashboard');
+            Route::get('/list', [ScheduleController::class, 'index'])->name('index');
+            Route::get('/archives', [ScheduleController::class, 'archives'])->name('archives');
+            Route::get('/{schedule}', [ScheduleController::class, 'show'])->name('show');
+        });
+
+        // Update / Edit / Workflows
+        Route::middleware('permission:schedules.update')->group(function () {
+            Route::get('/{schedule}/edit', [ScheduleController::class, 'edit'])->name('edit');
+            Route::put('/{schedule}', [ScheduleController::class, 'update'])->name('update');
+            Route::delete('/{schedule}', [ScheduleController::class, 'destroy'])->name('destroy');
+            Route::patch('/{id}/restore', [ScheduleController::class, 'restore'])->name('restore');
+        });
+
+        // Delete (Hard-Delete)
+        Route::middleware('permission:schedules.delete')->group(function () {
+            Route::delete('/{id}/force-delete', [ScheduleController::class, 'forceDelete'])->name('force-delete');
         });
     });
 

@@ -21,6 +21,12 @@
                             <i class="bi bi-file-earmark-check me-1"></i> Prepare CoC/CoT
                         </a>
                     @endif
+                    @if ($quotation->status === 'approved')
+                        <a href="{{ route('schedules.from-quote', $quotation->id) }}"
+                            class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-calendar-check me-1"></i> Create Schedule
+                        </a>
+                    @endif
                 </div>
             @endif
         </div>

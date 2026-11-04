@@ -22,6 +22,16 @@
                 ];
             }
 
+            if (auth()->user()->hasPermission('schedules.view')) {
+                $services[] = [
+                    'title' => 'Schedule',
+                    'desc' => 'Manage project schedules and track operations.',
+                    'icon' => 'bi-calendar-check',
+                    'url' => route('schedules.dashboard'),
+                    'available' => true,
+                ];
+            }
+
             if (auth()->user()->hasPermission('users.view')) {
                 $services[] = [
                     'title' => 'User Management',
