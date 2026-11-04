@@ -12,7 +12,7 @@
 
                 {{-- Dynamic Template Navigation Groups --}}
                 @forelse ($navGroups as $category => $items)
-                    <nav class="side-nav mb-4">
+                    <nav class="side-nav {{ !$loop->last ? 'mb-4' : '' }}">
                         <div class="side-title text-uppercase small fw-bold text-muted mb-2 px-2">
                             {{ ucfirst($category) }} Templates
                         </div>
