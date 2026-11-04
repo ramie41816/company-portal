@@ -45,7 +45,7 @@
 
                 {{-- Card 2: Access Control & Permissions Registry --}}
                 @if (auth()->user()->hasPermission('roles.index') || auth()->user()->hasPermission('permissions.manage'))
-                    <nav class="side-nav mb-4">
+                    <nav class="side-nav">
                         <div class="side-title text-uppercase small fw-bold text-muted mb-2 px-2">Access Control</div>
 
                         @if (auth()->user()->hasPermission('roles.index'))
