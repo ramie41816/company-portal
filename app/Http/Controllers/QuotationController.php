@@ -3,14 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Mail\QuotationMail;
-use App\Mail\CertificateOfCompletionMail;
 use App\Models\Quotation;
 use App\Models\QuotationItem;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 
 class QuotationController extends Controller
 {
@@ -386,124 +384,6 @@ class QuotationController extends Controller
             $quotation->update(['status' => 'emailed']);
 
             return back()->with('success', 'Quotation successfully emailed to ' . $recipientEmail);
-        } catch (\Exception $e) {
-            return back()->with('error', 'Failed to send email: ' . $e->getMessage());
-        }
-    }
-
-    // --- Certificate of Completion (CoC) Module Methods ---
-    public function prepareCoc(Quotation $quotation)
-    {
-        if (!auth()->user()->isModuleAdmin('quotation') && $quotation->created_by !== auth()->id()) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $quotation->load(['items' => function ($query) {
-            $query->orderBy('parent_id')->orderBy('id');
-        }]);
-
-        return view('quotations.prepare-coc', compact('quotation'));
-    }
-
-    public function generateCocPdf(Request $request, Quotation $quotation)
-    {
-        if (!auth()->user()->isModuleAdmin('quotation') && $quotation->created_by !== auth()->id()) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $validated = $request->validate([
-            'items' => ['nullable', 'array'],
-            'general_remarks' => ['nullable', 'string', 'max:1000'],
-            'executed_by' => ['nullable', 'string', 'max:255'],
-            'signature_file' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
-        ]);
-
-        $quotation->load('items');
-        $submittedItems = $request->input('items', []);
-
-        $processedItems = [];
-        foreach ($quotation->items as $item) {
-            $itemData = $submittedItems[$item->id] ?? [];
-            $isIncluded = isset($itemData['included']) && $itemData['included'] == '1';
-
-            $processedItems[] = [
-                'item' => $item,
-                'included' => $isIncluded,
-                'remarks' => $itemData['remarks'] ?? null,
-            ];
-        }
-
-        $generalRemarks = $request->input('general_remarks');
-        $executedBy = trim($request->input('executed_by')) ?: ($quotation->prepared_by ?? config('company.name'));
-
-        $signatureDataUri = null;
-        if ($request->hasFile('signature_file')) {
-            $file = $request->file('signature_file');
-            $signatureDataUri = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
-        }
-
-        $pdf = Pdf::loadView('templates.pdf.coc-template', compact(
-            'quotation',
-            'processedItems',
-            'generalRemarks',
-            'executedBy',
-            'signatureDataUri'
-        ));
-
-        $pdf->getDomPDF()->set_option('isPhpEnabled', true);
-
-        return $pdf->stream('Certificate-of-Completion-' . $quotation->quotation_number . '.pdf');
-    }
-
-    public function sendCocEmail(Request $request, Quotation $quotation)
-    {
-        if (!auth()->user()->isModuleAdmin('quotation') && $quotation->created_by !== auth()->id()) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        $validated = $request->validate([
-            'recipient_email' => ['required', 'email', 'max:255'],
-            'items' => ['nullable', 'array'],
-            'general_remarks' => ['nullable', 'string', 'max:1000'],
-            'executed_by' => ['nullable', 'string', 'max:255'],
-            'signature_file' => ['required', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
-        ]);
-
-        $quotation->load('items');
-        $submittedItems = $request->input('items', []);
-
-        $processedItems = [];
-        foreach ($quotation->items as $item) {
-            $itemData = $submittedItems[$item->id] ?? [];
-            $isIncluded = isset($itemData['included']) && $itemData['included'] == '1';
-
-            $processedItems[] = [
-                'item' => $item,
-                'included' => $isIncluded,
-                'remarks' => $itemData['remarks'] ?? null,
-            ];
-        }
-
-        $generalRemarks = $request->input('general_remarks');
-        $executedBy = trim($request->input('executed_by')) ?: ($quotation->prepared_by ?? config('company.name'));
-        $recipientEmail = $validated['recipient_email'];
-
-        $signatureDataUri = null;
-        if ($request->hasFile('signature_file')) {
-            $file = $request->file('signature_file');
-            $signatureDataUri = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
-        }
-
-        try {
-            Mail::to($recipientEmail)->send(new CertificateOfCompletionMail(
-                $quotation,
-                $processedItems,
-                $generalRemarks,
-                $executedBy,
-                $signatureDataUri
-            ));
-
-            return back()->with('success', 'Certificate of Completion successfully emailed to ' . $recipientEmail);
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to send email: ' . $e->getMessage());
         }

@@ -1,19 +1,21 @@
 @php
-    // Self-contained fallback defaults for empty data / template viewer preview
-    $user =
-        $user ??
-        (object) [
-            'name' => 'Sample User',
-            'email' => 'sample@example.com',
-            'userInfo' => (object) ['first_name' => 'Sample'],
-        ];
-    $token = $token ?? 'sample-reset-token-placeholder';
+    if (isset($template_viewing) && $template_viewing):
+        // Self-contained fallback defaults so this template handles empty data gracefully
+        $user =
+            $user ??
+            (object) [
+                'name' => 'Sample User',
+                'email' => 'sample@example.com',
+                'userInfo' => (object) ['first_name' => 'Sample'],
+            ];
+        $token = $token ?? 'sample-reset-token-placeholder';
 
-    // Safely generate reset URL if the route exists
-    $resetUrl =
-        Route::has('password.reset') && isset($token)
-            ? route('password.reset', ['token' => $token, 'email' => $user->email ?? 'sample@example.com'])
-            : '#';
+        // Safely generate reset URL if the route exists
+        $resetUrl =
+            Route::has('password.reset') && isset($token)
+                ? route('password.reset', ['token' => $token, 'email' => $user->email ?? 'sample@example.com'])
+                : '#';
+    endif;
 @endphp
 
 <!DOCTYPE html>

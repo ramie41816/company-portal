@@ -11,6 +11,20 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import Quill from 'quill';
 window.Quill = Quill;
 
+// Import FullCalendar and plugins
+import { Calendar } from '@fullcalendar/core';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+
+// Make FullCalendar globally available
+window.FullCalendar = {
+    Calendar,
+    dayGridPlugin,
+    timeGridPlugin,
+    interactionPlugin
+};
+
 // Function to update theme toggle icons based on current mode
 const setIcons = (theme) => {
     document.querySelectorAll('[data-theme-icon]').forEach((el) => {

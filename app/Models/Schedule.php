@@ -20,7 +20,7 @@ class Schedule extends Model
         'reference_project',
         'prepared_by',
         'other_info',
-        'quoted_to',
+        'scheduled_to',
         'client_company',
         'client_address',
         'client_phone',

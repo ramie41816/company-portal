@@ -1,14 +1,16 @@
 @php
-    // Self-contained fallback defaults for empty data / template viewer preview
-    $isReset = $isReset ?? false;
-    $user =
-        $user ??
-        (object) [
-            'name' => 'Sample User',
-            'email' => 'sample@example.com',
-            'userInfo' => (object) ['first_name' => 'Sample'],
-        ];
-    $tempPassword = $tempPassword ?? 'TempPass123!';
+    if (isset($template_viewing) && $template_viewing):
+        // Self-contained fallback defaults so this template handles empty data gracefully
+        $isReset = $isReset ?? false;
+        $user =
+            $user ??
+            (object) [
+                'name' => 'Sample User',
+                'email' => 'sample@example.com',
+                'userInfo' => (object) ['first_name' => 'Sample'],
+            ];
+        $tempPassword = $tempPassword ?? 'TempPass123!';
+    endif;
 @endphp
 
 <!DOCTYPE html>

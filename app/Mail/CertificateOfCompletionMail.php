@@ -2,7 +2,7 @@
 
 namespace App\Mail;
 
-use App\Models\Quotation;
+use App\Models\Schedule;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
@@ -12,15 +12,15 @@ class CertificateOfCompletionMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $quotation;
+    public $schedule;
     public $generalRemarks;
     public $executedBy;
     public $processedItems;
     public $signatureDataUri;
 
-    public function __construct(Quotation $quotation, array $processedItems, ?string $generalRemarks, ?string $executedBy, ?string $signatureDataUri)
+    public function __construct(Schedule $schedule, array $processedItems, ?string $generalRemarks, ?string $executedBy, ?string $signatureDataUri)
     {
-        $this->quotation = $quotation;
+        $this->schedule = $schedule;
         $this->processedItems = $processedItems;
         $this->generalRemarks = $generalRemarks;
         $this->executedBy = $executedBy;
@@ -30,7 +30,7 @@ class CertificateOfCompletionMail extends Mailable
     public function build()
     {
         $pdf = Pdf::loadView('templates.pdf.coc-template', [
-            'quotation' => $this->quotation,
+            'schedule' => $this->schedule,
             'processedItems' => $this->processedItems,
             'generalRemarks' => $this->generalRemarks,
             'executedBy' => $this->executedBy,
@@ -40,18 +40,18 @@ class CertificateOfCompletionMail extends Mailable
         $pdf->getDomPDF()->set_option('isPhpEnabled', true);
         $pdfOutput = $pdf->output();
 
-        $clientIdentifier = $this->quotation->client_company ?? $this->quotation->quoted_to;
+        $clientIdentifier = $this->schedule->client_company ?? $this->schedule->scheduled_to;
 
         $subject = sprintf(
             'Certificate of Completion #%s - %s | %s',
-            $this->quotation->quotation_number,
+            $this->schedule->schedule_number,
             $clientIdentifier,
             config('company.name')
         );
 
         return $this->subject($subject)
             ->view('templates.emails.certificate-of-completion')
-            ->attachData($pdfOutput, 'Certificate-of-Completion-' . $this->quotation->quotation_number . '.pdf', [
+            ->attachData($pdfOutput, 'Certificate-of-Completion-' . $this->schedule->schedule_number . '.pdf', [
                 'mime' => 'application/pdf',
             ]);
     }

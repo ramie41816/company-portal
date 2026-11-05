@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Schedule;
 use App\Models\ScheduleItem;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Quotation;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\CertificateOfCompletionMail;
 
 class ScheduleController extends Controller
 {
@@ -19,7 +21,7 @@ class ScheduleController extends Controller
         $schedules = Schedule::query()
             ->when($search, function ($query, $search) {
                 $query->where('schedule_number', 'like', "%{$search}%")
-                    ->orWhere('quoted_to', 'like', "%{$search}%")
+                    ->orWhere('scheduled_to', 'like', "%{$search}%")
                     ->orWhere('client_company', 'like', "%{$search}%")
                     ->orWhere('reference_project', 'like', "%{$search}%");
             })
@@ -43,18 +45,18 @@ class ScheduleController extends Controller
         $recentSchedules = Schedule::orderBy('schedule_date', 'desc')->take(5)->get();
 
         // Fetch active schedules for the interactive calendar feed
-        $calendarSchedules = Schedule::select('id', 'schedule_number', 'quoted_to', 'schedule_date', 'status', 'total')
+        $calendarSchedules = Schedule::select('id', 'schedule_number', 'scheduled_to', 'schedule_date', 'status', 'total')
             ->orderBy('schedule_date', 'asc')
             ->get()
             ->map(function ($schedule) {
                 return [
                     'id' => $schedule->id,
                     'quote_number' => $schedule->schedule_number,
-                    'quoted_to' => $schedule->quoted_to,
+                    'scheduled_to' => $schedule->scheduled_to,
                     'date' => $schedule->schedule_date ? $schedule->schedule_date->format('Y-m-d') : null,
                     'time' => $schedule->schedule_date ? $schedule->schedule_date->format('h:i A') : null,
                     'start' => $schedule->schedule_date ? $schedule->schedule_date->format('Y-m-d\TH:i:s') : null,
-                    'title' => $schedule->quoted_to . ' (' . $schedule->schedule_number . ')',
+                    'title' => $schedule->scheduled_to . ' (' . $schedule->schedule_number . ')',
                     'url' => route('schedules.show', $schedule->id),
                     'status' => $schedule->status,
                 ];
@@ -89,7 +91,7 @@ class ScheduleController extends Controller
             'reference_project'  => $quotation->reference_project,
             'prepared_by'        => $quotation->prepared_by,
             'other_info'         => $quotation->other_info,
-            'quoted_to'          => $quotation->quoted_to,
+            'scheduled_to'       => $quotation->quoted_to,
             'client_company'     => $quotation->client_company,
             'client_address'     => $quotation->client_address,
             'client_phone'       => $quotation->client_phone,
@@ -123,7 +125,7 @@ class ScheduleController extends Controller
     {
         $validated = $request->validate([
             'quotation_id'      => 'nullable|exists:quotations,id',
-            'quoted_to'         => 'required|string|max:255',
+            'scheduled_to'         => 'required|string|max:255',
             'client_company'    => 'nullable|string|max:255',
             'client_address'    => 'nullable|string',
             'client_phone'      => 'nullable|string|max:50',
@@ -197,7 +199,7 @@ class ScheduleController extends Controller
     public function update(Request $request, Schedule $schedule)
     {
         $validated = $request->validate([
-            'quoted_to'         => 'required|string|max:255',
+            'scheduled_to'         => 'required|string|max:255',
             'client_company'    => 'nullable|string|max:255',
             'client_address'    => 'nullable|string',
             'client_phone'      => 'nullable|string|max:50',
@@ -263,7 +265,7 @@ class ScheduleController extends Controller
     {
         $search = $request->input('search');
         $schedules = Schedule::onlyTrashed()
-            ->when($search, fn($q, $s) => $q->where('schedule_number', 'like', "%{$s}%")->orWhere('quoted_to', 'like', "%{$s}%"))
+            ->when($search, fn($q, $s) => $q->where('schedule_number', 'like', "%{$s}%")->orWhere('scheduled_to', 'like', "%{$s}%"))
             ->latest()
             ->paginate(10);
 
@@ -283,5 +285,123 @@ class ScheduleController extends Controller
         $schedule->items()->delete();
         $schedule->forceDelete();
         return redirect()->route('schedules.archives')->with('success', 'Schedule permanently deleted.');
+    }
+
+    // --- Certificate of Completion (CoC) Module Methods ---
+    public function prepareCoc(Schedule $schedule)
+    {
+        if (!auth()->user()->isModuleAdmin('schedule') && $schedule->created_by !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $schedule->load(['items' => function ($query) {
+            $query->orderBy('parent_id')->orderBy('id');
+        }]);
+
+        return view('schedules.prepare-coc', compact('schedule'));
+    }
+
+    public function generateCocPdf(Request $request, Schedule $schedule)
+    {
+        if (!auth()->user()->isModuleAdmin('schedule') && $schedule->created_by !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'items' => ['nullable', 'array'],
+            'general_remarks' => ['nullable', 'string', 'max:1000'],
+            'executed_by' => ['nullable', 'string', 'max:255'],
+            'signature_file' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+        ]);
+
+        $schedule->load('items');
+        $submittedItems = $request->input('items', []);
+
+        $processedItems = [];
+        foreach ($schedule->items as $item) {
+            $itemData = $submittedItems[$item->id] ?? [];
+            $isIncluded = isset($itemData['included']) && $itemData['included'] == '1';
+
+            $processedItems[] = [
+                'item' => $item,
+                'included' => $isIncluded,
+                'remarks' => $itemData['remarks'] ?? null,
+            ];
+        }
+
+        $generalRemarks = $request->input('general_remarks');
+        $executedBy = trim($request->input('executed_by')) ?: ($schedule->prepared_by ?? config('company.name'));
+
+        $signatureDataUri = null;
+        if ($request->hasFile('signature_file')) {
+            $file = $request->file('signature_file');
+            $signatureDataUri = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
+        }
+
+        $pdf = Pdf::loadView('templates.pdf.coc-template', compact(
+            'schedule',
+            'processedItems',
+            'generalRemarks',
+            'executedBy',
+            'signatureDataUri'
+        ));
+
+        $pdf->getDomPDF()->set_option('isPhpEnabled', true);
+
+        return $pdf->stream('Certificate-of-Completion-' . $schedule->schedule_number . '.pdf');
+    }
+
+    public function sendCocEmail(Request $request, Schedule $schedule)
+    {
+        if (!auth()->user()->isModuleAdmin('schedule') && $schedule->created_by !== auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'recipient_email' => ['required', 'email', 'max:255'],
+            'items' => ['nullable', 'array'],
+            'general_remarks' => ['nullable', 'string', 'max:1000'],
+            'executed_by' => ['nullable', 'string', 'max:255'],
+            'signature_file' => ['required', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+        ]);
+
+        $schedule->load('items');
+        $submittedItems = $request->input('items', []);
+
+        $processedItems = [];
+        foreach ($schedule->items as $item) {
+            $itemData = $submittedItems[$item->id] ?? [];
+            $isIncluded = isset($itemData['included']) && $itemData['included'] == '1';
+
+            $processedItems[] = [
+                'item' => $item,
+                'included' => $isIncluded,
+                'remarks' => $itemData['remarks'] ?? null,
+            ];
+        }
+
+        $generalRemarks = $request->input('general_remarks');
+        $executedBy = trim($request->input('executed_by')) ?: ($schedule->prepared_by ?? config('company.name'));
+        $recipientEmail = $validated['recipient_email'];
+
+        $signatureDataUri = null;
+        if ($request->hasFile('signature_file')) {
+            $file = $request->file('signature_file');
+            $signatureDataUri = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
+        }
+
+        try {
+            Mail::to($recipientEmail)->send(new CertificateOfCompletionMail(
+                $schedule,
+                $processedItems,
+                $generalRemarks,
+                $executedBy,
+                $signatureDataUri
+            ));
+
+            return back()->with('success', 'Certificate of Completion successfully emailed to ' . $recipientEmail);
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to send email: ' . $e->getMessage());
+        }
     }
 }

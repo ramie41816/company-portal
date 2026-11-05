@@ -16,14 +16,8 @@
                             <i class="bi bi-file-earmark-pdf me-1"></i> Prepare Quote
                         </a>
                     @endif
-                    @if (auth()->user()->hasPermission('quotations.coc.generate.pdf') && $quotation->status === 'completed')
-                        <a href="{{ route('quotations.coc', $quotation->id) }}" class="btn btn-sm btn-success">
-                            <i class="bi bi-file-earmark-check me-1"></i> Prepare CoC/CoT
-                        </a>
-                    @endif
                     @if ($quotation->status === 'approved')
-                        <a href="{{ route('schedules.from-quote', $quotation->id) }}"
-                            class="btn btn-sm btn-outline-primary">
+                        <a href="{{ route('schedules.from-quote', $quotation->id) }}" class="btn btn-sm btn-success">
                             <i class="bi bi-calendar-check me-1"></i> Create Schedule
                         </a>
                     @endif
@@ -68,13 +62,14 @@
                             style="letter-spacing: .08em;">Status</span>
                         @php
                             $statusBadge = match (strtolower($quotation->status)) {
-                                'approved' => 'bg-success text-white',
-                                'rejected' => 'bg-danger text-white',
-                                'pending' => 'bg-warning text-dark',
-                                'emailed' => 'bg-info text-white',
-                                'ongoing' => 'bg-primary text-white',
-                                'completed' => 'bg-success text-white',
-                                default => 'bg-secondary text-white',
+                                'draft' => 'text-bg-secondary',
+                                'pending' => 'text-bg-warning',
+                                'approved' => 'text-bg-success',
+                                'rejected' => 'text-bg-danger',
+                                'emailed' => 'text-bg-info',
+                                'ongoing' => 'text-bg-primary',
+                                'completed' => 'text-bg-success',
+                                default => 'text-bg-light text-dark',
                             };
                         @endphp
                         <span class="badge {{ $statusBadge }} px-3 py-2 text-uppercase fs-6">

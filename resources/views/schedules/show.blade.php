@@ -11,6 +11,11 @@
                     <i class="bi bi-pencil-square me-1"></i> Edit Schedule
                 </a>
             @endif
+            @if (auth()->user()->hasPermission('schedules.coc.generate.pdf') && $schedule->status === 'completed')
+                <a href="{{ route('schedules.coc', $schedule->id) }}" class="btn btn-sm btn-success">
+                    <i class="bi bi-file-earmark-check me-1"></i> Prepare CoC/CoT
+                </a>
+            @endif
         </div>
     </div>
 
@@ -46,7 +51,16 @@
                     <div class="col-md-4">
                         <span class="text-uppercase small text-muted d-block mb-1"
                             style="letter-spacing: .08em;">Status</span>
-                        <span class="badge bg-secondary px-3 py-2 text-uppercase fs-6">
+                        @php
+                            $statusBadge = match (strtolower($schedule->status)) {
+                                'scheduled' => 'bg-primary text-white',
+                                'ongoing' => 'bg-warning text-dark',
+                                'completed' => 'bg-success text-white',
+                                'cancelled' => 'bg-danger text-white',
+                                default => 'bg-secondary text-white',
+                            };
+                        @endphp
+                        <span class="badge {{ $statusBadge }} px-3 py-2 text-uppercase fs-6">
                             {{ ucfirst($schedule->status) }}
                         </span>
                     </div>

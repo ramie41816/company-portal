@@ -1,16 +1,18 @@
 @php
-    // Self-contained fallback defaults for empty data / template viewer preview
-    $quotation =
-        $quotation ??
-        (object) [
-            'quotation_number' => 'QT-SAMPLE-000',
-            'quoted_to' => 'Valued Client',
-            'attention' => 'Jane Doe',
-            'reference_project' => 'Sample Project Implementation',
-            'total' => 150000.0,
-            'valid_until' => now()->addDays(30),
-            'prepared_by' => 'System Administrator',
-        ];
+    if (isset($template_viewing) && $template_viewing):
+        // Self-contained fallback defaults so this template handles empty data gracefully
+        $quotation =
+            $quotation ??
+            (object) [
+                'quotation_number' => 'QT-SAMPLE-000',
+                'quoted_to' => 'Valued Client',
+                'attention' => 'Jane Doe',
+                'reference_project' => 'Sample Project Implementation',
+                'total' => 150000.0,
+                'valid_until' => now()->addDays(30),
+                'prepared_by' => 'System Administrator',
+            ];
+    endif;
 @endphp
 
 <!DOCTYPE html>

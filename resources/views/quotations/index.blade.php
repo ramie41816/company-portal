@@ -69,13 +69,13 @@
                             <td>
                                 @php
                                     $badgeColors = [
-                                        'draft' => 'bg-secondary text-white',
-                                        'pending' => 'bg-warning text-dark',
-                                        'approved' => 'bg-success text-white',
-                                        'rejected' => 'bg-danger text-white',
-                                        'emailed' => 'bg-info text-white',
-                                        'ongoing' => 'bg-primary text-white',
-                                        'completed' => 'bg-secondary text-white',
+                                        'draft' => 'text-bg-secondary',
+                                        'pending' => 'text-bg-warning',
+                                        'approved' => 'text-bg-success',
+                                        'rejected' => 'text-bg-danger',
+                                        'emailed' => 'text-bg-info',
+                                        'ongoing' => 'text-bg-primary',
+                                        'completed' => 'text-bg-success',
                                     ];
                                 @endphp
                                 <span
@@ -86,21 +86,21 @@
                             </td>
                             <td class="text-end fw-semibold">@money($q->total)</td>
                             <td class="text-end">
-                                <div class="btn-group btn-group-sm">
+                                <div class="btn-group btn-group-sm" role="group">
                                     @if (auth()->user()->hasPermission('quotations.view'))
-                                        <a href="{{ route('quotations.show', $q) }}"
-                                            class="btn btn-sm btn-outline-secondary" title="View">
+                                        <a href="{{ route('quotations.show', $q) }}" class="btn btn-outline-secondary"
+                                            title="View">
                                             <i class="bi bi-eye"></i>
                                         </a>
                                     @endif
                                     @if (auth()->user()->hasPermission('quotations.update'))
-                                        <a href="{{ route('quotations.edit', $q) }}"
-                                            class="btn btn-sm btn-outline-secondary" title="Update">
+                                        <a href="{{ route('quotations.edit', $q) }}" class="btn btn-outline-primary"
+                                            title="Update">
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
                                     @endif
                                     @if (auth()->user()->hasPermission('quotations.update'))
-                                        <button type="button" class="btn btn-sm btn-outline-warning" title="Delete"
+                                        <button type="button" class="btn btn-outline-danger" title="Delete"
                                             data-bs-toggle="modal" data-bs-target="#archiveModal"
                                             data-action="{{ route('quotations.destroy', $q) }}"
                                             data-name="{{ $q->quotation_number }} &ndash; {{ $q->quoted_to }}">
@@ -126,7 +126,6 @@
 
     <div class="mt-3">{{ $quotations->links() }}</div>
 
-    {{-- Archive confirmation modal --}}
     <div class="modal fade" id="archiveModal" tabindex="-1" aria-labelledby="archiveModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <form method="POST" id="archiveForm" class="modal-content shadow"
@@ -135,10 +134,9 @@
                 @method('DELETE')
 
                 <div class="modal-body text-center p-4">
-                    {{-- Changed icon container to an archive/amber accent --}}
-                    <div class="mx-auto mb-3"
-                        style="width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; font-size: 1.6rem; background: rgba(255, 193, 7, .15); color: #ffc107;">
-                        <i class="bi bi-archive"></i>
+                    <div class="mx-auto mb-3 bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center"
+                        style="width: 48px; height: 48px;">
+                        <i class="bi bi-archive fs-4"></i>
                     </div>
 
                     <h5 class="fw-semibold mb-2" id="archiveModalLabel">Archive Quotation?</h5>
@@ -150,9 +148,9 @@
                     </p>
 
                     <div class="d-flex justify-content-center gap-2">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                        {{-- Changed from btn-danger to warning/amber to indicate archiving instead of permanent deletion --}}
-                        <button type="submit" class="btn btn-warning text-dark fw-medium">
+                        <button type="button" class="btn btn-outline-secondary px-4"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger px-4">
                             <i class="bi bi-archive me-1"></i> Yes, Archive
                         </button>
                     </div>
