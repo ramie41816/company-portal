@@ -70,7 +70,6 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{quotation}', [QuotationController::class, 'destroy'])->name('destroy');
             Route::patch('/{id}/restore', [QuotationController::class, 'restore'])->name('restore');
             Route::get('/{quotation}/prepare/quotation', [QuotationController::class, 'prepareQuotation'])->name('prepare');
-            Route::get('/{quotation}/prepare/coc', [QuotationController::class, 'prepareCoc'])->name('coc');
         });
 
         // Generate PDF
@@ -80,15 +79,6 @@ Route::middleware('auth')->group(function () {
         // Sending of Email
         Route::middleware('permission:quotations.send.email')->group(function () {
             Route::post('/{quotation}/quotation/email', [QuotationController::class, 'sendQuotationEmail'])->name('email');
-        });
-
-        // Generate PDF
-        Route::middleware('permission:quotations.coc.generate.pdf')->group(function () {
-            Route::post('/{quotation}/coc/pdf', [QuotationController::class, 'generateCocPdf'])->name('coc-generate.pdf');
-        });
-        // Sending of Email
-        Route::middleware('permission:quotations.coc.send.email')->group(function () {
-            Route::post('/{quotation}/coc/email', [QuotationController::class, 'sendCocEmail'])->name('coc-email');
         });
 
 
@@ -121,6 +111,16 @@ Route::middleware('auth')->group(function () {
             Route::put('/{schedule}', [ScheduleController::class, 'update'])->name('update');
             Route::delete('/{schedule}', [ScheduleController::class, 'destroy'])->name('destroy');
             Route::patch('/{id}/restore', [ScheduleController::class, 'restore'])->name('restore');
+            Route::get('/{schedule}/prepare/coc', [ScheduleController::class, 'prepareCoc'])->name('coc');
+        });
+
+        // Generate PDF
+        Route::middleware('permission:schedules.coc.generate.pdf')->group(function () {
+            Route::post('/{schedule}/coc/pdf', [ScheduleController::class, 'generateCocPdf'])->name('coc-generate.pdf');
+        });
+        // Sending of Email
+        Route::middleware('permission:schedules.coc.send.email')->group(function () {
+            Route::post('/{schedule}/coc/email', [ScheduleController::class, 'sendCocEmail'])->name('coc-email');
         });
 
         // Delete (Hard-Delete)

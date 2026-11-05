@@ -68,8 +68,8 @@
                             <td>
                                 @php
                                     $badgeColors = [
-                                        'scheduled' => 'bg-secondary text-white',
-                                        'ongoing' => 'bg-primary text-white',
+                                        'scheduled' => 'bg-primary text-white',
+                                        'ongoing' => 'bg-warning text-dark',
                                         'completed' => 'bg-success text-white',
                                         'cancelled' => 'bg-danger text-white',
                                     ];
@@ -82,22 +82,22 @@
                             </td>
                             <td class="text-end fw-semibold">@money($s->total)</td>
                             <td class="text-end">
-                                <div class="btn-group btn-group-sm">
+                                <div class="btn-group btn-group-sm" role="group">
                                     @if (auth()->user()->hasPermission('schedules.view'))
-                                        <a href="{{ route('schedules.show', $s) }}"
-                                            class="btn btn-sm btn-outline-secondary" title="View">
+                                        <a href="{{ route('schedules.show', $s) }}" class="btn btn-outline-secondary"
+                                            title="View">
                                             <i class="bi bi-eye"></i>
                                         </a>
                                     @endif
                                     @if (auth()->user()->hasPermission('schedules.update'))
-                                        <a href="{{ route('schedules.edit', $s) }}"
-                                            class="btn btn-sm btn-outline-secondary" title="Update">
+                                        <a href="{{ route('schedules.edit', $s) }}" class="btn btn-outline-primary"
+                                            title="Update">
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
-                                        <button type="button" class="btn btn-sm btn-outline-warning" title="Archive"
+                                        <button type="button" class="btn btn-outline-danger" title="Archive"
                                             data-bs-toggle="modal" data-bs-target="#archiveModal"
                                             data-action="{{ route('schedules.destroy', $s) }}"
-                                            data-name="{{ $s->schedule_number }} &ndash; {{ $s->quoted_to }}">
+                                            data-name="{{ $s->schedule_number }} &ndash; {{ $s->scheduled_to }}">
                                             <i class="bi bi-archive"></i>
                                         </button>
                                     @endif
@@ -128,17 +128,17 @@
                 @csrf
                 @method('DELETE')
                 <div class="modal-body text-center p-4">
-                    <div class="mx-auto mb-3"
-                        style="width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; font-size: 1.6rem; background: rgba(255, 193, 7, .15); color: #ffc107;">
-                        <i class="bi bi-archive"></i>
+                    <div class="mx-auto mb-3 bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center"
+                        style="width: 48px; height: 48px;">
+                        <i class="bi bi-archive fs-4"></i>
                     </div>
                     <h5 class="fw-semibold mb-2" id="archiveModalLabel">Archive Schedule?</h5>
                     <div class="fw-medium mb-2" id="archiveName"></div>
-                    <p class="text-muted small mb-4">This schedule will be moved to the archive list and hidden from active
-                        records. Are you sure?</p>
+                    <p class="text-muted small mb-4">This schedule will be moved to the archive list. Are you sure?</p>
                     <div class="d-flex justify-content-center gap-2">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-warning text-dark fw-medium">
+                        <button type="button" class="btn btn-outline-secondary px-4"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger px-4">
                             <i class="bi bi-archive me-1"></i> Yes, Archive
                         </button>
                     </div>

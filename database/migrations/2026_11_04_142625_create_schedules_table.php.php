@@ -21,8 +21,8 @@ return new class extends Migration
             $table->string('reference_project')->nullable();
             $table->string('prepared_by')->nullable();
 
-            // Client details (same as quotation)
-            $table->string('quoted_to'); // or client_name
+            // Client details
+            $table->string('scheduled_to');
             $table->string('client_company')->nullable();
             $table->text('client_address')->nullable();
             $table->string('client_phone')->nullable();

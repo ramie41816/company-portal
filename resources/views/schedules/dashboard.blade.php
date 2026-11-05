@@ -85,8 +85,8 @@
         </div>
     </div>
 
-    {{-- Interactive Calendar Section (Added id for Submenu Navigation) --}}
-    <div id="calendar-section" class="row g-4 mb-4 scroll-mt">
+    {{-- Interactive Calendar Section --}}
+    <div id="calendar-section" class="row g-4 mb-4" style="scroll-behavior: smooth; scroll-margin-top: 20px;">
         <div class="col-lg-8">
             <div class="panel p-4 h-100 shadow-sm border-0">
                 <h5 class="fw-semibold mb-3"><i class="bi bi-calendar3 me-1"></i> Operations Calendar</h5>
@@ -95,10 +95,10 @@
         </div>
         <div class="col-lg-4">
             <div class="panel p-4 h-100 d-flex flex-column shadow-sm border-0">
-                <h5 class="fw-semibold mb-1"><i class="bi bi-list-task me-1"></i> Schedules on <div
-                        class="text-brand fw-bold mb-3 fs-5" id="selectedDateLabel">Today</div>
+                <h5 class="fw-semibold mb-1"><i class="bi bi-list-task me-1"></i> Schedules on <span`
+                        class="text-brand fw-bold mb-3 fs-5" id="selectedDateLabel">Today</span>
                 </h5>
-                <div id="dateSchedulesList" class="overflow-auto flex-grow-1 pe-1" style="max-height: 380px;">
+                <div id="dateSchedulesList" class="overflow-auto flex-grow-1 pe-1 mt-3" style="max-height: 380px;">
                     <div class="text-center text-muted py-5">
                         <i class="bi bi-calendar-event fs-2 d-block mb-2"></i>
                         Select a date from the calendar.
@@ -108,7 +108,7 @@
         </div>
     </div>
 
-    {{-- Recent Schedules Panel (Added id for Submenu Navigation) --}}
+    {{-- Recent Schedules Panel --}}
     <div id="recent-schedules-section" class="panel mb-4 shadow-sm border-0 scroll-mt">
         <div class="p-4 border-bottom d-flex justify-content-between align-items-center"
             style="border-color: var(--line) !important;">
@@ -187,19 +187,6 @@
         </div>
     </div>
 
-    {{-- Smooth Scrolling & Calendar Script --}}
-    @push('styles')
-        <style>
-            html {
-                scroll-behavior: smooth;
-            }
-
-            .scroll-mt {
-                scroll-margin-top: 20px;
-            }
-        </style>
-    @endpush
-
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -239,7 +226,7 @@
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <div>
                                     <span class="fw-bold text-brand" style="font-size: 0.95rem;">${item.quote_number}</span>
-                                    <div class="fw-medium mt-1" style="font-size: 0.875rem; color: var(--ink);">${item.quoted_to}</div>
+                                    <div class="fw-medium mt-1" style="font-size: 0.875rem; color: var(--ink);">${item.scheduled_to}</div>
                                 </div>
                                 <span class="badge ${badgeColor} text-uppercase px-2 py-1" style="font-size: 0.6rem; letter-spacing: .05em;">${item.status}</span>
                             </div>
@@ -260,7 +247,12 @@
                 const todayStr = new Date().toISOString().split('T')[0];
                 loadSchedulesForDate(todayStr);
 
-                const calendar = new FullCalendar.Calendar(calendarEl, {
+                const calendar = new window.FullCalendar.Calendar(calendarEl, {
+                    plugins: [
+                        window.FullCalendar.dayGridPlugin,
+                        window.FullCalendar.timeGridPlugin,
+                        window.FullCalendar.interactionPlugin
+                    ],
                     initialView: 'dayGridMonth',
                     headerToolbar: {
                         left: 'prev,next today',

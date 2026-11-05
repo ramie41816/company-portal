@@ -1,43 +1,45 @@
 @php
-    // Self-contained fallback defaults for empty data / template viewer preview
-    $quotation =
-        $quotation ??
-        (object) [
-            'quotation_number' => 'QT-SAMPLE-000',
-            'quoted_to' => 'Valued Client Name',
-            'client_company' => 'Sample Client Corporation',
-            'client_address' => '123 Business Rd, Metro Manila',
-            'client_phone' => '+63 912 345 6789',
-            'contact_email' => 'client@example.com',
-            'attention' => 'Jane Doe',
-            'quotation_date' => now(),
-            'valid_until' => now()->addDays(30),
-            'reference_project' => 'Sample Enterprise System Implementation',
-            'prepared_by' => 'System Administrator',
-            'total' => 150000.0,
-            'items' => collect([
-                (object) [
-                    'id' => 1,
-                    'parent_id' => null,
-                    'description' => 'System Analysis & Requirements Gathering',
-                    'quantity' => 1,
-                    'unit_price' => 50000.0,
-                    'total' => 50000.0,
-                ],
-                (object) [
-                    'id' => 2,
-                    'parent_id' => null,
-                    'description' => 'Core Module Development & Integration',
-                    'quantity' => 1,
-                    'unit_price' => 100000.0,
-                    'total' => 100000.0,
-                ],
-            ]),
-            'other_info' => 'Notes: Standard implementation timeline applies.',
-        ];
+    if (isset($template_viewing) && $template_viewing):
+        // Self-contained fallback defaults so this template handles empty data gracefully
+        $quotation =
+            $quotation ??
+            (object) [
+                'quotation_number' => 'QT-####-####',
+                'quoted_to' => 'Valued Client Name',
+                'client_company' => 'Sample Client Corporation',
+                'client_address' => '123 Business Rd, Metro Manila',
+                'client_phone' => '+63 912 345 6789',
+                'contact_email' => 'client@example.com',
+                'attention' => 'Jane Doe',
+                'quotation_date' => now(),
+                'valid_until' => now()->addDays(30),
+                'reference_project' => 'Sample Enterprise System Implementation',
+                'prepared_by' => 'System Administrator',
+                'total' => 150000.0,
+                'items' => collect([
+                    (object) [
+                        'id' => 1,
+                        'parent_id' => null,
+                        'description' => 'System Analysis & Requirements Gathering',
+                        'quantity' => 1,
+                        'unit_price' => 50000.0,
+                        'total' => 50000.0,
+                    ],
+                    (object) [
+                        'id' => 2,
+                        'parent_id' => null,
+                        'description' => 'Core Module Development & Integration',
+                        'quantity' => 1,
+                        'unit_price' => 100000.0,
+                        'total' => 100000.0,
+                    ],
+                ]),
+                'other_info' => 'Notes: Standard implementation timeline applies.',
+            ];
 
-    $signatureDataUri = $signatureDataUri ?? null;
-    $tempSignaturePath = $tempSignaturePath ?? null;
+        $signatureDataUri = $signatureDataUri ?? null;
+        $tempSignaturePath = $tempSignaturePath ?? null;
+    endif;
 @endphp
 <!DOCTYPE html>
 <html lang="en">

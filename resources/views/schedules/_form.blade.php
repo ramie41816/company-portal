@@ -1,6 +1,7 @@
 @php
     $isEdit = isset($schedule) && $schedule->exists;
     $currency = config('company.currency_symbol');
+    $hasQuotation = isset($schedule->quotation_id) && !empty($schedule->quotation_id);
 
     if (!isset($savedItems)) {
         $savedItems = (isset($schedule) && $schedule->relationLoaded('items') ? $schedule->items : collect())
@@ -72,7 +73,7 @@
         <input type="hidden" name="status" value="scheduled">
     @endif
 
-    @if (isset($schedule->quotation_id) && $schedule->quotation_id)
+    @if ($hasQuotation)
         <div class="alert alert-info border-0 shadow-sm mb-4 d-flex align-items-center justify-content-between">
             <div>
                 <i class="bi bi-link-45deg me-1"></i> Generated from Quotation:
@@ -88,43 +89,50 @@
             <h6 class="fw-semibold mb-3">Customer & Project Details</h6>
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label for="quoted_to" class="form-label">Client Name (To)</label>
-                    <input id="quoted_to" type="text" name="quoted_to"
-                        value="{{ old('quoted_to', $schedule->quoted_to ?? '') }}" class="form-control" required>
+                    <label for="scheduled_to" class="form-label">Client Name (To)</label>
+                    <input id="scheduled_to" type="text" name="scheduled_to"
+                        value="{{ old('scheduled_to', $schedule->scheduled_to ?? '') }}" class="form-control"
+                        {{ $hasQuotation ? 'readonly' : '' }} required>
                 </div>
                 <div class="col-md-6">
                     <label for="client_company" class="form-label">Company Name <span
                             class="text-muted fw-normal">(optional)</span></label>
                     <input id="client_company" type="text" name="client_company"
-                        value="{{ old('client_company', $schedule->client_company ?? '') }}" class="form-control">
+                        value="{{ old('client_company', $schedule->client_company ?? '') }}" class="form-control"
+                        {{ $hasQuotation ? 'readonly' : '' }}>
                 </div>
                 <div class="col-md-12">
                     <label for="client_address" class="form-label">Address <span
                             class="text-muted fw-normal">(optional)</span></label>
                     <input id="client_address" type="text" name="client_address"
-                        value="{{ old('client_address', $schedule->client_address ?? '') }}" class="form-control">
+                        value="{{ old('client_address', $schedule->client_address ?? '') }}" class="form-control"
+                        {{ $hasQuotation ? 'readonly' : '' }}>
                 </div>
                 <div class="col-md-6">
                     <label for="client_phone" class="form-label">Phone Number <span
                             class="text-muted fw-normal">(optional)</span></label>
                     <input id="client_phone" type="text" name="client_phone"
-                        value="{{ old('client_phone', $schedule->client_phone ?? '') }}" class="form-control">
+                        value="{{ old('client_phone', $schedule->client_phone ?? '') }}" class="form-control"
+                        {{ $hasQuotation ? 'readonly' : '' }}>
                 </div>
                 <div class="col-md-6">
                     <label for="contact_email" class="form-label">Email Address <span
                             class="text-muted fw-normal">(optional)</span></label>
                     <input id="contact_email" type="email" name="contact_email"
-                        value="{{ old('contact_email', $schedule->contact_email ?? '') }}" class="form-control">
+                        value="{{ old('contact_email', $schedule->contact_email ?? '') }}" class="form-control"
+                        {{ $hasQuotation ? 'readonly' : '' }}>
                 </div>
                 <div class="col-md-6">
                     <label for="attention" class="form-label">Contact Person (Attention)</label>
                     <input id="attention" type="text" name="attention"
-                        value="{{ old('attention', $schedule->attention ?? '') }}" class="form-control">
+                        value="{{ old('attention', $schedule->attention ?? '') }}" class="form-control"
+                        {{ $hasQuotation ? 'readonly' : '' }}>
                 </div>
                 <div class="col-md-6">
                     <label for="prepared_by" class="form-label">Prepared By</label>
                     <input id="prepared_by" type="text" name="prepared_by"
-                        value="{{ old('prepared_by', $schedule->prepared_by ?? '') }}" class="form-control">
+                        value="{{ old('prepared_by', $schedule->prepared_by ?? '') }}" class="form-control"
+                        {{ $hasQuotation ? 'readonly' : '' }}>
                 </div>
                 <div class="col-md-4">
                     <label for="schedule_date" class="form-label">Schedule Date & Time</label>
@@ -150,7 +158,7 @@
                     <label for="reference_project" class="form-label">Reference / Project</label>
                     <input id="reference_project" type="text" name="reference_project"
                         value="{{ old('reference_project', $schedule->reference_project ?? '') }}"
-                        class="form-control">
+                        class="form-control" {{ $hasQuotation ? 'readonly' : '' }}>
                 </div>
             </div>
         </div>
@@ -163,9 +171,11 @@
                 <h6 class="fw-semibold mb-1">Scope of Work & Services</h6>
                 <p class="text-muted small mb-0">Add services and hierarchical child sub-items.</p>
             </div>
-            <button type="button" id="add-row" class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-plus-lg me-1"></i> Add Main Item
-            </button>
+            @if (!$hasQuotation)
+                <button type="button" id="add-row" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-plus-lg me-1"></i> Add Main Item
+                </button>
+            @endif
         </div>
 
         <div class="table-responsive px-4 pb-4">
@@ -176,7 +186,9 @@
                         <th style="width: 170px;">Unit Price ({{ $currency }})</th>
                         <th style="width: 130px;">Quantity</th>
                         <th style="width: 150px;" class="text-end">Total</th>
-                        <th style="width: 110px;" class="text-end">Actions</th>
+                        @if (!$hasQuotation)
+                            <th style="width: 110px;" class="text-end">Actions</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -185,7 +197,9 @@
                         <td colspan="3" class="text-end fw-semibold pt-3">Grand Total</td>
                         <td class="text-end fw-bold fs-5 text-brand pt-3" id="grand-total">{{ $currency }}0.00
                         </td>
-                        <td></td>
+                        @if (!$hasQuotation)
+                            <td></td>
+                        @endif
                     </tr>
                 </tfoot>
             </table>
@@ -247,10 +261,10 @@
 
         const oldItems = @json($oldItems);
         const currency = @json($currency);
+        const hasQuotation = @json($hasQuotation);
         const tbody = document.querySelector('#items-table tbody');
         let globalIndex = 0;
 
-        // SweetAlert confirmation logic on form submit (matching quotations)
         document.getElementById('scheduleForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -315,28 +329,35 @@
                 '<span class="text-muted small me-2"><i class="bi bi-arrow-return-right"></i> Sub:</span>' :
                 '<span class="badge bg-secondary me-2">Main</span>';
             const safeDescription = (item.description ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            const readonlyAttr = hasQuotation ? 'readonly' : '';
 
-            tr.innerHTML = `
-                <td class="p-2 ${paddingLeft}">
-                    <div class="d-flex align-items-center">
-                        ${badgeIcon}
-                        <input type="text" name="items[${i}][description]" class="form-control form-control-sm flex-grow-1" placeholder="Description..." value="${safeDescription}" required>
-                        <input type="hidden" name="items[${i}][is_sub]" value="${isSubItem ? '1' : '0'}">
-                    </div>
-                </td>
-                <td class="p-2 align-middle">
-                    <input type="number" step="0.01" min="0" name="items[${i}][unit_price]" class="form-control form-control-sm price" value="${item.unit_price ?? ''}" required>
-                </td>
-                <td class="p-2 align-middle">
-                    <input type="number" step="0.01" min="0.01" name="items[${i}][quantity]" class="form-control form-control-sm qty" value="${item.quantity ?? 1}" required>
-                </td>
-                <td class="text-end fw-medium line-total align-middle">${formatMoney(0)}</td>
+            let actionsHtml = '';
+            if (!hasQuotation) {
+                actionsHtml = `
                 <td class="p-2 text-end align-middle">
                     <div class="btn-group" role="group">
                         ${!isSubItem ? `<button type="button" class="btn btn-sm btn-outline-primary add-sub" title="Add Sub-item"><i class="bi bi-plus-lg"></i></button>` : ''}
                         <button type="button" class="btn btn-sm btn-outline-danger remove" title="Remove"><i class="bi bi-x-lg"></i></button>
                     </div>
+                </td>`;
+            }
+
+            tr.innerHTML = `
+                <td class="p-2 ${paddingLeft}">
+                    <div class="d-flex align-items-center">
+                        ${badgeIcon}
+                        <input type="text" name="items[${i}][description]" class="form-control form-control-sm flex-grow-1" placeholder="Description..." value="${safeDescription}" ${readonlyAttr} required>
+                        <input type="hidden" name="items[${i}][is_sub]" value="${isSubItem ? '1' : '0'}">
+                    </div>
                 </td>
+                <td class="p-2 align-middle">
+                    <input type="number" step="0.01" min="0" name="items[${i}][unit_price]" class="form-control form-control-sm price" value="${item.unit_price ?? ''}" ${readonlyAttr} required>
+                </td>
+                <td class="p-2 align-middle">
+                    <input type="number" step="0.01" min="0.01" name="items[${i}][quantity]" class="form-control form-control-sm qty" value="${item.quantity ?? 1}" ${readonlyAttr} required>
+                </td>
+                <td class="text-end fw-medium line-total align-middle">${formatMoney(0)}</td>
+                ${actionsHtml}
             `;
 
             if (insertAfterRow && insertAfterRow.parentNode) {
@@ -362,6 +383,8 @@
         tbody.addEventListener('input', recalc);
 
         tbody.addEventListener('click', e => {
+            if (hasQuotation) return;
+
             if (e.target.closest('.remove')) {
                 const tr = e.target.closest('tr');
                 if (!tr.classList.contains('main-item-sub')) {
@@ -387,7 +410,10 @@
             }
         });
 
-        document.getElementById('add-row').addEventListener('click', () => renderRow());
+        const addRowBtn = document.getElementById('add-row');
+        if (addRowBtn) {
+            addRowBtn.addEventListener('click', () => renderRow());
+        }
 
         if (oldItems.length > 0) {
             oldItems.forEach(item => {

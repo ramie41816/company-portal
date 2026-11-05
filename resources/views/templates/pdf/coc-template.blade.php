@@ -1,52 +1,57 @@
 @php
-    // Self-contained fallback defaults for empty data / template viewer preview
-    $quotation =
-        $quotation ??
-        (object) [
-            'quotation_number' => 'QT-SAMPLE-000',
-            'quoted_to' => 'Valued Client Name',
-            'client_company' => 'Sample Client Corporation',
-            'client_address' => '123 Business Rd, Metro Manila',
-            'client_phone' => '+63 912 345 6789',
-            'contact_email' => 'client@example.com',
-            'quotation_date' => now(),
-            'reference_project' => 'Sample Enterprise System Implementation',
-            'total' => 150000.0,
-            'items' => collect([
-                (object) [
-                    'id' => 1,
-                    'parent_id' => null,
-                    'description' => 'System Analysis & Requirements Gathering',
-                    'quantity' => 1,
-                    'unit_price' => 50000.0,
-                ],
-                (object) [
-                    'id' => 2,
-                    'parent_id' => null,
-                    'description' => 'Core Module Development & Integration',
-                    'quantity' => 1,
-                    'unit_price' => 100000.0,
-                ],
-            ]),
-            'attention' => 'Jane Doe',
+    if (isset($template_viewing) && $template_viewing):
+        // Self-contained fallback defaults so this template handles empty data gracefully
+        $quotation =
+            $quotation ??
+            (object) [
+                'schedule_number' => 'QT-SAMPLE-000',
+                'scheduled_to' => 'Valued Client Name',
+                'client_company' => 'Sample Client Corporation',
+                'client_address' => '123 Business Rd, Metro Manila',
+                'client_phone' => '+63 912 345 6789',
+                'contact_email' => 'client@example.com',
+                'schedule_date' => now(),
+                'reference_project' => 'Sample Enterprise System Implementation',
+                'total' => 150000.0,
+                'items' => collect([
+                    (object) [
+                        'id' => 1,
+                        'parent_id' => null,
+                        'description' => 'System Analysis & Requirements Gathering',
+                        'quantity' => 1,
+                        'unit_price' => 50000.0,
+                    ],
+                    (object) [
+                        'id' => 2,
+                        'parent_id' => null,
+                        'description' => 'Core Module Development & Integration',
+                        'quantity' => 1,
+                        'unit_price' => 100000.0,
+                    ],
+                ]),
+                'attention' => 'Jane Doe',
+            ];
+
+        $processedItems = $processedItems ?? [
+            ['item' => (object) ['id' => 1], 'included' => true, 'remarks' => 'Completed on schedule.'],
+            ['item' => (object) ['id' => 2], 'included' => true, 'remarks' => 'Tested and deployed successfully.'],
         ];
 
-    $processedItems = $processedItems ?? [
-        ['item' => (object) ['id' => 1], 'included' => true, 'remarks' => 'Completed on schedule.'],
-        ['item' => (object) ['id' => 2], 'included' => true, 'remarks' => 'Tested and deployed successfully.'],
-    ];
+        $executedBy = $executedBy ?? 'System Administrator';
+        $generalRemarks =
+            $generalRemarks ?? 'All project milestones have been met successfully with full client acceptance.';
+        $signatureDataUri = $signatureDataUri ?? null;
+    endif;
 
-    $executedBy = $executedBy ?? 'System Administrator';
-    $generalRemarks =
-        $generalRemarks ?? 'All project milestones have been met successfully with full client acceptance.';
-    $signatureDataUri = $signatureDataUri ?? null;
+    $hasQuotation = isset($schedule->quotation_id) && !empty($schedule->quotation_id);
+    $quotationNumber = $hasQuotation ? optional($schedule->quotation)->quotation_number : null;
 @endphp
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8">
-    <title>Certificate of Completion - {{ $quotation->quotation_number ?? 'SAMPLE' }}</title>
+    <title>Certificate of Completion - {{ $schedule->schedule_number ?? 'SAMPLE' }}</title>
     <style>
         @page {
             size: A4 portrait;
@@ -56,8 +61,8 @@
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             color: #2d3748;
-            font-size: 10.5px;
-            line-height: 1.5;
+            font-size: 10px;
+            line-height: 1.45;
             margin: 0;
             padding: 0;
         }
@@ -107,8 +112,8 @@
             vertical-align: top;
         }
 
-        .quotation-main-title {
-            font-size: 22px;
+        .schedule-main-title {
+            font-size: 20px;
             font-weight: 800;
             color: #0f3460;
             text-transform: uppercase;
@@ -117,26 +122,37 @@
         }
 
         .company-tagline {
-            font-size: 10px;
+            font-size: 9.5px;
             color: #166534;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .company-meta-box {
-            font-size: 10px;
+            font-size: 9.5px;
             color: #4a5568;
-            line-height: 1.4;
+            line-height: 1.35;
         }
 
-        .info-grid-container {
+        .section-box {
             background-color: #f8fafc;
             border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 10px 15px;
-            margin: 10px 0;
+            border-radius: 4px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #0f3460;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #cbd5e1;
+            padding-bottom: 3px;
         }
 
         .info-grid {
@@ -149,39 +165,28 @@
             vertical-align: top;
         }
 
-        .section-subtitle {
-            font-size: 11px;
-            font-weight: 700;
-            color: #0f3460;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            border-bottom: 1px solid #cbd5e1;
-            padding-bottom: 4px;
-        }
-
         .field-table {
             width: 100%;
             border-collapse: collapse;
         }
 
         .field-table td {
-            padding-bottom: 3px;
+            padding-bottom: 2px;
             vertical-align: top;
-            font-size: 10px;
+            font-size: 9.5px;
         }
 
         .field-label {
             font-weight: 600;
             color: #4a5568;
-            width: 95px;
+            width: 90px;
             white-space: nowrap;
         }
 
         .field-label-right {
             font-weight: 600;
             color: #4a5568;
-            width: 115px;
+            width: 110px;
             white-space: nowrap;
         }
 
@@ -190,43 +195,42 @@
         }
 
         .completion-statement {
-            margin: 12px 0;
+            margin-bottom: 12px;
             text-align: justify;
             color: #2d3748;
-            font-size: 10.5px;
+            font-size: 10px;
         }
 
         .items-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 5px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .items-table th {
             background-color: #0f3460;
             color: #ffffff;
-            font-size: 9.5px;
+            font-size: 9px;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            padding: 7px 10px;
+            padding: 6px 8px;
             text-align: left;
             font-weight: bold;
         }
 
         .items-table td {
-            padding: 7px 10px;
+            padding: 6px 8px;
             border-bottom: 1px solid #e2e8f0;
-            font-size: 10px;
+            font-size: 9.5px;
             color: #2d3748;
             vertical-align: top;
         }
 
         .badge-pill {
             font-weight: bold;
-            padding: 3px 7px;
-            border-radius: 4px;
-            font-size: 8.5px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 8px;
             letter-spacing: 0.03em;
             display: inline-block;
         }
@@ -243,24 +247,42 @@
             border: 1px solid #fecaca;
         }
 
-        .signatory-section {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
+        .notes-box {
+            font-size: 9.5px;
+            line-height: 1.4;
+            color: #2d3748;
+            background: #fdfdfd;
+            border: 1px solid #e2e8f0;
+            border-left: 3px solid #166534;
+            padding: 8px 10px;
+            border-radius: 4px;
+            margin-bottom: 12px;
+        }
+
+        .signatory-container {
+            border: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
             page-break-inside: avoid;
         }
 
-        .signatory-section td {
-            width: 50%;
-            vertical-align: top;
-            padding: 0 10px;
+        .signatory-table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        .signatory-box {
-            font-size: 10px;
+        .signatory-table td {
+            width: 50%;
+            vertical-align: top;
+            padding: 0 6px;
+        }
+
+        .signatory-card {
             background: #ffffff;
-            border: 1px solid #e2e8f0;
-            padding: 10px;
+            border: 1px solid #cbd5e1;
+            padding: 8px;
             border-radius: 4px;
         }
     </style>
@@ -278,10 +300,10 @@
     </div>
 
     {{-- Header Section --}}
-    <table class="w-full header-table">
+    <table class="w-full header-table" style="margin-bottom: 12px;">
         <tr>
             <td>
-                <div class="quotation-main-title">Certificate of Completion</div>
+                <div class="schedule-main-title">Certificate of Completion</div>
                 @if (config('company.tagline'))
                     <div class="company-tagline">{{ config('company.tagline') }}</div>
                 @endif
@@ -293,66 +315,73 @@
             </td>
             <td style="text-align: right;">
                 @if (config('company.logo'))
-                    <img src="{{ public_path(config('company.logo')) }}" alt="Logo" height="70"
+                    <img src="{{ public_path(config('company.logo')) }}" alt="Logo" height="60"
                         style="display: inline-block;">
                 @endif
             </td>
         </tr>
     </table>
 
-    {{-- Client & Quotation Overview Grid Container --}}
-    <div class="info-grid-container">
+    {{-- Client & Schedule Overview Section --}}
+    <div class="section-box">
         <table class="info-grid">
             <tr>
-                <td style="padding-right: 10px;">
-                    <div class="section-subtitle">Quote To (Client)</div>
+                <td style="padding-right: 8px;">
+                    <div class="section-title">Client Information</div>
                     <table class="field-table">
-                        @if (($quotation->quoted_to ?? '') !== ($quotation->client_company ?? ''))
+                        @if (($schedule->scheduled_to ?? '') !== ($schedule->client_company ?? ''))
                             <tr>
                                 <td class="field-label">Client Name:</td>
-                                <td class="field-val">{{ $quotation->quoted_to ?? '—' }}</td>
+                                <td class="field-val">{{ $schedule->scheduled_to ?? '—' }}</td>
                             </tr>
                         @endif
                         <tr>
                             <td class="field-label">Company Name:</td>
-                            <td class="field-val">{{ $quotation->client_company ?? '—' }}</td>
+                            <td class="field-val">{{ $schedule->client_company ?? '—' }}</td>
                         </tr>
                         <tr>
                             <td class="field-label">Address:</td>
-                            <td class="field-val">{{ $quotation->client_address ?? '—' }}</td>
+                            <td class="field-val">{{ $schedule->client_address ?? '—' }}</td>
                         </tr>
                         <tr>
                             <td class="field-label">Phone:</td>
-                            <td class="field-val">{{ $quotation->client_phone ?? '—' }}</td>
+                            <td class="field-val">{{ $schedule->client_phone ?? '—' }}</td>
                         </tr>
                         <tr>
                             <td class="field-label">Email:</td>
-                            <td class="field-val">{{ $quotation->contact_email ?? '—' }}</td>
+                            <td class="field-val">{{ $schedule->contact_email ?? '—' }}</td>
                         </tr>
                     </table>
                 </td>
-                <td style="padding-left: 10px; border-left: 1px solid #cbd5e1;">
-                    <div class="section-subtitle">Quotation Overview</div>
+                <td style="padding-left: 8px; border-left: 1px solid #cbd5e1;">
+                    <div class="section-title">Schedule Overview</div>
                     <table class="field-table">
+                        @if ($hasQuotation)
+                            <tr>
+                                <td class="field-label-right">Quotation Ref:</td>
+                                <td class="field-val" style="font-weight: bold; color: #0f3460;">
+                                    {{ $quotationNumber }}</td>
+                            </tr>
+                        @endif
                         <tr>
-                            <td class="field-label-right">Quotation Number:</td>
+                            <td class="field-label-right">Schedule Number:</td>
                             <td class="field-val" style="font-weight: bold; color: #0f3460;">
-                                {{ $quotation->quotation_number ?? '—' }}</td>
+                                {{ $schedule->schedule_number ?? '—' }}</td>
                         </tr>
                         <tr>
                             <td class="field-label-right">Issue Date:</td>
                             <td class="field-val">
-                                {{ isset($quotation->quotation_date) ? \Carbon\Carbon::parse($quotation->quotation_date)->format('d/m/Y') : now()->format('d/m/Y') }}
+                                {{ isset($schedule->schedule_date) ? \Carbon\Carbon::parse($schedule->schedule_date)->format('d/m/Y') : now()->format('d/m/Y') }}
                             </td>
                         </tr>
                         <tr>
                             <td class="field-label-right">Project Reference:</td>
-                            <td class="field-val">{{ $quotation->reference_project ?? '—' }}</td>
+                            <td class="field-val">{{ $schedule->reference_project ?? '—' }}</td>
                         </tr>
                         <tr>
                             <td class="field-label-right">Total Amount:</td>
                             <td class="field-val" style="font-weight: bold; color: #0f3460;">PHP
-                                {{ number_format($quotation->total ?? 0, 2) }}</td>
+                                {{ number_format($schedule->total ?? 0, 2) }}</td>
                         </tr>
                     </table>
                 </td>
@@ -360,27 +389,32 @@
         </table>
     </div>
 
+    {{-- Statement Section --}}
     <div class="completion-statement">
-        This is to certify that the services and scope of work outlined under quotation reference
-        <strong>{{ $quotation->quotation_number ?? '—' }}</strong> have been inspected, reviewed, and executed in
-        accordance
-        with the specified agreements. Below is the itemized completion status and corresponding remarks:
+        This is to certify that the services and scope of work outlined in
+        @if ($hasQuotation)
+            quotation reference <strong>{{ $quotationNumber }}</strong> under schedule reference
+        @else
+            schedule reference
+        @endif
+        <strong>{{ $schedule->schedule_number ?? '—' }}</strong> have been inspected, reviewed, and executed in
+        accordance with the specified agreements. Below is the itemized completion status and corresponding remarks:
     </div>
 
-    {{-- Scope of Work Items Table --}}
+    {{-- Scope of Work Items Section --}}
     <table class="items-table">
         <thead>
             <tr>
-                <th style="width: 35px;">#</th>
+                <th style="width: 30px;">#</th>
                 <th>Description</th>
-                <th class="text-center" style="width: 55px;">Qty</th>
-                <th style="width: 90px; text-align: center;">Status</th>
-                <th style="width: 140px;">Remarks</th>
+                <th class="text-center" style="width: 45px;">Qty</th>
+                <th style="width: 85px; text-align: center;">Status</th>
+                <th style="width: 130px;">Remarks</th>
             </tr>
         </thead>
         <tbody>
             @php
-                $itemsCollection = collect($quotation->items ?? []);
+                $itemsCollection = collect($schedule->items ?? []);
                 $mainItems = $itemsCollection->whereNull('parent_id');
                 $x = 1;
             @endphp
@@ -415,9 +449,9 @@
                     @endphp
                     <tr>
                         <td></td>
-                        <td style="padding-left: 15px;">
+                        <td style="padding-left: 12px;">
                             <span
-                                style="color: #166534; font-weight: bold; margin-right: 5px;">{{ $numbering }}</span>
+                                style="color: #166534; font-weight: bold; margin-right: 4px;">{{ $numbering }}</span>
                             <span style="color: #4a5568;">{{ $subItem->description ?? 'Sub-item description' }}</span>
                         </td>
                         <td class="text-center">
@@ -440,60 +474,70 @@
         </tbody>
     </table>
 
-    {{-- General Remarks Block --}}
+    {{-- General Remarks Section --}}
     @if (!empty($generalRemarks))
-        <div
-            style="margin-top: 10px; margin-bottom: 10px; font-size: 10px; line-height: 1.4; color: #2d3748; background: #fdfdfd; border-left: 3px solid #166534; padding: 6px 10px;">
+        <div class="notes-box">
             <strong>Completion Notes:</strong><br>
             {!! nl2br(e($generalRemarks)) !!}
         </div>
     @endif
 
-    <!-- Signatory Section -->
-    <table class="signatory-section"
-        style="width: 100%; border-collapse: collapse; margin-top: 20px; page-break-inside: avoid;">
-        <tr>
-            <td style="width: 50%; vertical-align: top; padding: 0 10px;">
-                <div class="signatory-box"
-                    style="background: #ffffff; border: 1px solid #e2e8f0; padding: 10px; border-radius: 4px;">
-                    <strong style="color: #0f3460;">Executed By:</strong>
+    {{-- Signatory Section Container --}}
+    <div class="signatory-container">
+        <div
+            style="font-size: 10px; font-weight: 700; color: #0f3460; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">
+            Signatory Authorization & Acceptance
+        </div>
 
-                    <div style="width: 180px; height: 55px; text-align: center; margin: 4px auto 0 auto;">
-                        @if (!empty($signatureDataUri))
-                            {{-- Rendered via Base64 Data URI in memory --}}
-                            <img src="{{ $signatureDataUri }}" alt="eSignature"
-                                style="max-height: 53px; max-width: 180px; width: auto; display: inline-block;">
-                        @endif
+        <table class="signatory-table">
+            <tr>
+                <td>
+                    <div class="signatory-card">
+                        <div
+                            style="font-size: 9.5px; font-weight: 700; color: #0f3460; text-transform: uppercase; margin-bottom: 6px;">
+                            Prepared / Executed By
+                        </div>
+
+                        <div style="width: 160px; height: 50px; text-align: center; margin: 2px auto 0 auto;">
+                            @if (!empty($signatureDataUri))
+                                <img src="{{ $signatureDataUri }}" alt="eSignature"
+                                    style="max-height: 48px; max-width: 160px; width: auto; display: inline-block;">
+                            @endif
+                        </div>
+
+                        <div
+                            style="border-bottom: 1px solid #4a5568; width: 100%; margin-bottom: 4px; margin-top: 2px;">
+                        </div>
+
+                        <div style="font-weight: bold; color: #1a202c; font-size: 9.5px;">
+                            {{ $executedBy ?? config('company.name') }}
+                        </div>
+                        <div style="color: #4a5568; font-size: 9px;">Authorized Representative</div>
                     </div>
+                </td>
 
-                    <div style="border-bottom: 1px solid #4a5568; width: 100%; margin-bottom: 4px; margin-top: 2px;">
+                <td>
+                    <div class="signatory-card">
+                        <div
+                            style="font-size: 9.5px; font-weight: 700; color: #0f3460; text-transform: uppercase; margin-bottom: 6px;">
+                            Conforme / Client Acceptance
+                        </div>
+
+                        <div style="width: 160px; height: 50px; margin: 2px auto 0 auto;"></div>
+
+                        <div
+                            style="border-bottom: 1px solid #4a5568; width: 100%; margin-bottom: 4px; margin-top: 2px;">
+                        </div>
+
+                        <div style="font-weight: bold; color: #1a202c; font-size: 9.5px;">
+                            {{ $schedule->attention ?? ($schedule->scheduled_to ?? 'Client Name') }}
+                        </div>
+                        <div style="color: #4a5568; font-size: 9px;">Date: ________________________</div>
                     </div>
-
-                    <div style="font-weight: bold; color: #1a202c;">
-                        {{ $executedBy ?? config('company.name') }}
-                    </div>
-                    <div style="color: #4a5568; font-size: 9.5px;">Authorized Representative</div>
-                </div>
-            </td>
-
-            <td style="width: 50%; vertical-align: top; padding: 0 10px;">
-                <div class="signatory-box"
-                    style="background: #ffffff; border: 1px solid #e2e8f0; padding: 10px; border-radius: 4px;">
-                    <strong style="color: #0f3460;">Conforme (Client Acceptance):</strong>
-
-                    <div style="width: 180px; height: 55px; margin: 4px auto 0 auto;"></div>
-
-                    <div style="border-bottom: 1px solid #4a5568; width: 100%; margin-bottom: 4px; margin-top: 2px;">
-                    </div>
-
-                    <div style="font-weight: bold; color: #1a202c;">
-                        {{ $quotation->attention ?? ($quotation->quoted_to ?? 'Client Name') }}
-                    </div>
-                    <div style="color: #4a5568; font-size: 9.5px;">Date: ________________________</div>
-                </div>
-            </td>
-        </tr>
-    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
 
     {{-- Dompdf Page Numbering Script --}}
     <script type="text/php">
@@ -505,9 +549,9 @@
             $companyText = "{{ config('company.name') }}";
             $pdf->page_text(25, 795, $companyText, $font, $size, $color);
             
-            $quotationNumber = "{{ $quotation->quotation_number ?? 'SAMPLE' }}";
-            $pageText = "Page {PAGE_NUM} of {PAGE_COUNT} | " . $quotationNumber;
-            $pdf->page_text(455, 795, $pageText, $font, $size, $color);
+            $scheduleNumber = "{{ $schedule->schedule_number ?? 'SCH-6AECB05DB5031' }}";
+            $pageText = "Page {PAGE_NUM} of {PAGE_COUNT} | " . $scheduleNumber;
+            $pdf->page_text(424, 795, $pageText, $font, $size, $color);
         }
     </script>
 </body>

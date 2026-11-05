@@ -73,6 +73,7 @@ class TemplateManagerController extends Controller
         }
 
         return view($viewPath, [
+            'template_viewing' => true,
             'user' => auth()->user(),
         ]);
     }
@@ -90,8 +91,11 @@ class TemplateManagerController extends Controller
 
         // Compiles and streams the template view using Dompdf
         $pdf = Pdf::loadView($viewPath, [
+            'template_viewing' => true,
             'user' => auth()->user(),
         ]);
+
+        $pdf->getDomPDF()->set_option('isPhpEnabled', true);
 
         return $pdf->stream('template-preview.pdf');
     }

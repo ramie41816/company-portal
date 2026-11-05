@@ -1,14 +1,16 @@
 @php
-    // Self-contained fallback defaults so this template handles empty data gracefully
-    $quotation =
-        $quotation ??
-        (object) [
-            'quotation_number' => 'QT-SAMPLE-000',
-            'quoted_to' => 'Valued Client',
-            'reference_project' => 'Sample Project Name',
-        ];
-    $executedBy = $executedBy ?? 'System Administrator';
-    $generalRemarks = $generalRemarks ?? null;
+    if (isset($template_viewing) && $template_viewing):
+        // Self-contained fallback defaults so this template handles empty data gracefully
+        $schedule =
+            $schedule ??
+            (object) [
+                'schedule_number' => 'SC-SAMPLE-000',
+                'scheduled_to' => 'Valued Client',
+                'reference_project' => 'Sample Project Name',
+            ];
+        $executedBy = $executedBy ?? 'System Administrator';
+        $generalRemarks = $generalRemarks ?? null;
+    endif;
 @endphp
 
 <!DOCTYPE html>
@@ -17,7 +19,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Certificate of Completion - {{ $quotation->quotation_number ?? 'SAMPLE' }}</title>
+    <title>Certificate of Completion - {{ $schedule->schedule_number ?? 'SAMPLE' }}</title>
     <style>
         body {
             background-color: #f8fafc;
@@ -171,21 +173,21 @@
 
             <!-- Body -->
             <div class="email-body">
-                <p>Dear <strong>{{ $quotation->quoted_to ?? 'Valued Client' }}</strong>,</p>
+                <p>Dear <strong>{{ $schedule->scheduled_to ?? 'Valued Client' }}</strong>,</p>
 
-                <p>We are pleased to inform you that the project services associated with your quotation have been
+                <p>We are pleased to inform you that the project services associated with your schedule have been
                     successfully executed and completed.</p>
 
                 <!-- Concise Project Details Box -->
                 <div class="project-box">
                     <table>
                         <tr>
-                            <td class="label">Quotation No:</td>
-                            <td class="value" style="color: #0f3460;">{{ $quotation->quotation_number ?? '—' }}</td>
+                            <td class="label">Schedule No:</td>
+                            <td class="value" style="color: #0f3460;">{{ $schedule->schedule_number ?? '—' }}</td>
                         </tr>
                         <tr>
                             <td class="label">Project / Ref:</td>
-                            <td class="value">{{ $quotation->reference_project ?? '—' }}</td>
+                            <td class="value">{{ $schedule->reference_project ?? '—' }}</td>
                         </tr>
                         <tr>
                             <td class="label">Executed By:</td>

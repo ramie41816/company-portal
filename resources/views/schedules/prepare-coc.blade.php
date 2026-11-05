@@ -1,27 +1,27 @@
-@extends('layouts.quotation')
+@extends('layouts.schedule')
 
-@section('quotation_content')
+@section('schedule_content')
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <div>
             <h2 class="mb-1 fw-bold fs-4 fs-md-3 text-body">
                 <i class="bi bi-file-earmark-check me-2"></i>Prepare Certificate of Completion / Treatment
             </h2>
             <p class="text-muted small mb-0">
-                Review quotation summary, select executed services, add item remarks, configure execution settings, and
+                Review schedule summary, select executed services, add item remarks, configure execution settings, and
                 generate CoC.
             </p>
         </div>
-        <a href="{{ route('quotations.show', $quotation->id) }}" class="btn btn-outline-secondary btn-sm text-nowrap">
-            <i class="bi bi-arrow-left me-1"></i> Back to Quotation
+        <a href="{{ route('schedules.show', $schedule->id) }}" class="btn btn-outline-secondary btn-sm text-nowrap">
+            <i class="bi bi-arrow-left me-1"></i> Back to Schedule
         </a>
     </div>
 
     {{-- Main Form for PDF Preview --}}
-    <form action="{{ route('quotations.coc-generate.pdf', $quotation->id) }}" method="POST" target="pdf-frame" id="cocForm"
+    <form action="{{ route('schedules.coc-generate.pdf', $schedule->id) }}" method="POST" target="pdf-frame" id="cocForm"
         enctype="multipart/form-data">
         @csrf
 
-        {{-- Client & Quotation Overview Panel --}}
+        {{-- Client & Schedule Overview Panel --}}
         <div class="panel mb-4">
             <div class="p-4">
                 <div class="row g-4 gy-lg-0 align-items-stretch">
@@ -31,51 +31,51 @@
                             <h6 class="fw-semibold mb-3 text-body">Client Information (Quote To)</h6>
                             <div class="mb-3">
                                 <span class="text-muted small d-block">Client / Contact Name</span>
-                                <strong class="fs-6 text-body">{{ $quotation->quoted_to }}</strong>
+                                <strong class="fs-6 text-body">{{ $schedule->quoted_to }}</strong>
                             </div>
                             <div class="mb-3">
                                 <span class="text-muted small d-block">Company Name</span>
-                                <span class="fw-medium text-body">{{ $quotation->client_company ?? '—' }}</span>
+                                <span class="fw-medium text-body">{{ $schedule->client_company ?? '—' }}</span>
                             </div>
                             <div class="mb-3">
                                 <span class="text-muted small d-block">Address</span>
-                                <span class="small text-body">{{ $quotation->client_address ?? '—' }}</span>
+                                <span class="small text-body">{{ $schedule->client_address ?? '—' }}</span>
                             </div>
                         </div>
                         <div class="row g-2 mt-2">
                             <div class="col-sm-6">
                                 <span class="text-muted small d-block">Phone</span>
-                                <span class="small text-body">{{ $quotation->client_phone ?? '—' }}</span>
+                                <span class="small text-body">{{ $schedule->client_phone ?? '—' }}</span>
                             </div>
                             <div class="col-sm-6">
                                 <span class="text-muted small d-block">Email</span>
-                                <span class="small text-body text-break">{{ $quotation->contact_email ?? '—' }}</span>
+                                <span class="small text-body text-break">{{ $schedule->contact_email ?? '—' }}</span>
                             </div>
                         </div>
                     </div>
 
-                    {{-- Quotation Overview Column --}}
+                    {{-- Schedule Overview Column --}}
                     <div class="col-lg-6 ps-lg-4 mt-4 mt-lg-0 d-flex flex-column justify-content-between">
                         <div>
-                            <h6 class="fw-semibold mb-3 text-body">Quotation Overview</h6>
+                            <h6 class="fw-semibold mb-3 text-body">Schedule Overview</h6>
                             <div class="row g-3 mb-3">
                                 <div class="col-sm-6">
-                                    <span class="text-muted small d-block">Quotation Number</span>
-                                    <strong class="text-primary font-monospace">{{ $quotation->quotation_number }}</strong>
+                                    <span class="text-muted small d-block">Schedule Number</span>
+                                    <strong class="text-primary font-monospace">{{ $schedule->schedule_number }}</strong>
                                 </div>
                                 <div class="col-sm-6">
                                     <span class="text-muted small d-block">Issue Date</span>
-                                    <span class="text-body">{{ $quotation->quotation_date->format('d/m/Y') }}</span>
+                                    <span class="text-body">{{ $schedule->schedule_date->format('d/m/Y') }}</span>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <span class="text-muted small d-block">Project / Reference</span>
-                                <strong class="text-body">{{ $quotation->reference_project ?? '—' }}</strong>
+                                <strong class="text-body">{{ $schedule->reference_project ?? '—' }}</strong>
                             </div>
                         </div>
                         <div class="p-3 rounded-3 bg-body-secondary border mt-3 mt-lg-0">
-                            <span class="text-muted small d-block">Total Quotation Amount</span>
-                            <strong class="text-success fs-4">PHP {{ number_format($quotation->total, 2) }}</strong>
+                            <span class="text-muted small d-block">Total Schedule Amount</span>
+                            <strong class="text-success fs-4">PHP {{ number_format($schedule->total, 2) }}</strong>
                         </div>
                     </div>
                 </div>
@@ -109,12 +109,12 @@
                         </thead>
                         <tbody>
                             @php
-                                $mainItems = $quotation->items->whereNull('parent_id');
+                                $mainItems = $schedule->items->whereNull('parent_id');
                                 $x = 1;
                             @endphp
                             @foreach ($mainItems as $item)
                                 @php
-                                    $subItems = $quotation->items->where('parent_id', $item->id);
+                                    $subItems = $schedule->items->where('parent_id', $item->id);
                                     $y = 1;
                                 @endphp
                                 {{-- Main Item Row --}}
@@ -180,8 +180,8 @@
                         <label for="executed_by" class="form-label text-body">Prepared / Executed By <span
                                 class="text-muted fw-normal">(Optional)</span></label>
                         <input type="text" id="executed_by" name="executed_by" class="form-control"
-                            value="{{ old('executed_by', $quotation->prepared_by) }}"
-                            placeholder="Defaults to quotation preparer if left blank">
+                            value="{{ old('executed_by', $schedule->prepared_by) }}"
+                            placeholder="Defaults to schedule preparer if left blank">
                     </div>
 
                     <div class="col-md-6">
@@ -207,8 +207,7 @@
         </div>
 
         <div class="d-flex justify-content-end gap-2 mb-4">
-            <a href="{{ route('quotations.show', $quotation->id) }}"
-                class="btn btn-outline-secondary px-4 py-2">Cancel</a>
+            <a href="{{ route('schedules.show', $schedule->id) }}" class="btn btn-outline-secondary px-4 py-2">Cancel</a>
             <button id="generatePDF" type="submit" class="btn btn-primary px-4 py-2 shadow-sm">
                 <i class="bi bi-file-earmark-pdf me-1"></i> Generate PDF Preview
             </button>
@@ -243,7 +242,7 @@
                         <iframe name="pdf-frame" id="pdfFrame" class="w-100 h-100" style="border: none;"></iframe>
                     </div>
 
-                    @if (auth()->user()->hasPermission('quotations.coc.send.email'))
+                    @if (auth()->user()->hasPermission('schedules.coc.send.email'))
                         {{-- Email Dispatch Section --}}
                         <div class="card bg-body-secondary border-0 p-3">
                             <label for="recipientEmail" class="form-label fw-semibold text-body">
@@ -252,7 +251,7 @@
                             <div class="row g-2">
                                 <div class="col-md-9">
                                     <input type="email" id="recipientEmail" class="form-control"
-                                        value="{{ $quotation->contact_email }}"
+                                        value="{{ $schedule->contact_email }}"
                                         placeholder="Enter recipient email address...">
                                 </div>
                                 <div class="col-md-3">
@@ -292,7 +291,6 @@
 
                 if (cocForm) {
                     cocForm.addEventListener('submit', function(e) {
-                        // Check if signature file is provided
                         if (signatureInput && signatureInput.files.length === 0) {
                             e.preventDefault();
                             alert('Please upload an eSignature image before proceeding.');
@@ -300,8 +298,7 @@
                             return;
                         }
 
-                        // Ensure form targets the iframe for preview
-                        cocForm.action = "{{ route('quotations.coc-generate.pdf', $quotation->id) }}";
+                        cocForm.action = "{{ route('schedules.coc-generate.pdf', $schedule->id) }}";
                         cocForm.removeAttribute('target');
                         cocForm.target = "pdf-frame";
 
@@ -359,11 +356,9 @@
                     });
                 });
 
-                // Standard Form Submission for Email with SweetAlert2 Loading State
                 const sendEmailBtn = document.getElementById('sendEmailBtn');
                 if (sendEmailBtn) {
                     sendEmailBtn.addEventListener('click', function() {
-                        // Check signature validation first
                         if (signatureInput && signatureInput.files.length === 0) {
                             alert('Please upload an eSignature image before sending the email.');
                             document.querySelector('[data-bs-dismiss="modal"]').click();
@@ -378,36 +373,63 @@
                             return;
                         }
 
-                        // Trigger SweetAlert2 Loading Dialog
                         if (typeof Swal !== 'undefined') {
                             Swal.fire({
-                                title: 'Sending Email...',
-                                text: 'Please wait while we generate and dispatch the Certificate of Completion.',
-                                allowOutsideClick: false,
-                                allowEscapeKey: false,
-                                showConfirmButton: false,
-                                didOpen: () => {
-                                    Swal.showLoading();
+                                title: 'Send CoC Email?',
+                                text: `Are you sure you want to send this Certificate of Completion to ${email}?`,
+                                icon: 'question',
+                                showCancelButton: true,
+                                confirmButtonColor: '#2b3a67',
+                                cancelButtonColor: '#6c757d',
+                                confirmButtonText: 'Yes, send it!',
+                                cancelButtonText: 'Cancel',
+                                customClass: {
+                                    popup: 'rounded-4 shadow'
+                                }
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    Swal.fire({
+                                        title: 'Sending Email...',
+                                        text: 'Please wait while we generate and dispatch the Certificate of Completion.',
+                                        allowOutsideClick: false,
+                                        allowEscapeKey: false,
+                                        showConfirmButton: false,
+                                        didOpen: () => {
+                                            Swal.showLoading();
+                                        }
+                                    });
+
+                                    let emailField = cocForm.querySelector('input[name="recipient_email"]');
+                                    if (!emailField) {
+                                        emailField = document.createElement('input');
+                                        emailField.type = 'hidden';
+                                        emailField.name = 'recipient_email';
+                                        cocForm.appendChild(emailField);
+                                    }
+                                    emailField.value = email;
+
+                                    cocForm.action = "{{ route('schedules.coc-email', $schedule->id) }}";
+                                    cocForm.removeAttribute('target');
+                                    cocForm.submit();
                                 }
                             });
+                        } else {
+                            if (confirm(
+                                    `Are you sure you want to send this Certificate of Completion to ${email}?`)) {
+                                let emailField = cocForm.querySelector('input[name="recipient_email"]');
+                                if (!emailField) {
+                                    emailField = document.createElement('input');
+                                    emailField.type = 'hidden';
+                                    emailField.name = 'recipient_email';
+                                    cocForm.appendChild(emailField);
+                                }
+                                emailField.value = email;
+
+                                cocForm.action = "{{ route('schedules.coc-email', $schedule->id) }}";
+                                cocForm.removeAttribute('target');
+                                cocForm.submit();
+                            }
                         }
-
-                        // Dynamically append or update recipient email field inside the main form
-                        let emailField = cocForm.querySelector('input[name="recipient_email"]');
-                        if (!emailField) {
-                            emailField = document.createElement('input');
-                            emailField.type = 'hidden';
-                            emailField.name = 'recipient_email';
-                            cocForm.appendChild(emailField);
-                        }
-                        emailField.value = email;
-
-                        // Switch form action to the email route and remove target
-                        cocForm.action = "{{ route('quotations.coc-email', $quotation->id) }}";
-                        cocForm.removeAttribute('target');
-
-                        // Submit form normally
-                        cocForm.submit();
                     });
                 }
             })();
