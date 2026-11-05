@@ -21,6 +21,7 @@
         "@laravel/multiplex": "^0.4.1"
     },
     "dependencies": {
-        "quill": "^2.0.2"
+        "quill": "^2.0.2",
+        "sweetalert2": "^11.26.25"
     }
 }
