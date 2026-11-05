@@ -1,8 +1,9 @@
 @import 'bootstrap/scss/bootstrap';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
 @import 'quill/dist/quill.snow.css';
 
-/* ---------- Base ---------- */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+/* ---------- Base & Fonts ---------- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
@@ -44,7 +45,7 @@ h3,
     box-shadow: none;
 }
 
-/* ---------- Buttons (one consistent style everywhere) ---------- */
+/* ---------- Buttons ---------- */
 .btn {
     --bs-btn-padding-y: .6rem;
     --bs-btn-padding-x: 1.25rem;
@@ -280,7 +281,6 @@ h3,
     overflow: hidden;
 }
 
-/* Smooth swiping on phones */
 .table-responsive {
     -webkit-overflow-scrolling: touch;
 }
@@ -290,7 +290,6 @@ h3,
     --bs-table-color: var(--ink);
     margin: 0;
     min-width: 780px;
-    /* on small screens the table keeps this width and scrolls sideways instead of squeezing */
 }
 
 .table-elegant thead th {
@@ -315,7 +314,6 @@ h3,
     background: color-mix(in srgb, var(--brand) 7%, transparent);
 }
 
-/* Numbers, dates, totals and buttons stay on one line */
 .table-elegant td:first-child,
 .table-elegant td.text-end {
     white-space: nowrap;
