@@ -40,7 +40,27 @@ class ScheduleController extends Controller
         $completedCount = Schedule::where('status', 'completed')->count();
         $recentSchedules = Schedule::latest()->take(5)->get();
 
-        return view('schedules.dashboard', compact('totalSchedules', 'totalValue', 'ongoingCount', 'completedCount', 'recentSchedules'));
+        // Fetch active schedules
+        $calendarSchedules = Schedule::select('id', 'schedule_number', 'quoted_to', 'schedule_date', 'status', 'total')
+            ->get()
+            ->map(function ($schedule) {
+                return [
+                    'id' => $schedule->id,
+                    'title' => $schedule->schedule_number . ' - ' . $schedule->quoted_to,
+                    'date' => $schedule->schedule_date ? $schedule->schedule_date->format('Y-m-d') : null,
+                    'url' => route('schedules.show', $schedule->id),
+                    'status' => $schedule->status,
+                ];
+            });
+
+        return view('schedules.dashboard', compact(
+            'totalSchedules',
+            'totalValue',
+            'ongoingCount',
+            'completedCount',
+            'recentSchedules',
+            'calendarSchedules'
+        ));
     }
 
     public function create()
@@ -53,10 +73,8 @@ class ScheduleController extends Controller
     // Handles conversion from an Approved Quotation
     public function createFromQuotation(Quotation $quotation)
     {
-        // Load the items associated with the quotation
         $quotation->load('items');
 
-        // Pre-fill the schedule instance with quotation data
         $schedule = new Schedule([
             'quotation_id'       => $quotation->id,
             'schedule_number'    => 'SCH-' . str_replace('QTE-', '', $quotation->quotation_number),
@@ -74,16 +92,14 @@ class ScheduleController extends Controller
             'status'             => 'scheduled',
         ]);
 
-        // Map quotation items so the form's $savedItems can render them automatically
         $savedItems = $quotation->items->map(fn($item) => [
-            'id'          => null, // Treat as new items to create
+            'id'          => null,
             'parent_id'   => $item->parent_id,
             'description' => $item->description,
             'unit_price'  => (float) $item->unit_price,
             'quantity'    => (float) $item->quantity,
         ])->all();
 
-        // If for some reason the quote had no items, fallback to a blank default row
         if (empty($savedItems)) {
             $savedItems = [['id' => null, 'parent_id' => null, 'description' => '', 'unit_price' => '', 'quantity' => 1]];
         }
@@ -91,7 +107,7 @@ class ScheduleController extends Controller
         return view('schedules.create', [
             'schedule'   => $schedule,
             'quotation'  => $quotation,
-            'savedItems' => $savedItems, // Pass this to the view if needed, or handle it via form logic
+            'savedItems' => $savedItems,
             'action'     => route('schedules.store')
         ]);
     }
@@ -99,6 +115,7 @@ class ScheduleController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'quotation_id'      => 'nullable|exists:quotations,id',
             'quoted_to'         => 'required|string|max:255',
             'client_company'    => 'nullable|string|max:255',
             'client_address'    => 'nullable|string',
@@ -120,13 +137,11 @@ class ScheduleController extends Controller
             'items.*.is_sub'      => 'nullable|boolean',
         ]);
 
-        // Generate a unique schedule number if not set
         $validated['schedule_number'] = 'SCH-' . strtoupper(uniqid());
         $validated['created_by'] = auth()->user()->name ?? 'System';
 
         $schedule = Schedule::create($validated);
 
-        // Process Hierarchical Items (Main and Sub items)
         $lastMainItem = null;
         $grandTotal = 0;
 
@@ -198,7 +213,7 @@ class ScheduleController extends Controller
 
         $schedule->update($validated);
 
-        // Delete old items and re-create new set
+        // Reset items
         $schedule->items()->delete();
 
         $lastMainItem = null;

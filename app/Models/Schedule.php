@@ -37,9 +37,9 @@ class Schedule extends Model
     protected function casts(): array
     {
         return [
-            'schedule_date' => 'date',
-            'start_date' => 'date',
-            'valid_until' => 'date',
+            'schedule_date' => 'datetime',
+            'start_date' => 'datetime',
+            'end_date' => 'datetime',
             'status_modified_at' => 'datetime',
         ];
     }

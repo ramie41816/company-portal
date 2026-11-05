@@ -126,25 +126,27 @@
                     <input id="prepared_by" type="text" name="prepared_by"
                         value="{{ old('prepared_by', $schedule->prepared_by ?? '') }}" class="form-control">
                 </div>
-                <div class="col-md-3">
-                    <label for="schedule_date" class="form-label">Schedule Date</label>
-                    <input id="schedule_date" type="date" name="schedule_date"
-                        value="{{ old('schedule_date', $isEdit ? $schedule->schedule_date->toDateString() : now()->toDateString()) }}"
+                <div class="col-md-4">
+                    <label for="schedule_date" class="form-label">Schedule Date & Time</label>
+                    <input id="schedule_date" type="datetime-local" name="schedule_date"
+                        value="{{ old('schedule_date', $isEdit && $schedule->schedule_date ? $schedule->schedule_date->format('Y-m-d\TH:i') : now()->format('Y-m-d\TH:i')) }}"
                         class="form-control" required>
                 </div>
-                <div class="col-md-3">
-                    <label for="start_date" class="form-label">Start Date</label>
-                    <input id="start_date" type="date" name="start_date"
-                        value="{{ old('start_date', $isEdit && $schedule->start_date ? $schedule->start_date->toDateString() : '') }}"
+                <div class="col-md-4">
+                    <label for="start_date" class="form-label">Start Date & Time <span
+                            class="text-muted fw-normal">(optional)</span></label>
+                    <input id="start_date" type="datetime-local" name="start_date"
+                        value="{{ old('start_date', $isEdit && $schedule->start_date ? $schedule->start_date->format('Y-m-d\TH:i') : '') }}"
                         class="form-control">
                 </div>
-                <div class="col-md-3">
-                    <label for="end_date" class="form-label">End Date</label>
-                    <input id="end_date" type="date" name="end_date"
-                        value="{{ old('end_date', $isEdit && $schedule->end_date ? $schedule->end_date->toDateString() : '') }}"
+                <div class="col-md-4">
+                    <label for="end_date" class="form-label">End Date & Time <span
+                            class="text-muted fw-normal">(optional)</span></label>
+                    <input id="end_date" type="datetime-local" name="end_date"
+                        value="{{ old('end_date', $isEdit && $schedule->end_date ? $schedule->end_date->format('Y-m-d\TH:i') : '') }}"
                         class="form-control">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-12">
                     <label for="reference_project" class="form-label">Reference / Project</label>
                     <input id="reference_project" type="text" name="reference_project"
                         value="{{ old('reference_project', $schedule->reference_project ?? '') }}"

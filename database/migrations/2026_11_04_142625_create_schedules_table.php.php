@@ -15,9 +15,9 @@ return new class extends Migration
 
             // Schedule identifiers & metadata
             $table->string('schedule_number')->unique();
-            $table->date('schedule_date');
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
+            $table->dateTime('schedule_date');
+            $table->dateTime('start_date')->nullable();
+            $table->dateTime('end_date')->nullable();
             $table->string('reference_project')->nullable();
             $table->string('prepared_by')->nullable();
 
