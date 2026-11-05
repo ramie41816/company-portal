@@ -25,7 +25,7 @@ class ScheduleController extends Controller
             })
             ->when($dateFrom, fn($q, $date) => $q->whereDate('schedule_date', '>=', $date))
             ->when($dateTo, fn($q, $date) => $q->whereDate('schedule_date', '<=', $date))
-            ->latest('schedule_date')
+            ->orderBy('schedule_date', 'desc')
             ->paginate(10)
             ->withQueryString();
 
@@ -38,16 +38,23 @@ class ScheduleController extends Controller
         $totalValue = Schedule::sum('total');
         $ongoingCount = Schedule::where('status', 'ongoing')->count();
         $completedCount = Schedule::where('status', 'completed')->count();
-        $recentSchedules = Schedule::latest()->take(5)->get();
 
-        // Fetch active schedules
+        // Fetch recent schedules sorted by schedule_date (datetime) descending
+        $recentSchedules = Schedule::orderBy('schedule_date', 'desc')->take(5)->get();
+
+        // Fetch active schedules for the interactive calendar feed
         $calendarSchedules = Schedule::select('id', 'schedule_number', 'quoted_to', 'schedule_date', 'status', 'total')
+            ->orderBy('schedule_date', 'asc')
             ->get()
             ->map(function ($schedule) {
                 return [
                     'id' => $schedule->id,
-                    'title' => $schedule->schedule_number . ' - ' . $schedule->quoted_to,
+                    'quote_number' => $schedule->schedule_number,
+                    'quoted_to' => $schedule->quoted_to,
                     'date' => $schedule->schedule_date ? $schedule->schedule_date->format('Y-m-d') : null,
+                    'time' => $schedule->schedule_date ? $schedule->schedule_date->format('h:i A') : null,
+                    'start' => $schedule->schedule_date ? $schedule->schedule_date->format('Y-m-d\TH:i:s') : null,
+                    'title' => $schedule->quoted_to . ' (' . $schedule->schedule_number . ')',
                     'url' => route('schedules.show', $schedule->id),
                     'status' => $schedule->status,
                 ];

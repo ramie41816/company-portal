@@ -6,7 +6,7 @@
 </head>
 
 <body>
-    <nav class="topbar navbar py-3 mb-4">
+    <nav class="topbar navbar py-3 mb-4 sticky-top shadow-sm">
         <div class="container-fluid px-4">
             <a class="navbar-brand d-flex align-items-center gap-2 font-serif text-brand fw-semibold"
                 href="{{ route('home') }}">
@@ -66,7 +66,36 @@
         @yield('content')
     </main>
 
+    <!-- Back to Top Button -->
+    <button id="backToTopBtn" type="button" class="btn btn-primary rounded-circle shadow-lg" aria-label="Back to top">
+        <i class="bi bi-arrow-up fs-5"></i>
+    </button>
+
     @stack('scripts')
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const backToTopBtn = document.getElementById('backToTopBtn');
+
+            // Toggle visibility with fade transition based on scroll position
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 300) {
+                    backToTopBtn.classList.add('show');
+                } else {
+                    backToTopBtn.classList.remove('show');
+                }
+            });
+
+            // Smooth scroll to top on click
+            backToTopBtn.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
 
     @if (session('success'))
         <script>
