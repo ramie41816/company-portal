@@ -27,12 +27,13 @@
                 <div class="text-md-end">
                     <h2 class="mb-1">SCHEDULE</h2>
                     <div class="fw-semibold text-brand">No: {{ $schedule->schedule_number }}</div>
-                    <div class="text-muted small">Date: {{ $schedule->schedule_date->format('F d, Y') }}</div>
+                    <div class="text-muted small">Date & Time:
+                        {{ $schedule->schedule_date ? $schedule->schedule_date->format('F d, Y h:i A') : '—' }}</div>
                     @if ($schedule->start_date)
-                        <div class="text-muted small">Start: {{ $schedule->start_date->format('F d, Y') }}</div>
+                        <div class="text-muted small">Start: {{ $schedule->start_date->format('F d, Y h:i A') }}</div>
                     @endif
                     @if ($schedule->end_date)
-                        <div class="text-muted small">End: {{ $schedule->end_date->format('F d, Y') }}</div>
+                        <div class="text-muted small">End: {{ $schedule->end_date->format('F d, Y h:i A') }}</div>
                     @endif
                 </div>
             </div>

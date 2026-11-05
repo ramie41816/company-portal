@@ -3,7 +3,8 @@
 @section('content')
     <div class="container-fluid px-4">
         <div class="row g-4">
-            <div class="col-md-3 col-lg-2">
+            {{-- Sidebar --}}
+            <div class="sticky-sidebar col-md-3 col-lg-2">
 
                 {{-- Utilize the template groups passed from the controller --}}
                 @php

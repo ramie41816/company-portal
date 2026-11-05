@@ -369,6 +369,60 @@ h3,
     background-color: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.02)) !important;
 }
 
+#backToTopBtn {
+    position: fixed;
+    bottom: 30px;
+    left: 30px;
+    /* Positioned on the lower left */
+    right: auto;
+    width: 48px;
+    height: 48px;
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--card, #ffffff);
+    color: var(--ink, #212529);
+    border: 1px solid var(--line, #dee2e6);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Active state visible on scroll */
+#backToTopBtn.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+#backToTopBtn:hover {
+    transform: translateY(-3px);
+    background-color: var(--brand, #0d6efd);
+    color: #ffffff;
+    border-color: var(--brand, #0d6efd);
+}
+
+.sticky-sidebar {
+    position: sticky;
+    top: 100px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    z-index: 1020;
+    align-self: flex-start;
+}
+
+/* Optional: Custom scrollbar styling for the sidebar for a smoother look */
+.sticky-sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sticky-sidebar::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
 /* ---------- Small screens ---------- */
 @media (max-width: 575.98px) {
     .hero {
