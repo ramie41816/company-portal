@@ -9,7 +9,7 @@
     <div class="card border-0 shadow-sm mb-4" style="background: var(--card); border-radius: 0.75rem;">
         <div class="card-body">
             <form action="{{ route('schedules.index') }}" method="GET" class="row g-3 align-items-end">
-                <div class="col-md-5">
+                <div class="col-12 col-md-5">
                     <label class="form-label small fw-semibold text-muted">Search keyword</label>
                     <div class="input-group">
                         <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search"></i></span>
@@ -17,15 +17,15 @@
                             placeholder="Schedule #, client, company, project...">
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-12 col-md-3">
                     <label class="form-label small fw-semibold text-muted">From Date</label>
                     <input type="date" name="date_from" value="{{ $dateFrom ?? '' }}" class="form-control">
                 </div>
-                <div class="col-md-3">
+                <div class="col-12 col-md-3">
                     <label class="form-label small fw-semibold text-muted">To Date</label>
                     <input type="date" name="date_to" value="{{ $dateTo ?? '' }}" class="form-control">
                 </div>
-                <div class="col-md-1 d-grid">
+                <div class="col-12 col-md-1 d-grid">
                     <button type="submit" class="btn btn-primary" title="Filter">
                         <i class="bi bi-filter"></i> Filter
                     </button>
@@ -47,7 +47,7 @@
                 <thead>
                     <tr>
                         <th>No.</th>
-                        <th>Date</th>
+                        <th class="d-none d-md-table-cell">Date</th>
                         <th>To</th>
                         <th>Status</th>
                         <th class="text-end">Total</th>
@@ -58,11 +58,12 @@
                     @forelse ($schedules as $s)
                         <tr>
                             <td class="fw-semibold text-brand">{{ $s->schedule_number }}</td>
-                            <td>{{ $s->schedule_date->format('M d, Y') }}</td>
+                            <td class="d-none d-md-table-cell">{{ $s->schedule_date->format('M d, Y') }}</td>
                             <td>
-                                <div class="fw-medium">{{ $s->quoted_to }}</div>
+                                <div class="fw-medium text-truncate" style="max-width: 150px;">{{ $s->quoted_to }}</div>
                                 @if ($s->client_company)
-                                    <div class="text-muted small">{{ $s->client_company }}</div>
+                                    <div class="text-muted small text-truncate" style="max-width: 150px;">
+                                        {{ $s->client_company }}</div>
                                 @endif
                             </td>
                             <td>
@@ -120,7 +121,6 @@
 
     <div class="mt-3">{{ $schedules->links() }}</div>
 
-    {{-- Archive confirmation modal --}}
     <div class="modal fade" id="archiveModal" tabindex="-1" aria-labelledby="archiveModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <form method="POST" id="archiveForm" class="modal-content shadow"

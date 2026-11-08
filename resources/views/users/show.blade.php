@@ -1,7 +1,6 @@
 @extends('layouts.user')
 
 @section('user_content')
-    {{-- When printing: hide menus, always use light colors --}}
     <style>
         @media print {
             html[data-bs-theme] {
@@ -39,24 +38,22 @@
         }
     </style>
 
-    {{-- Top Action Bar --}}
-    <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
+    <div
+        class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2 mb-4 d-print-none">
         <a href="{{ route('users.index') }}" class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-arrow-left me-1"></i> Back to users
         </a>
         <div class="d-flex align-items-center gap-2">
-            <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning btn-sm">
+            <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning btn-sm w-100 w-md-auto">
                 <i class="bi bi-pencil-square me-1"></i> Edit Profile
             </a>
         </div>
     </div>
 
-    {{-- Main Profile Panel (Theme-Aware) --}}
     <div class="panel border-0 shadow-sm mb-4"
         style="background: var(--card); color: var(--ink); border: 1px solid var(--line); border-radius: 1rem;">
         <div class="p-4 p-md-5">
 
-            {{-- Profile Header / Cover Card --}}
             <div class="d-flex align-items-center flex-wrap gap-4 pb-4 mb-4 border-bottom"
                 style="border-color: var(--line) !important;">
                 <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white bg-primary shadow-sm"
@@ -65,8 +62,8 @@
                 </div>
                 <div>
                     <h3 class="mb-1 fw-bold">{{ $user->userInfo?->full_name ?? 'Unnamed User' }}</h3>
-                    <div class="text-muted mb-2"><i class="bi bi-envelope me-1"></i> {{ $user->email }}</div>
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="text-muted mb-2 text-break"><i class="bi bi-envelope me-1"></i> {{ $user->email }}</div>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
                         <span
                             class="badge bg-{{ $user->access_level === 'admin' ? 'danger' : ($user->access_level === 'manager' ? 'warning text-dark' : 'secondary') }}">
                             Role: {{ ucfirst($user->access_level) }}
@@ -78,10 +75,8 @@
                 </div>
             </div>
 
-            {{-- Profile Details Grid --}}
             <div class="row g-4">
-                {{-- Personal Information Section --}}
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <div class="card h-100 border shadow-none"
                         style="background: var(--surface, var(--card)); border-color: var(--line) !important; border-radius: 0.75rem;">
                         <div class="card-body p-4">
@@ -107,8 +102,7 @@
                     </div>
                 </div>
 
-                {{-- Account & System Metadata Section --}}
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <div class="card h-100 border shadow-none"
                         style="background: var(--surface, var(--card)); border-color: var(--line) !important; border-radius: 0.75rem;">
                         <div class="card-body p-4">
@@ -116,7 +110,8 @@
                                 <i class="bi bi-shield-lock me-1 text-primary"></i> Account & System Settings
                             </h6>
                             <ul class="list-unstyled mb-0 d-flex flex-column gap-2">
-                                <li><strong>Email Address:</strong> <span class="text-muted">{{ $user->email }}</span>
+                                <li><strong>Email Address:</strong> <span
+                                        class="text-muted text-break">{{ $user->email }}</span>
                                 </li>
                                 <li><strong>Access Control Level:</strong> <span
                                         class="text-muted">{{ ucfirst($user->access_level) }}</span></li>
@@ -137,7 +132,6 @@
         </div>
     </div>
 
-    {{-- Delete confirmation modal --}}
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <form method="POST" id="deleteForm" class="modal-content shadow"
@@ -157,8 +151,9 @@
                         This user will be permanently removed from the system along with their associated profile record.
                     </p>
                     <div class="d-flex justify-content-center gap-2">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">
+                        <button type="button" class="btn btn-outline-secondary px-4"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger px-4">
                             <i class="bi bi-trash me-1"></i> Delete
                         </button>
                     </div>

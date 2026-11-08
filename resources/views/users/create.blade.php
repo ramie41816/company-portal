@@ -2,14 +2,13 @@
 
 @section('user_content')
     <div class="page-head mb-4">
-        <h2 class="mb-1 fw-bold" style="color: var(--ink);"> <i class="bi bi-person-plus"></i> Create New User</h2>
+        <h2 class="mb-1 fw-bold" style="color: var(--ink);"><i class="bi bi-person-plus"></i> Create New User</h2>
         <div class="text-muted">Add a new user account, configure role access, and set initial account status.</div>
     </div>
 
     <form action="{{ route('users.store') }}" method="POST" id="createUserForm">
         @csrf
 
-        {{-- Personal Information Panel --}}
         <div class="card border-0 shadow-sm mb-4"
             style="background: var(--card); border: 1px solid var(--line); border-radius: 1rem;">
             <div class="card-body p-4">
@@ -19,7 +18,7 @@
                 </h5>
 
                 <div class="row g-3">
-                    <div class="col-md-3 col-sm-6">
+                    <div class="col-12 col-md-3 col-sm-6">
                         <label class="form-label small fw-semibold text-muted">First Name *</label>
                         <input type="text" name="first_name" value="{{ old('first_name') }}"
                             class="form-control @error('first_name') is-invalid @enderror" required>
@@ -28,12 +27,12 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-3 col-sm-6">
+                    <div class="col-12 col-md-3 col-sm-6">
                         <label class="form-label small fw-semibold text-muted">Middle Name</label>
                         <input type="text" name="middle_name" value="{{ old('middle_name') }}" class="form-control">
                     </div>
 
-                    <div class="col-md-3 col-sm-6">
+                    <div class="col-12 col-md-3 col-sm-6">
                         <label class="form-label small fw-semibold text-muted">Last Name *</label>
                         <input type="text" name="last_name" value="{{ old('last_name') }}"
                             class="form-control @error('last_name') is-invalid @enderror" required>
@@ -42,13 +41,13 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-3 col-sm-6">
+                    <div class="col-12 col-md-3 col-sm-6">
                         <label class="form-label small fw-semibold text-muted">Suffix</label>
                         <input type="text" name="suffix" value="{{ old('suffix') }}" class="form-control"
                             placeholder="Jr., III">
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label small fw-semibold text-muted">Gender</label>
                         <select name="gender" class="form-select @error('gender') is-invalid @enderror">
                             <option value="">Select Gender</option>
@@ -61,7 +60,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label small fw-semibold text-muted">Birthday</label>
                         <input type="date" name="birthday" value="{{ old('birthday') }}"
                             class="form-control @error('birthday') is-invalid @enderror">
@@ -73,7 +72,6 @@
             </div>
         </div>
 
-        {{-- Account & Access Panel --}}
         <div class="card border-0 shadow-sm mb-4"
             style="background: var(--card); border: 1px solid var(--line); border-radius: 1rem;">
             <div class="card-body p-4">
@@ -83,7 +81,7 @@
                 </h5>
 
                 <div class="row g-3">
-                    <div class="col-md-12">
+                    <div class="col-12">
                         <label class="form-label small fw-semibold text-muted">Email Address *</label>
                         <input type="email" name="email" value="{{ old('email') }}"
                             class="form-control @error('email') is-invalid @enderror" placeholder="name@example.com"
@@ -93,7 +91,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label small fw-semibold text-muted">User Role *</label>
                         <select name="role_id" class="form-select @error('role_id') is-invalid @enderror" required>
                             <option value="">Select Role</option>
@@ -108,7 +106,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label small fw-semibold text-muted">Account Status *</label>
                         <select name="status" class="form-select @error('status') is-invalid @enderror" required>
                             <option value="active" {{ old('status', 'active') == 'active' ? 'selected' : '' }}>Active
@@ -120,11 +118,10 @@
                         @enderror
                     </div>
 
-                    {{-- Auto-generated temporary password notice --}}
                     <div class="col-12 mt-3">
                         <div class="alert alert-info border-0 shadow-sm mb-0 d-flex align-items-center" role="alert">
-                            <i class="bi bi-info-circle-fill fs-5 me-2"></i>
-                            <div>
+                            <i class="bi bi-info-circle-fill fs-5 me-2 flex-shrink-0"></i>
+                            <div class="small">
                                 A secure temporary password will be <strong>auto-generated by the system</strong> and sent
                                 directly to the user's email address upon creation.
                             </div>
@@ -134,10 +131,9 @@
             </div>
         </div>
 
-        {{-- Form Actions --}}
-        <div class="d-flex justify-content-end gap-2 mb-4">
-            <a href="{{ route('users.index') }}" class="btn btn-outline-secondary px-4">Cancel</a>
-            <button type="submit" class="btn btn-primary px-4">
+        <div class="d-flex flex-column-reverse flex-md-row justify-content-end gap-2 mb-4">
+            <a href="{{ route('users.index') }}" class="btn btn-outline-secondary px-4 w-100 w-md-auto">Cancel</a>
+            <button type="submit" class="btn btn-primary px-4 w-100 w-md-auto">
                 <i class="bi bi-check2-circle me-1"></i> Create User
             </button>
         </div>

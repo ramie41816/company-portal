@@ -8,11 +8,10 @@
         </div>
     </div>
 
-    {{-- Advanced Search & Filter Bar --}}
     <div class="card border-0 shadow-sm mb-4" style="background: var(--card); border-radius: 0.75rem;">
         <div class="card-body">
             <form action="{{ route('users.archives') }}" method="GET" class="row g-3 align-items-end">
-                <div class="col-md-7">
+                <div class="col-12 col-md-7">
                     <label class="form-label small fw-semibold text-muted">Search keyword</label>
                     <div class="input-group">
                         <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search"></i></span>
@@ -20,7 +19,7 @@
                             placeholder="Name, email...">
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <label class="form-label small fw-semibold text-muted">Access Level</label>
                     <select name="access_level" class="form-select">
                         <option value="">All Access Levels</option>
@@ -29,7 +28,7 @@
                         <option value="staff" {{ ($accessLevel ?? '') == 'staff' ? 'selected' : '' }}>Staff</option>
                     </select>
                 </div>
-                <div class="col-md-1 d-grid">
+                <div class="col-12 col-md-1 d-grid">
                     <button type="submit" class="btn btn-primary" title="Filter">
                         <i class="bi bi-filter"></i> Filter
                     </button>
@@ -52,24 +51,25 @@
                     <tr>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>Role</th>
+                        <th class="d-none d-md-table-cell">Role</th>
                         <th>Status</th>
-                        <th>Gender</th>
+                        <th class="d-none d-lg-table-cell">Gender</th>
                         <th class="text-end">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($users as $user)
-                        <<tr>
+                        <tr>
                             <td class="fw-semibold text-brand">{{ $user->userInfo?->full_name ?? '—' }}</td>
-                            <td class="text-muted">{{ $user->email }}</td>
-                            <td>
-                                <span class="badge bg-secondary">{{ ucfirst($user->access_level) }}</span>
+                            <td class="text-muted text-truncate" style="max-width: 150px;">{{ $user->email }}</td>
+                            <td class="d-none d-md-table-cell">
+                                <span class="badge bg-secondary"
+                                    style="font-size: 0.7rem;">{{ ucfirst($user->access_level) }}</span>
                             </td>
                             <td>
-                                <span class="badge bg-danger">Archived</span>
+                                <span class="badge bg-danger" style="font-size: 0.7rem;">Archived</span>
                             </td>
-                            <td>{{ $user->userInfo?->gender ?? '—' }}</td>
+                            <td class="d-none d-lg-table-cell">{{ $user->userInfo?->gender ?? '—' }}</td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm">
                                     <button type="button" class="btn btn-sm btn-outline-success" title="Restore User"
@@ -86,22 +86,21 @@
                                     </button>
                                 </div>
                             </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-5">
-                                    <i class="bi bi-archive fs-1 text-muted d-block mb-2"></i>
-                                    <div class="fw-medium">No archived users found</div>
-                                    <div class="text-muted small">Inactive or disabled user accounts will appear here.</div>
-                                </td>
-                            </tr>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <i class="bi bi-archive fs-1 text-muted d-block mb-2"></i>
+                                <div class="fw-medium">No archived users found</div>
+                                <div class="text-muted small">Inactive or disabled user accounts will appear here.</div>
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Restore Modal -->
     <div class="modal fade" id="restoreModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <form method="POST" id="restoreForm" class="modal-content shadow"
@@ -118,15 +117,15 @@
                     <p class="text-muted small mb-4">This user will be restored to active status and regain portal access.
                     </p>
                     <div class="d-flex justify-content-center gap-2">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-success">Yes, Restore</button>
+                        <button type="button" class="btn btn-outline-secondary px-4"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success px-4">Yes, Restore</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Force Delete Modal -->
     <div class="modal fade" id="forceDeleteModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <form method="POST" id="forceDeleteForm" class="modal-content shadow"
@@ -143,8 +142,9 @@
                     <p class="text-muted small mb-4">This action is irreversible and will completely delete the user
                         profile and credentials from the database.</p>
                     <div class="d-flex justify-content-center gap-2">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">
+                        <button type="button" class="btn btn-outline-secondary px-4"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger px-4">
                             <i class="bi bi-trash me-1"></i> Delete Permanently
                         </button>
                     </div>
@@ -154,7 +154,6 @@
     </div>
 
     <script>
-        // Script to bind data to modals dynamically
         const restoreModal = document.getElementById('restoreModal');
         if (restoreModal) {
             restoreModal.addEventListener('show.bs.modal', function(event) {

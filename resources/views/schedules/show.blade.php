@@ -1,13 +1,14 @@
 @extends('layouts.schedule')
 
 @section('schedule_content')
-    <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
+    <div
+        class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2 mb-4 d-print-none">
         <a href="{{ route('schedules.index') }}" class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-arrow-left me-1"></i> Back to list
         </a>
-        <div class="d-flex align-items-center">
+        <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center gap-2">
             @if (auth()->user()->hasPermission('schedules.update'))
-                <a href="{{ route('schedules.edit', $schedule->id) }}" class="btn btn-warning btn-sm me-2">
+                <a href="{{ route('schedules.edit', $schedule->id) }}" class="btn btn-warning btn-sm">
                     <i class="bi bi-pencil-square me-1"></i> Edit Schedule
                 </a>
             @endif
@@ -29,7 +30,7 @@
                         <div class="text-muted small">{{ config('company.address') }}</div>
                     @endif
                 </div>
-                <div class="text-md-end">
+                <div class="text-start text-md-end">
                     <h2 class="mb-1">SCHEDULE</h2>
                     <div class="fw-semibold text-brand">No: {{ $schedule->schedule_number }}</div>
                     <div class="text-muted small">Date & Time:
@@ -48,7 +49,7 @@
             <div class="card border mb-4 p-3 rounded-3"
                 style="background-color: var(--surface); border-color: var(--line) !important;">
                 <div class="row align-items-center g-3">
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <span class="text-uppercase small text-muted d-block mb-1"
                             style="letter-spacing: .08em;">Status</span>
                         @php
@@ -64,7 +65,7 @@
                             {{ ucfirst($schedule->status) }}
                         </span>
                     </div>
-                    <div class="col-md-8">
+                    <div class="col-12 col-md-8">
                         <span class="text-uppercase small text-muted d-block mb-1"
                             style="letter-spacing: .08em;">Remarks</span>
                         <div class="fw-medium mb-1" style="color: var(--ink);">
@@ -75,7 +76,7 @@
             </div>
 
             <div class="row g-4 mb-5">
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <div class="text-uppercase small text-muted mb-1" style="letter-spacing: .08em;">Schedule For</div>
                     <div class="fw-semibold fs-5">{{ $schedule->quoted_to }}</div>
                     @if ($schedule->client_company)
@@ -89,7 +90,7 @@
                         </div>
                     @endif
                 </div>
-                <div class="col-md-6 text-md-end">
+                <div class="col-12 col-md-6 text-md-end">
                     @if ($schedule->reference_project)
                         <div class="mb-2">
                             <span class="text-uppercase small text-muted d-block" style="letter-spacing: .08em;">Reference /

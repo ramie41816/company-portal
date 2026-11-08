@@ -9,7 +9,7 @@
     <div class="card border-0 shadow-sm mb-4" style="background: var(--card); border-radius: 0.75rem;">
         <div class="card-body">
             <form action="{{ route('schedules.archives') }}" method="GET" class="row g-3 align-items-end">
-                <div class="col-md-9">
+                <div class="col-12 col-md-9">
                     <label class="form-label small fw-semibold text-muted">Search archive</label>
                     <div class="input-group">
                         <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search"></i></span>
@@ -17,7 +17,7 @@
                             placeholder="Schedule #, client, company...">
                     </div>
                 </div>
-                <div class="col-md-3 d-grid">
+                <div class="col-12 col-md-3 d-grid">
                     <button type="submit" class="btn btn-primary" title="Filter">
                         <i class="bi bi-filter"></i> Filter
                     </button>
@@ -32,7 +32,7 @@
                 <thead>
                     <tr>
                         <th>No.</th>
-                        <th>Date</th>
+                        <th class="d-none d-md-table-cell">Date</th>
                         <th>To</th>
                         <th class="text-end">Total</th>
                         <th class="text-end">Action</th>
@@ -42,8 +42,8 @@
                     @forelse ($schedules as $s)
                         <tr>
                             <td class="fw-semibold text-brand">{{ $s->schedule_number }}</td>
-                            <td>{{ $s->schedule_date->format('M d, Y') }}</td>
-                            <td class="fw-medium">{{ $s->quoted_to }}</td>
+                            <td class="d-none d-md-table-cell">{{ $s->schedule_date->format('M d, Y') }}</td>
+                            <td class="fw-medium text-truncate" style="max-width: 150px;">{{ $s->quoted_to }}</td>
                             <td class="text-end fw-semibold">@money($s->total)</td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm">
@@ -82,7 +82,6 @@
 
     <div class="mt-3">{{ $schedules->links() }}</div>
 
-    {{-- Restore Modal --}}
     <div class="modal fade" id="restoreModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <form method="POST" id="restoreForm" class="modal-content shadow"
@@ -101,7 +100,6 @@
         </div>
     </div>
 
-    {{-- Force Delete Modal --}}
     <div class="modal fade" id="forceDeleteModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <form method="POST" id="forceDeleteForm" class="modal-content shadow"

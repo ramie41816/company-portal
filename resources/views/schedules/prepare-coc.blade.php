@@ -16,17 +16,14 @@
         </a>
     </div>
 
-    {{-- Main Form for PDF Preview --}}
     <form action="{{ route('schedules.coc-generate.pdf', $schedule->id) }}" method="POST" target="pdf-frame" id="cocForm"
         enctype="multipart/form-data">
         @csrf
 
-        {{-- Client & Schedule Overview Panel --}}
         <div class="panel mb-4">
             <div class="p-4">
                 <div class="row g-4 gy-lg-0 align-items-stretch">
-                    {{-- Client Information Column --}}
-                    <div class="col-lg-6 pe-lg-4 d-flex flex-column justify-content-between border-end-lg-0">
+                    <div class="col-12 col-lg-6 pe-lg-4 d-flex flex-column justify-content-between border-end-lg-0">
                         <div>
                             <h6 class="fw-semibold mb-3 text-body">Client Information (Quote To)</h6>
                             <div class="mb-3">
@@ -54,8 +51,7 @@
                         </div>
                     </div>
 
-                    {{-- Schedule Overview Column --}}
-                    <div class="col-lg-6 ps-lg-4 mt-4 mt-lg-0 d-flex flex-column justify-content-between">
+                    <div class="col-12 col-lg-6 ps-lg-4 mt-4 mt-lg-0 d-flex flex-column justify-content-between">
                         <div>
                             <h6 class="fw-semibold mb-3 text-body">Schedule Overview</h6>
                             <div class="row g-3 mb-3">
@@ -82,7 +78,6 @@
             </div>
         </div>
 
-        {{-- Scope of Work & Items Checkbox Selection Panel --}}
         <div class="panel mb-4">
             <div class="p-4">
                 <div
@@ -117,7 +112,6 @@
                                     $subItems = $schedule->items->where('parent_id', $item->id);
                                     $y = 1;
                                 @endphp
-                                {{-- Main Item Row --}}
                                 <tr>
                                     <td class="text-center align-middle">
                                         <input type="checkbox" name="items[{{ $item->id }}][included]" value="1"
@@ -137,7 +131,6 @@
                                     </td>
                                 </tr>
 
-                                {{-- Sub-items Rows --}}
                                 @foreach ($subItems as $subItem)
                                     @php
                                         $numbering = $x . '.' . $y;
@@ -171,12 +164,11 @@
             </div>
         </div>
 
-        {{-- Execution & Signatory Settings Panel --}}
         <div class="panel mb-4">
             <div class="p-4">
                 <h6 class="fw-semibold mb-3 text-body">Execution & Signatory Settings</h6>
                 <div class="row g-3">
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label for="executed_by" class="form-label text-body">Prepared / Executed By <span
                                 class="text-muted fw-normal">(Optional)</span></label>
                         <input type="text" id="executed_by" name="executed_by" class="form-control"
@@ -184,7 +176,7 @@
                             placeholder="Defaults to schedule preparer if left blank">
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label for="signature_file" class="form-label text-body">Upload eSignature Image <span
                                 class="text-danger">*</span> <span class="text-muted fw-normal">(PNG/JPG)</span></label>
                         <input type="file" id="signature_file" name="signature_file" class="form-control"
@@ -196,7 +188,6 @@
             </div>
         </div>
 
-        {{-- General Remarks / Notes Panel --}}
         <div class="panel mb-4">
             <div class="p-4">
                 <h6 class="fw-semibold mb-2 text-body">General Completion Remarks / Notes <span
@@ -206,15 +197,15 @@
             </div>
         </div>
 
-        <div class="d-flex justify-content-end gap-2 mb-4">
-            <a href="{{ route('schedules.show', $schedule->id) }}" class="btn btn-outline-secondary px-4 py-2">Cancel</a>
-            <button id="generatePDF" type="submit" class="btn btn-primary px-4 py-2 shadow-sm">
+        <div class="d-flex flex-column-reverse flex-md-row justify-content-end gap-2 mb-4">
+            <a href="{{ route('schedules.show', $schedule->id) }}"
+                class="btn btn-outline-secondary px-4 py-2 w-100 w-md-auto">Cancel</a>
+            <button id="generatePDF" type="submit" class="btn btn-primary px-4 py-2 shadow-sm w-100 w-md-auto">
                 <i class="bi bi-file-earmark-pdf me-1"></i> Generate PDF Preview
             </button>
         </div>
     </form>
 
-    {{-- Bootstrap Modal containing the iFrame Preview with Loading Overlay and Email Option --}}
     <div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
@@ -227,11 +218,9 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    {{-- iFrame Preview Container with Loading Overlay --}}
                     <div class="position-relative ratio ratio-16x9 mb-4 border rounded overflow-hidden shadow-sm"
                         style="min-height: 500px;">
 
-                        {{-- Loading Spinner Overlay --}}
                         <div id="pdfLoadingOverlay"
                             class="position-absolute top-0 start-0 w-100 h-100 d-none flex-column justify-content-center align-items-center bg-body bg-opacity-75 z-3">
                             <div class="spinner-border text-primary mb-2" role="status"
@@ -245,18 +234,17 @@
                     </div>
 
                     @if (auth()->user()->hasPermission('schedules.coc.send.email'))
-                        {{-- Email Dispatch Section --}}
                         <div class="card bg-body-secondary border-0 p-3">
                             <label for="recipientEmail" class="form-label fw-semibold text-body">
                                 <i class="bi bi-envelope me-1"></i> Send CoC via Email
                             </label>
                             <div class="row g-2">
-                                <div class="col-md-9">
+                                <div class="col-12 col-md-9">
                                     <input type="email" id="recipientEmail" class="form-control"
                                         value="{{ $schedule->contact_email }}"
                                         placeholder="Enter recipient email address...">
                                 </div>
-                                <div class="col-md-3">
+                                <div class="col-12 col-md-3">
                                     <button type="button" id="sendEmailBtn" class="btn btn-success w-100 shadow-sm">
                                         <i class="bi bi-send me-1"></i> Send Email
                                     </button>
@@ -337,7 +325,6 @@
                             document.body.appendChild(backdrop);
                         }
 
-                        // Prepare form data for fetch request
                         const formData = new FormData(cocForm);
                         const actionUrl = "{{ route('schedules.coc-generate.pdf', $schedule->id) }}";
 
@@ -372,7 +359,6 @@
                                 }
                             })
                             .catch(error => {
-                                // Close modal and backdrop on validation failure
                                 if (pdfModalEl) {
                                     pdfModalEl.classList.remove('show');
                                     pdfModalEl.style.display = 'none';
@@ -383,7 +369,6 @@
                                 const backdrop = document.querySelector('.modal-backdrop');
                                 if (backdrop) backdrop.remove();
 
-                                // Parse validation error message
                                 let errorMessage =
                                     'Invalid file uploaded. Please check file format (PNG, JPG, JPEG) and size (< 2MB).';
                                 if (error && error.errors) {

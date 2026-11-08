@@ -1,12 +1,13 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container py-4">
+    <div class="container py-3 py-md-4 px-3 px-md-4">
 
-        <div class="hero mb-5">
-            <p class="text-uppercase small opacity-75 mb-2" style="letter-spacing: .12em;">{{ config('company.tagline') }}</p>
-            <h1 class="display-6 mb-2">Welcome back, {{ auth()->user()->userInfo->first_name }}</h1>
-            <p class="opacity-75 mb-0">What would you like to work on today?</p>
+        {{-- Responsive Hero Section --}}
+        <div class="hero mb-4 mb-md-5 text-center text-md-start">
+            <p class="text-uppercase small opacity-75 mb-1" style="letter-spacing: .12em;">{{ config('company.tagline') }}</p>
+            <h1 class="h3 h-md-display-6 fw-bold mb-2">Welcome back, {{ auth()->user()->userInfo->first_name }}</h1>
+            <p class="text-muted small mb-0">What would you like to work on today?</p>
         </div>
 
         @php
@@ -62,24 +63,25 @@
             ];
         @endphp
 
-        <h5 class="fw-semibold mb-3">Our Services</h5>
+        <h5 class="fw-semibold mb-3 px-1">Our Services</h5>
 
-        <div class="row g-4">
+        <div class="row g-3 g-md-4">
             @forelse ($services as $service)
-                <div class="col-md-6 col-lg-4 d-flex">
-                    <div class="service-card p-4 p-lg-5 d-flex flex-column text-center justify-content-between shadow-sm w-100 h-100"
+                <div class="col-12 col-md-6 col-lg-4 d-flex">
+                    <div class="service-card p-3 p-md-4 p-lg-5 d-flex flex-column text-center justify-content-between shadow-sm w-100 h-100"
                         style="background: var(--card); border: 1px solid var(--line); border-radius: 1rem;">
 
                         <div>
-                            <div class="service-icon mx-auto mb-4 d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle shadow-sm"
-                                style="width: 90px; height: 90px; font-size: 2.75rem;">
+                            {{-- Adjusted icon container sizing for mobile vs desktop --}}
+                            <div class="service-icon mx-auto mb-3 mb-md-4 d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle shadow-sm"
+                                style="width: 75px; height: 75px; font-size: 2.25rem;">
                                 <i class="bi {{ $service['icon'] }}"></i>
                             </div>
-                            <h5 class="fw-bold mb-2 fs-4" style="color: var(--ink);">{{ $service['title'] }}</h5>
+                            <h5 class="fw-bold mb-2 fs-5 fs-md-4" style="color: var(--ink);">{{ $service['title'] }}</h5>
                             <p class="text-muted small px-2 mb-0">{{ $service['desc'] }}</p>
                         </div>
 
-                        <div class="mt-4 pt-3">
+                        <div class="mt-3 mt-md-4 pt-2 pt-md-3">
                             @if ($service['available'])
                                 <a href="{{ $service['url'] }}" class="btn btn-primary w-100 py-2">
                                     Open Module <i class="bi bi-arrow-right ms-1"></i>

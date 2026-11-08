@@ -38,7 +38,7 @@
             <div class="p-4">
                 <h6 class="fw-semibold mb-3">Status & Remarks</h6>
                 <div class="row g-3">
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <label for="status" class="form-label">Status</label>
                         <select id="status" name="status" class="form-select">
                             <option value="draft"
@@ -64,7 +64,7 @@
                             </option>
                         </select>
                     </div>
-                    <div class="col-md-8">
+                    <div class="col-12 col-md-8">
                         <label for="remarks" class="form-label">Remarks / Approval Notes <span
                                 class="text-muted fw-normal">(optional)</span></label>
                         <input id="remarks" type="text" name="remarks"
@@ -81,67 +81,67 @@
         <div class="p-4">
             <h6 class="fw-semibold mb-3">Customer & Project Details</h6>
             <div class="row g-3">
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <label for="quoted_to" class="form-label">Client Name (To)</label>
                     <input id="quoted_to" type="text" name="quoted_to"
                         value="{{ old('quoted_to', $quotation->quoted_to ?? '') }}" class="form-control" required>
                 </div>
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <label for="client_company" class="form-label">Company Name <span
                             class="text-muted fw-normal">(optional)</span></label>
                     <input id="client_company" type="text" name="client_company"
                         value="{{ old('client_company', $quotation->client_company ?? '') }}" class="form-control"
                         placeholder="Client's Company Name">
                 </div>
-                <div class="col-md-12">
+                <div class="col-12">
                     <label for="client_address" class="form-label">Address <span
                             class="text-muted fw-normal">(optional)</span></label>
                     <input id="client_address" type="text" name="client_address"
                         value="{{ old('client_address', $quotation->client_address ?? '') }}" class="form-control"
                         placeholder="Street, City, State, Zip">
                 </div>
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <label for="client_phone" class="form-label">Phone Number <span
                             class="text-muted fw-normal">(optional)</span></label>
                     <input id="client_phone" type="text" name="client_phone"
                         value="{{ old('client_phone', $quotation->client_phone ?? '') }}" class="form-control"
                         placeholder="(000) 000-0000">
                 </div>
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <label for="contact_email" class="form-label">Email Address <span
                             class="text-muted fw-normal">(optional)</span></label>
                     <input id="contact_email" type="email" name="contact_email"
                         value="{{ old('contact_email', $quotation->contact_email ?? '') }}" class="form-control"
                         placeholder="name@example.com">
                 </div>
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <label for="attention" class="form-label">Contact Person (Attention) <span
                             class="text-muted fw-normal">(optional)</span></label>
                     <input id="attention" type="text" name="attention"
                         value="{{ old('attention', $quotation->attention ?? '') }}" class="form-control"
                         placeholder="Person in charge">
                 </div>
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <label for="prepared_by" class="form-label">Prepared By <span
                             class="text-muted fw-normal">(optional)</span></label>
                     <input id="prepared_by" type="text" name="prepared_by"
                         value="{{ old('prepared_by', $quotation->prepared_by ?? '') }}" class="form-control"
                         placeholder="Your Name">
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <label for="quotation_date" class="form-label">Issue Date</label>
                     <input id="quotation_date" type="date" name="quotation_date"
                         value="{{ old('quotation_date', $isEdit ? $quotation->quotation_date->toDateString() : now()->toDateString()) }}"
                         class="form-control" required>
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <label for="valid_until" class="form-label">Valid Until <span
                             class="text-muted fw-normal">(optional)</span></label>
                     <input id="valid_until" type="date" name="valid_until"
                         value="{{ old('valid_until', $isEdit && $quotation->valid_until ? $quotation->valid_until->toDateString() : '') }}"
                         class="form-control">
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <label for="reference_project" class="form-label">Reference / Project <span
                             class="text-muted fw-normal">(optional)</span></label>
                     <input id="reference_project" type="text" name="reference_project"
@@ -154,7 +154,8 @@
 
     {{-- Scope of work & Sub-items --}}
     <div class="panel mb-4">
-        <div class="p-4 pb-3 d-flex justify-content-between align-items-center">
+        <div
+            class="p-4 pb-3 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
             <div>
                 <h6 class="fw-semibold mb-1">Scope of Work & Items</h6>
                 <p class="text-muted small mb-0">Add main services and attach child sub-services as needed.</p>
@@ -168,11 +169,11 @@
             <table class="table table-elegant align-middle" id="items-table">
                 <thead>
                     <tr>
-                        <th style="min-width: 320px;">Service / Item Description</th>
-                        <th style="width: 170px;">Unit Price ({{ $currency }})</th>
-                        <th style="width: 130px;">Quantity</th>
-                        <th style="width: 150px;" class="text-end">Total</th>
-                        <th style="width: 110px;" class="text-end">Actions</th>
+                        <th style="min-width: 250px;">Service / Item Description</th>
+                        <th style="width: 150px;">Unit Price ({{ $currency }})</th>
+                        <th style="width: 110px;">Quantity</th>
+                        <th style="width: 130px;" class="text-end">Total</th>
+                        <th style="width: 100px;" class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -205,9 +206,9 @@
         </div>
     </div>
 
-    <div class="d-flex justify-content-end gap-2 mb-4">
-        <a href="{{ route('quotations.index') }}" class="btn btn-outline-secondary">Cancel</a>
-        <button type="submit" class="btn btn-brand">
+    <div class="d-flex flex-column-reverse flex-md-row justify-content-end gap-2 mb-4">
+        <a href="{{ route('quotations.index') }}" class="btn btn-outline-secondary w-100 w-md-auto">Cancel</a>
+        <button type="submit" class="btn btn-brand w-100 w-md-auto">
             <i class="bi bi-check2-circle me-1"></i> {{ $isEdit ? 'Update Quotation' : 'Save Quotation' }}
         </button>
     </div>
@@ -243,7 +244,6 @@
                 }
             });
 
-            // Instant sync on change
             const hiddenInput = document.querySelector('#other_info');
             quill.on('text-change', function() {
                 const htmlContent = quill.root.innerHTML;
@@ -323,7 +323,6 @@
                 '<span class="text-muted small me-2"><i class="bi bi-arrow-return-right"></i> Sub:</span>' :
                 '<span class="badge bg-secondary me-2">Main</span>';
 
-            // Safely escape description quotes to prevent truncation bugs (e.g. 8" PVC Pipes)
             const safeDescription = (item.description ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
             tr.innerHTML = `
