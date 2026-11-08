@@ -145,9 +145,10 @@
                             <td>
                                 @php
                                     $badgeColors = match (strtolower($schedule->status)) {
+                                        'scheduled' => 'bg-primary text-white',
+                                        'ongoing' => 'bg-warning text-dark',
                                         'completed' => 'bg-success text-white',
                                         'cancelled' => 'bg-danger text-white',
-                                        'ongoing' => 'bg-primary text-white',
                                         default => 'bg-secondary text-white',
                                     };
                                 @endphp
@@ -218,7 +219,8 @@
                     let html = '<div class="list-group list-group-flush border-0 gap-2">';
                     filtered.forEach(item => {
                         const badgeColor = item.status === 'completed' ? 'bg-success text-white' :
-                            item.status === 'ongoing' ? 'bg-primary text-white' :
+                            item.status === 'ongoing' ? 'bg-warning text-dark' :
+                            item.status === 'scheduled' ? 'bg-primary text-white' :
                             item.status === 'cancelled' ? 'bg-danger text-white' : 'bg-secondary text-white';
 
                         html += `

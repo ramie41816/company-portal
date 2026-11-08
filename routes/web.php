@@ -99,10 +99,10 @@ Route::middleware('auth')->group(function () {
 
         // Read / View
         Route::middleware('permission:schedules.view')->group(function () {
-            Route::get('/', [ScheduleController::class, 'dashboard'])->name('dashboard');
             Route::get('/list', [ScheduleController::class, 'index'])->name('index');
             Route::get('/archives', [ScheduleController::class, 'archives'])->name('archives');
             Route::get('/{schedule}', [ScheduleController::class, 'show'])->name('show');
+            Route::get('/', [ScheduleController::class, 'dashboard'])->name('dashboard');
         });
 
         // Update / Edit / Workflows

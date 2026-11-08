@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ config('company.name') }}</title>
+<title>{{ config('company.app_name') }}</title>
 
 {{-- Browser tab icon: uses the favicon, or the logo if no favicon is set --}}
 @php $favicon = config('company.favicon') ?: config('company.logo'); @endphp

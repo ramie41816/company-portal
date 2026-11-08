@@ -18,7 +18,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Password Updated - {{ config('company.name', 'Company Portal') }}</title>
+    <title>Password Updated - {{ config('company.app_name', 'Company Portal') }}</title>
     <style>
         body {
             background-color: #f8fafc;
@@ -140,7 +140,7 @@
 
             <!-- Header -->
             <div class="email-header">
-                <h1>{{ config('company.name', 'Company Portal') }}</h1>
+                <h1>{{ config('company.app_name', 'Company Portal') }}</h1>
                 <p>Security & Account Management</p>
             </div>
 
@@ -148,7 +148,7 @@
             <div class="email-body">
                 <p>Hello <strong>{{ $user->userInfo?->first_name ?? ($user->name ?? 'User') }}</strong>,</p>
 
-                <p>Your password for <strong>{{ config('company.name', 'Company Portal') }}</strong> has been
+                <p>Your password for <strong>{{ config('company.app_name', 'Company Portal') }}</strong> has been
                     successfully updated.</p>
                 <p>For your records and safekeeping, your new account credentials are provided below:</p>
 
@@ -184,7 +184,7 @@
 
             <!-- Footer -->
             <div class="footer">
-                This is an automated email from {{ config('company.name', 'Company Portal') }}. All rights
+                This is an automated email from {{ config('company.app_name', 'Company Portal') }}. All rights
                 reserved.
             </div>
 

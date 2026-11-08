@@ -218,11 +218,13 @@
     <div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="pdfModalLabel">
+                <div class="modal-header d-flex align-items-center justify-content-between">
+                    <h5 class="modal-title m-0" id="pdfModalLabel">
                         <i class="bi bi-file-earmark-pdf text-primary me-2"></i>Certificate of Completion Preview
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" id="printPdfBtn" class="btn btn-sm btn-danger px-4" style="display: none;">
+                        <i class="bi bi-printer me-1"></i> Print PDF
+                    </button>
                 </div>
                 <div class="modal-body">
                     {{-- iFrame Preview Container with Loading Overlay --}}
@@ -263,8 +265,9 @@
                         </div>
                     @endif
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Close</button>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary px-4 ms-auto"
+                        data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -288,23 +291,32 @@
                 const pdfFrame = document.getElementById('pdfFrame');
                 const cocForm = document.getElementById('cocForm');
                 const signatureInput = document.getElementById('signature_file');
+                const printPdfBtn = document.getElementById('printPdfBtn');
 
                 if (cocForm) {
                     cocForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+
                         if (signatureInput && signatureInput.files.length === 0) {
-                            e.preventDefault();
-                            alert('Please upload an eSignature image before proceeding.');
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'bottom-end',
+                                    icon: 'warning',
+                                    title: 'Please upload an eSignature image before proceeding.',
+                                    showConfirmButton: false,
+                                    timer: 4000,
+                                    timerProgressBar: true
+                                });
+                            } else {
+                                alert('Please upload an eSignature image before proceeding.');
+                            }
                             signatureInput.focus();
                             return;
                         }
 
-                        cocForm.action = "{{ route('schedules.coc-generate.pdf', $schedule->id) }}";
-                        cocForm.removeAttribute('target');
-                        cocForm.target = "pdf-frame";
-
-                        if (pdfFrame) {
-                            pdfFrame.src = 'about:blank';
-                        }
+                        if (pdfFrame) pdfFrame.src = 'about:blank';
+                        if (printPdfBtn) printPdfBtn.style.display = 'none';
 
                         if (loadingOverlay) {
                             loadingOverlay.classList.remove('d-none');
@@ -325,12 +337,82 @@
                             document.body.appendChild(backdrop);
                         }
 
-                        setTimeout(function() {
-                            if (loadingOverlay) {
-                                loadingOverlay.classList.remove('d-flex');
-                                loadingOverlay.classList.add('d-none');
-                            }
-                        }, 1500);
+                        // Prepare form data for fetch request
+                        const formData = new FormData(cocForm);
+                        const actionUrl = "{{ route('schedules.coc-generate.pdf', $schedule->id) }}";
+
+                        fetch(actionUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json'
+                                },
+                                body: formData
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    return response.json().then(errData => {
+                                        throw errData;
+                                    });
+                                }
+                                return response.blob();
+                            })
+                            .then(blob => {
+                                const blobUrl = window.URL.createObjectURL(blob);
+                                if (pdfFrame) {
+                                    pdfFrame.src = blobUrl + '#toolbar=0&navpanes=0&scrollbar=0';
+                                }
+                                if (printPdfBtn) {
+                                    printPdfBtn.style.display = 'inline-block';
+                                    printPdfBtn.onclick = function() {
+                                        if (pdfFrame && pdfFrame.contentWindow) {
+                                            pdfFrame.contentWindow.print();
+                                        }
+                                    };
+                                }
+                            })
+                            .catch(error => {
+                                // Close modal and backdrop on validation failure
+                                if (pdfModalEl) {
+                                    pdfModalEl.classList.remove('show');
+                                    pdfModalEl.style.display = 'none';
+                                    pdfModalEl.setAttribute('aria-hidden', 'true');
+                                    pdfModalEl.removeAttribute('aria-modal');
+                                }
+                                document.body.classList.remove('modal-open');
+                                const backdrop = document.querySelector('.modal-backdrop');
+                                if (backdrop) backdrop.remove();
+
+                                // Parse validation error message
+                                let errorMessage =
+                                    'Invalid file uploaded. Please check file format (PNG, JPG, JPEG) and size (< 2MB).';
+                                if (error && error.errors) {
+                                    const firstKey = Object.keys(error.errors)[0];
+                                    if (firstKey && error.errors[firstKey][0]) {
+                                        errorMessage = error.errors[firstKey][0];
+                                    }
+                                }
+
+                                if (typeof Swal !== 'undefined') {
+                                    Swal.fire({
+                                        toast: true,
+                                        position: 'bottom-end',
+                                        icon: 'error',
+                                        title: errorMessage,
+                                        showConfirmButton: false,
+                                        timer: 6000,
+                                        timerProgressBar: true
+                                    });
+                                } else {
+                                    alert(errorMessage);
+                                }
+                            })
+                            .finally(() => {
+                                if (loadingOverlay) {
+                                    loadingOverlay.classList.remove('d-flex');
+                                    loadingOverlay.classList.add('d-none');
+                                }
+                            });
                     });
                 }
 
@@ -352,6 +434,10 @@
                         }
                         if (pdfFrame) {
                             pdfFrame.src = 'about:blank';
+                        }
+                        if (printPdfBtn) {
+                            printPdfBtn.style.display = 'none';
+                            printPdfBtn.onclick = null;
                         }
                     });
                 });
@@ -394,6 +480,7 @@
                                         allowOutsideClick: false,
                                         allowEscapeKey: false,
                                         showConfirmButton: false,
+                                        target: 'body',
                                         didOpen: () => {
                                             Swal.showLoading();
                                         }

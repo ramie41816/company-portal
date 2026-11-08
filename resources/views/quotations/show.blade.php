@@ -16,7 +16,7 @@
                             <i class="bi bi-file-earmark-pdf me-1"></i> Prepare Quote
                         </a>
                     @endif
-                    @if ($quotation->status === 'approved')
+                    @if ($quotation->status === 'approved' && auth()->user()->hasPermission('schedules.add'))
                         <a href="{{ route('schedules.from-quote', $quotation->id) }}" class="btn btn-sm btn-success">
                             <i class="bi bi-calendar-check me-1"></i> Create Schedule
                         </a>
@@ -183,7 +183,7 @@
                                         -
                                     @endif
                                 </td>
-                                <td class="text-end" style="color: #0f3460;">
+                                <td class="text-end fw-semibold text-brand" style="color: var(--ink);">
                                     @if ($item->total > 0)
                                         {!! 'PHP ' . number_format($item->total, 2) !!}
                                     @else

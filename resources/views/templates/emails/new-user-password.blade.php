@@ -19,7 +19,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $isReset ? 'Password Reset' : 'Welcome' }} - {{ config('company.name', 'Company Portal') }}</title>
+    <title>{{ $isReset ? 'Password Reset' : 'Welcome' }} - {{ config('company.app_name', 'Company Portal') }}</title>
     <style>
         body {
             background-color: #f8fafc;
@@ -146,12 +146,8 @@
 
             {{-- Header --}}
             <div class="email-header">
-                <h1>{{ config('company.name', 'Company Portal') }}</h1>
-                @if (config('company.tagline'))
-                    <p>{{ config('company.tagline') }}</p>
-                @else
-                    <p>{{ $isReset ? 'Account Security' : 'Welcome Portal' }}</p>
-                @endif
+                <h1>{{ config('company.app_name', 'Company Portal') }}</h1>
+                <p>Security & Account Management</p>
             </div>
 
             {{-- Content Body --}}
@@ -161,7 +157,7 @@
                 @if ($isReset)
                     <p>
                         An administrator has issued a password reset for your account on
-                        <strong>{{ config('company.name', 'Company Portal') }}</strong>.
+                        <strong>{{ config('company.app_name', 'Company Portal') }}</strong>.
                     </p>
                     <p>
                         Your previous password has been invalidated. Please use the temporary password below to sign in
@@ -169,7 +165,8 @@
                     </p>
                 @else
                     <p>
-                        Welcome to <strong>{{ config('company.name', 'Company Portal') }}</strong>! Your user account
+                        Welcome to <strong>{{ config('company.app_name', 'Company Portal') }}</strong>! Your user
+                        account
                         has been
                         successfully created by an administrator.
                     </p>
@@ -210,7 +207,8 @@
             <div class="footer">
                 <p style="margin: 0 0 6px 0;">If you did not request or expect this account update, please contact your
                     system administrator immediately.</p>
-                <p style="margin: 0;">&copy; {{ date('Y') }} {{ config('company.name', 'Company Portal') }}. All
+                <p style="margin: 0;">&copy; {{ date('Y') }} {{ config('company.app_name', 'Company Portal') }}.
+                    All
                     rights reserved.
                 </p>
             </div>

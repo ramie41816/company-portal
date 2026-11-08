@@ -44,13 +44,31 @@ class Schedule extends Model
         ];
     }
 
-    // Optional link back to quotation if originated from one
+    protected static function booted(): void
+    {
+        static::saved(function (Schedule $schedule) {
+            // Check if the schedule has an associated quotation
+            if ($schedule->quotation_id) {
+                $status = strtolower($schedule->status);
+
+                if (in_array($status, ['completed', 'cancelled'])) {
+                    $schedule->quotation()->update([
+                        'status' => $status
+                    ]);
+                } else {
+                    $schedule->quotation()->update([
+                        'status' => 'ongoing'
+                    ]);
+                }
+            }
+        });
+    }
+
     public function quotation(): BelongsTo
     {
         return $this->belongsTo(Quotation::class);
     }
 
-    // A schedule has many line items
     public function items(): HasMany
     {
         return $this->hasMany(ScheduleItem::class);

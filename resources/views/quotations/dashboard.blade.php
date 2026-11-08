@@ -114,12 +114,13 @@
                             <td>
                                 @php
                                     $badgeColors = match (strtolower($quotation->status)) {
-                                        'approved' => 'bg-success text-white',
-                                        'rejected' => 'bg-danger text-white',
-                                        'pending', 'revision' => 'bg-warning text-dark',
-                                        'emailed' => 'bg-info text-white',
-                                        'ongoing' => 'bg-primary text-white',
-                                        'completed' => 'bg-secondary text-white',
+                                        'draft' => 'text-bg-secondary',
+                                        'pending' => 'text-bg-warning',
+                                        'approved' => 'text-bg-success',
+                                        'cancelled' => 'text-bg-danger',
+                                        'emailed' => 'text-bg-info',
+                                        'ongoing' => 'text-bg-primary',
+                                        'completed' => 'text-bg-success',
                                         default => 'bg-secondary text-white',
                                     };
                                 @endphp

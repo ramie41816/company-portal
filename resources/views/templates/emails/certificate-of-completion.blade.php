@@ -167,8 +167,8 @@
 
             <!-- Header -->
             <div class="email-header">
-                <h1>Certificate of Completion</h1>
-                <p>{{ config('company.name', 'Company Portal') }}</p>
+                <h1>{{ config('company.app_name', 'Company Portal') }}</h1>
+                <p>{{ config('company.tagline', 'Your Tagline') }}</p>
             </div>
 
             <!-- Body -->
@@ -221,7 +221,7 @@
 
             <!-- Footer -->
             <div class="footer">
-                This is an automated email from {{ config('company.name', 'Company Portal') }}.
+                This is an automated email from {{ config('company.app_name', 'Company Portal') }}.
             </div>
 
         </div>

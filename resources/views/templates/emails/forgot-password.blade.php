@@ -24,7 +24,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Password Reset - {{ config('company.name', 'Company Portal') }}</title>
+    <title>Password Reset - {{ config('company.app_name', 'Company Portal') }}</title>
     <style>
         body {
             background-color: #f8fafc;
@@ -149,12 +149,8 @@
 
             <!-- Header -->
             <div class="email-header">
-                <h1>{{ config('company.name', 'Company Portal') }}</h1>
-                @if (config('company.tagline'))
-                    <p>{{ config('company.tagline') }}</p>
-                @else
-                    <p>Security & Account Management</p>
-                @endif
+                <h1>{{ config('company.app_name', 'Company Portal') }}</h1>
+                <p>Security & Account Management</p>
             </div>
 
             <!-- Body -->
@@ -184,7 +180,7 @@
 
             <!-- Footer -->
             <div class="footer">
-                This is an automated email from {{ config('company.name', 'Company Portal') }}. All rights reserved.
+                This is an automated email from {{ config('company.app_name', 'Company Portal') }}. All rights reserved.
             </div>
 
         </div>

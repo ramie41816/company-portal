@@ -80,11 +80,13 @@
     <div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="pdfModalLabel">
+                <div class="modal-header d-flex align-items-center justify-content-between">
+                    <h5 class="modal-title m-0" id="pdfModalLabel">
                         <i class="bi bi-file-earmark-pdf text-primary me-2"></i>Quotation Document Preview
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" id="printPdfBtn" class="btn btn-sm btn-danger px-4" style="display: none;">
+                        <i class="bi bi-printer me-1"></i> Print PDF
+                    </button>
                 </div>
                 <div class="modal-body">
                     <div class="position-relative ratio ratio-16x9 mb-4 border rounded overflow-hidden shadow-sm"
@@ -120,8 +122,9 @@
                         </div>
                     @endif
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Close</button>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary px-4 ms-auto"
+                        data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -138,21 +141,33 @@
                 const pdfFrame = document.getElementById('pdfFrame');
                 const quotationForm = document.getElementById('quotationForm');
                 const signatureInput = document.getElementById('signature_file');
+                const printPdfBtn = document.getElementById('printPdfBtn');
 
                 if (quotationForm) {
                     quotationForm.addEventListener('submit', function(e) {
+                        e.preventDefault();
+
                         if (signatureInput && signatureInput.files.length === 0) {
-                            e.preventDefault();
-                            alert('Please upload an eSignature image before proceeding.');
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'bottom-end',
+                                    icon: 'warning',
+                                    title: 'Please upload an eSignature image before proceeding.',
+                                    showConfirmButton: false,
+                                    timer: 4000,
+                                    timerProgressBar: true
+                                });
+                            } else {
+                                alert('Please upload an eSignature image before proceeding.');
+                            }
                             signatureInput.focus();
                             return;
                         }
 
-                        quotationForm.action = "{{ route('quotations.generate.pdf', $quotation->id) }}";
-                        quotationForm.removeAttribute('target');
-                        quotationForm.target = "pdf-frame";
-
                         if (pdfFrame) pdfFrame.src = 'about:blank';
+                        if (printPdfBtn) printPdfBtn.style.display = 'none';
+
                         if (loadingOverlay) {
                             loadingOverlay.classList.remove('d-none');
                             loadingOverlay.classList.add('d-flex');
@@ -172,12 +187,79 @@
                             document.body.appendChild(backdrop);
                         }
 
-                        setTimeout(function() {
-                            if (loadingOverlay) {
-                                loadingOverlay.classList.remove('d-flex');
-                                loadingOverlay.classList.add('d-none');
-                            }
-                        }, 1500);
+                        const formData = new FormData(quotationForm);
+                        const actionUrl = "{{ route('quotations.generate.pdf', $quotation->id) }}";
+
+                        fetch(actionUrl, {
+                                method: 'POST',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json'
+                                },
+                                body: formData
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    return response.json().then(errData => {
+                                        throw errData;
+                                    });
+                                }
+                                return response.blob();
+                            })
+                            .then(blob => {
+                                const blobUrl = window.URL.createObjectURL(blob);
+                                if (pdfFrame) {
+                                    pdfFrame.src = blobUrl + '#toolbar=0&navpanes=0&scrollbar=0';
+                                }
+                                if (printPdfBtn) {
+                                    printPdfBtn.style.display = 'inline-block';
+                                    printPdfBtn.onclick = function() {
+                                        if (pdfFrame && pdfFrame.contentWindow) {
+                                            pdfFrame.contentWindow.print();
+                                        }
+                                    };
+                                }
+                            })
+                            .catch(error => {
+                                if (pdfModalEl) {
+                                    pdfModalEl.classList.remove('show');
+                                    pdfModalEl.style.display = 'none';
+                                    pdfModalEl.setAttribute('aria-hidden', 'true');
+                                    pdfModalEl.removeAttribute('aria-modal');
+                                }
+                                document.body.classList.remove('modal-open');
+                                const backdrop = document.querySelector('.modal-backdrop');
+                                if (backdrop) backdrop.remove();
+
+                                let errorMessage =
+                                    'Invalid file uploaded. Please check file format (PNG, JPG, JPEG) and size (< 2MB).';
+                                if (error && error.errors) {
+                                    const firstKey = Object.keys(error.errors)[0];
+                                    if (firstKey && error.errors[firstKey][0]) {
+                                        errorMessage = error.errors[firstKey][0];
+                                    }
+                                }
+
+                                if (typeof Swal !== 'undefined') {
+                                    Swal.fire({
+                                        toast: true,
+                                        position: 'bottom-end',
+                                        icon: 'error',
+                                        title: errorMessage,
+                                        showConfirmButton: false,
+                                        timer: 6000,
+                                        timerProgressBar: true
+                                    });
+                                } else {
+                                    alert(errorMessage);
+                                }
+                            })
+                            .finally(() => {
+                                if (loadingOverlay) {
+                                    loadingOverlay.classList.remove('d-flex');
+                                    loadingOverlay.classList.add('d-none');
+                                }
+                            });
                     });
                 }
 
@@ -198,6 +280,10 @@
                             loadingOverlay.classList.add('d-none');
                         }
                         if (pdfFrame) pdfFrame.src = 'about:blank';
+                        if (printPdfBtn) {
+                            printPdfBtn.style.display = 'none';
+                            printPdfBtn.onclick = null;
+                        }
                     });
                 });
 

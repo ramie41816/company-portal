@@ -131,11 +131,11 @@
                             <td class="text-muted small">{{ $user->created_at->format('M d, Y') }}</td>
                             <td class="text-end px-3">
                                 <div class="btn-group btn-group-sm">
-                                    <a href="{{ route('users.show', $user->id) }}" class="btn btn-outline-primary"
+                                    <a href="{{ route('users.show', $user->id) }}" class="btn btn-outline-secondary"
                                         title="View">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <a href="{{ route('users.edit', $user->id) }}" class="btn btn-outline-warning"
+                                    <a href="{{ route('users.edit', $user->id) }}" class="btn btn-outline-secondary"
                                         title="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </a>

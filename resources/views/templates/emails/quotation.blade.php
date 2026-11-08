@@ -158,10 +158,8 @@
 
             <!-- Header -->
             <div class="email-header">
-                <h1>{{ config('company.name', 'Company Portal') }}</h1>
-                @if (config('company.tagline'))
-                    <p>{{ config('company.tagline') }}</p>
-                @endif
+                <h1>{{ config('company.app_name', 'Company Portal') }}</h1>
+                <p>{{ config('company.tagline', 'Your Tagline') }}</p>
             </div>
 
             <!-- Body -->
@@ -214,8 +212,8 @@
                 <div class="signature-section">
                     <p style="margin: 0 0 4px 0;">Best regards,</p>
                     <div class="signature-name">
-                        {{ $quotation->prepared_by ?? config('company.name', 'Company Portal') }}</div>
-                    <div>{{ config('company.name', 'Company Portal') }}</div>
+                        {{ $quotation->prepared_by ?? config('company.app_name', 'Company Portal') }}</div>
+                    <div>{{ config('company.app_name', 'Company Portal') }}</div>
                     @if (config('company.phone'))
                         <div>Phone: {{ config('company.phone') }}</div>
                     @endif
@@ -224,7 +222,7 @@
 
             <!-- Footer -->
             <div class="footer">
-                This is an automated email from {{ config('company.name', 'Company Portal') }}.
+                This is an automated email from {{ config('company.app_name', 'Company Portal') }}.
             </div>
 
         </div>

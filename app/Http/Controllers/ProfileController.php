@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use App\Mail\PasswordChangedMail;
+use Illuminate\Support\Facades\Mail;
 
 class ProfileController extends Controller
 {
@@ -85,6 +87,16 @@ class ProfileController extends Controller
         auth()->user()->update([
             'password' => Hash::make($validated['password']),
         ]);
+
+        // Get the Authenticated User Details
+        $user = auth()->user();
+        // Get the Authenticated Email
+        $email = $user->email;
+        // Get the Validated New Password
+        $password = $validated['password'];
+
+        // Send branded temporary password email
+        Mail::to($email)->send(new PasswordChangedMail($user, $password));
 
         return back()->with('success', 'Password changed successfully.');
     }

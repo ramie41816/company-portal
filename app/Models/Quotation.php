@@ -39,9 +39,33 @@ class Quotation extends Model
         ];
     }
 
-    // A quotation has many items
+    protected static function booted(): void
+    {
+        static::deleted(function (Quotation $quotation) {
+            if (method_exists($quotation, 'isForceDeleting') && !$quotation->isForceDeleting()) {
+                \App\Models\Schedule::where('quotation_id', $quotation->id)
+                    ->each(function ($schedule) {
+                        $schedule->delete();
+                    });
+            }
+        });
+
+        static::restored(function (Quotation $quotation) {
+            \App\Models\Schedule::onlyTrashed()
+                ->where('quotation_id', $quotation->id)
+                ->each(function ($schedule) {
+                    $schedule->restore();
+                });
+        });
+    }
+
     public function items(): HasMany
     {
         return $this->hasMany(QuotationItem::class);
+    }
+
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(Schedule::class, 'quotation_id');
     }
 }
