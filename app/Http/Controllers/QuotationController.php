@@ -335,9 +335,22 @@ class QuotationController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $validated = $request->validate([
+        // Validate the request manually so we can catch and return JSON for iframe/AJAX requests
+        $validator = \Validator::make($request->all(), [
             'signature_file' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
         ]);
+
+        if ($validator->fails()) {
+            // If called via AJAX/fetch from the iframe, return JSON error response
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            return back()->withErrors($validator)->withInput();
+        }
 
         $quotation->load('items');
 

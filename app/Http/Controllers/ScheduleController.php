@@ -18,13 +18,18 @@ class ScheduleController extends Controller
         $dateFrom = $request->input('date_from');
         $dateTo = $request->input('date_to');
 
-        $schedules = Schedule::query()
-            ->when($search, function ($query, $search) {
-                $query->where('schedule_number', 'like', "%{$search}%")
-                    ->orWhere('scheduled_to', 'like', "%{$search}%")
-                    ->orWhere('client_company', 'like', "%{$search}%")
-                    ->orWhere('reference_project', 'like', "%{$search}%");
-            })
+        $query = Schedule::query();
+
+        if (!auth()->user()->isModuleAdmin('schedule')) {
+            $query->where('created_by', auth()->id());
+        }
+
+        $schedules = $query->when($search, function ($query, $search) {
+            $query->where('schedule_number', 'like', "%{$search}%")
+                ->orWhere('scheduled_to', 'like', "%{$search}%")
+                ->orWhere('client_company', 'like', "%{$search}%")
+                ->orWhere('reference_project', 'like', "%{$search}%");
+        })
             ->when($dateFrom, fn($q, $date) => $q->whereDate('schedule_date', '>=', $date))
             ->when($dateTo, fn($q, $date) => $q->whereDate('schedule_date', '<=', $date))
             ->orderBy('schedule_date', 'desc')
@@ -36,16 +41,20 @@ class ScheduleController extends Controller
 
     public function dashboard()
     {
-        $totalSchedules = Schedule::count();
-        $totalValue = Schedule::sum('total');
-        $ongoingCount = Schedule::where('status', 'ongoing')->count();
-        $completedCount = Schedule::where('status', 'completed')->count();
+        $query = Schedule::query();
 
-        // Fetch recent schedules sorted by schedule_date (datetime) descending
-        $recentSchedules = Schedule::orderBy('schedule_date', 'desc')->take(5)->get();
+        if (!auth()->user()->isModuleAdmin('schedule')) {
+            $query->where('created_by', auth()->id());
+        }
 
-        // Fetch active schedules for the interactive calendar feed
-        $calendarSchedules = Schedule::select('id', 'schedule_number', 'scheduled_to', 'schedule_date', 'status', 'total')
+        $totalSchedules = (clone $query)->count();
+        $totalValue = (clone $query)->sum('total');
+        $ongoingCount = (clone $query)->where('status', 'ongoing')->count();
+        $completedCount = (clone $query)->where('status', 'completed')->count();
+
+        $recentSchedules = (clone $query)->orderBy('schedule_date', 'desc')->take(5)->get();
+
+        $calendarSchedules = (clone $query)->select('id', 'schedule_number', 'scheduled_to', 'schedule_date', 'status', 'total')
             ->orderBy('schedule_date', 'asc')
             ->get()
             ->map(function ($schedule) {
@@ -79,9 +88,15 @@ class ScheduleController extends Controller
         ]);
     }
 
-    // Handles conversion from an Approved Quotation
     public function createFromQuotation(Quotation $quotation)
     {
+        $existingSchedule = Schedule::where('quotation_id', $quotation->id)->first();
+
+        if ($existingSchedule) {
+            return redirect()->route('schedules.edit', $existingSchedule)
+                ->with('info', 'A schedule already exists for this quotation. You are now editing it.');
+        }
+
         $quotation->load('items');
 
         $schedule = new Schedule([
@@ -125,7 +140,7 @@ class ScheduleController extends Controller
     {
         $validated = $request->validate([
             'quotation_id'      => 'nullable|exists:quotations,id',
-            'scheduled_to'         => 'required|string|max:255',
+            'scheduled_to'      => 'required|string|max:255',
             'client_company'    => 'nullable|string|max:255',
             'client_address'    => 'nullable|string',
             'client_phone'      => 'nullable|string|max:50',
@@ -147,7 +162,7 @@ class ScheduleController extends Controller
         ]);
 
         $validated['schedule_number'] = 'SCH-' . strtoupper(uniqid());
-        $validated['created_by'] = auth()->user()->name ?? 'System';
+        $validated['created_by'] = auth()->id();
 
         $schedule = Schedule::create($validated);
 
@@ -183,12 +198,20 @@ class ScheduleController extends Controller
 
     public function show(Schedule $schedule)
     {
+        if (!auth()->user()->isModuleAdmin('schedule') && $schedule->created_by != auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $schedule->load('items.subItems', 'quotation');
         return view('schedules.show', compact('schedule'));
     }
 
     public function edit(Schedule $schedule)
     {
+        if (!auth()->user()->isModuleAdmin('schedule') && $schedule->created_by != auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $schedule->load('items');
         return view('schedules.edit', [
             'schedule' => $schedule,
@@ -198,8 +221,12 @@ class ScheduleController extends Controller
 
     public function update(Request $request, Schedule $schedule)
     {
+        if (!auth()->user()->isModuleAdmin('schedule') && $schedule->created_by != auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $validated = $request->validate([
-            'scheduled_to'         => 'required|string|max:255',
+            'scheduled_to'      => 'required|string|max:255',
             'client_company'    => 'nullable|string|max:255',
             'client_address'    => 'nullable|string',
             'client_phone'      => 'nullable|string|max:50',
@@ -220,9 +247,14 @@ class ScheduleController extends Controller
             'items.*.is_sub'      => 'nullable|boolean',
         ]);
 
+        if ($schedule->quotation_id) {
+            Schedule::where('quotation_id', $schedule->quotation_id)
+                ->where('id', '!=', $schedule->id)
+                ->delete();
+        }
+
         $schedule->update($validated);
 
-        // Reset items
         $schedule->items()->delete();
 
         $lastMainItem = null;
@@ -257,6 +289,10 @@ class ScheduleController extends Controller
 
     public function destroy(Schedule $schedule)
     {
+        if (!auth()->user()->isModuleAdmin('schedule') && $schedule->created_by != auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $schedule->delete();
         return redirect()->route('schedules.index')->with('success', 'Schedule moved to archives.');
     }
@@ -264,10 +300,16 @@ class ScheduleController extends Controller
     public function archives(Request $request)
     {
         $search = $request->input('search');
-        $schedules = Schedule::onlyTrashed()
-            ->when($search, fn($q, $s) => $q->where('schedule_number', 'like', "%{$s}%")->orWhere('scheduled_to', 'like', "%{$s}%"))
+        $query = Schedule::onlyTrashed();
+
+        if (!auth()->user()->isModuleAdmin('schedule')) {
+            $query->where('created_by', auth()->id());
+        }
+
+        $schedules = $query->when($search, fn($q, $s) => $q->where('schedule_number', 'like', "%{$s}%")->orWhere('scheduled_to', 'like', "%{$s}%"))
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return view('schedules.archives', compact('schedules', 'search'));
     }
@@ -275,6 +317,11 @@ class ScheduleController extends Controller
     public function restore($id)
     {
         $schedule = Schedule::onlyTrashed()->findOrFail($id);
+
+        if (!auth()->user()->isModuleAdmin('schedule') && $schedule->created_by != auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $schedule->restore();
         return redirect()->route('schedules.archives')->with('success', 'Schedule restored successfully.');
     }
@@ -282,15 +329,19 @@ class ScheduleController extends Controller
     public function forceDelete($id)
     {
         $schedule = Schedule::onlyTrashed()->findOrFail($id);
+
+        if (!auth()->user()->isModuleAdmin('schedule') && $schedule->created_by != auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $schedule->items()->delete();
         $schedule->forceDelete();
         return redirect()->route('schedules.archives')->with('success', 'Schedule permanently deleted.');
     }
 
-    // --- Certificate of Completion (CoC) Module Methods ---
     public function prepareCoc(Schedule $schedule)
     {
-        if (!auth()->user()->isModuleAdmin('schedule') && $schedule->created_by !== auth()->id()) {
+        if (!auth()->user()->isModuleAdmin('schedule') && $schedule->created_by != auth()->id()) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -303,16 +354,27 @@ class ScheduleController extends Controller
 
     public function generateCocPdf(Request $request, Schedule $schedule)
     {
-        if (!auth()->user()->isModuleAdmin('schedule') && $schedule->created_by !== auth()->id()) {
+        if (!auth()->user()->isModuleAdmin('schedule') && $schedule->created_by != auth()->id()) {
             abort(403, 'Unauthorized action.');
         }
 
-        $validated = $request->validate([
+        $validator = \Validator::make($request->all(), [
             'items' => ['nullable', 'array'],
             'general_remarks' => ['nullable', 'string', 'max:1000'],
             'executed_by' => ['nullable', 'string', 'max:255'],
             'signature_file' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
         ]);
+
+        if ($validator->fails()) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            return back()->withErrors($validator)->withInput();
+        }
 
         $schedule->load('items');
         $submittedItems = $request->input('items', []);
@@ -353,7 +415,7 @@ class ScheduleController extends Controller
 
     public function sendCocEmail(Request $request, Schedule $schedule)
     {
-        if (!auth()->user()->isModuleAdmin('schedule') && $schedule->created_by !== auth()->id()) {
+        if (!auth()->user()->isModuleAdmin('schedule') && $schedule->created_by != auth()->id()) {
             abort(403, 'Unauthorized action.');
         }
 

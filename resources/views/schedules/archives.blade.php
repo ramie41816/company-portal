@@ -109,12 +109,18 @@
                 @csrf
                 @method('DELETE')
                 <div class="modal-body text-center p-4">
+                    <div class="mx-auto mb-3 bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center"
+                        style="width: 48px; height: 48px;">
+                        <i class="bi bi-trash fs-4"></i>
+                    </div>
                     <h5 class="fw-semibold mb-2">Permanently delete schedule?</h5>
                     <div class="fw-medium mb-2" id="forceDeleteName"></div>
                     <p class="text-muted small mb-4">This action cannot be undone.</p>
                     <div class="d-flex justify-content-center gap-2">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">Delete Permanently</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-1"></i> Delete Permanently
+                        </button>
                     </div>
                 </div>
             </form>

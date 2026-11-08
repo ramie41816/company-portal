@@ -16,7 +16,7 @@
                 @endif
 
                 @if (config('company.show_name') || !config('company.logo'))
-                    <span>{{ config('company.name') }}</span>
+                    <span>{{ config('company.app_name') }}</span>
                 @endif
             </a>
 
@@ -121,14 +121,14 @@
         </script>
     @endif
 
-    @if (session('error'))
+    @if (session('info'))
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 Swal.fire({
                     toast: true,
                     position: 'bottom-end',
-                    icon: 'error',
-                    title: "{{ session('error') }}",
+                    icon: 'info',
+                    title: "{{ session('info') }}",
                     showConfirmButton: false,
                     timer: 5000,
                     timerProgressBar: true,

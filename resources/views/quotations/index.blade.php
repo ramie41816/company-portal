@@ -72,7 +72,7 @@
                                         'draft' => 'text-bg-secondary',
                                         'pending' => 'text-bg-warning',
                                         'approved' => 'text-bg-success',
-                                        'rejected' => 'text-bg-danger',
+                                        'cancelled' => 'text-bg-danger',
                                         'emailed' => 'text-bg-info',
                                         'ongoing' => 'text-bg-primary',
                                         'completed' => 'text-bg-success',

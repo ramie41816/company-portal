@@ -141,10 +141,9 @@
                 @method('DELETE')
 
                 <div class="modal-body text-center p-4">
-                    <div class="mx-auto mb-3"
-                        style="width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center;
-                                font-size: 1.6rem; background: rgba(220, 53, 69, .12); color: #dc3545;">
-                        <i class="bi bi-exclamation-triangle"></i>
+                    <div class="mx-auto mb-3 bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center"
+                        style="width: 48px; height: 48px;">
+                        <i class="bi bi-trash fs-4"></i>
                     </div>
                     <h5 class="fw-semibold mb-2" id="forceDeleteModalLabel">Permanently delete quotation?</h5>
                     <div class="fw-medium mb-2" id="forceDeleteName"></div>
@@ -156,7 +155,7 @@
                     <div class="d-flex justify-content-center gap-2">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-danger">
-                            <i class="bi bi-trash-fill me-1"></i> Delete Permanently
+                            <i class="bi bi-trash me-1"></i> Delete Permanently
                         </button>
                     </div>
                 </div>

@@ -59,8 +59,8 @@
                             <option value="completed"
                                 {{ old('status', $quotation->status ?? '') == 'completed' ? 'selected' : '' }}>Completed
                             </option>
-                            <option value="rejected"
-                                {{ old('status', $quotation->status ?? '') == 'rejected' ? 'selected' : '' }}>Rejected
+                            <option value="cancelled"
+                                {{ old('status', $quotation->status ?? '') == 'cancelled' ? 'selected' : '' }}>Cancelled
                             </option>
                         </select>
                     </div>

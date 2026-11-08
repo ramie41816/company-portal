@@ -95,15 +95,15 @@
                             </td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm">
-                                    <a href="{{ route('users.show', $user) }}" class="btn btn-sm btn-outline-primary"
+                                    <a href="{{ route('users.show', $user) }}" class="btn btn-outline-secondary"
                                         title="View Profile">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <a href="{{ route('users.edit', $user) }}" class="btn btn-sm btn-outline-warning"
+                                    <a href="{{ route('users.edit', $user) }}" class="btn btn-outline-primary"
                                         title="Edit User">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Archive User"
+                                    <button type="button" class="btn btn-outline-danger" title="Archive User"
                                         data-bs-toggle="modal" data-bs-target="#archiveModal"
                                         data-action="{{ route('users.destroy', $user) }}"
                                         data-name="{{ $user->userInfo?->full_name ?? $user->email }}">
@@ -137,10 +137,9 @@
                 @method('DELETE')
 
                 <div class="modal-body text-center p-4">
-                    <div class="mx-auto mb-3"
-                        style="width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center;
-                                font-size: 1.6rem; background: rgba(255, 193, 7, .15); color: #ffc107;">
-                        <i class="bi bi-archive"></i>
+                    <div class="mx-auto mb-3 bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center"
+                        style="width: 48px; height: 48px;">
+                        <i class="bi bi-archive fs-4"></i>
                     </div>
                     <h5 class="fw-semibold mb-2" id="archiveModalLabel">Archive this user account?</h5>
                     <div class="fw-medium mb-2 text-muted" id="deleteName"></div>
@@ -150,7 +149,7 @@
                     </p>
                     <div class="d-flex justify-content-center gap-2">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-warning text-dark fw-medium">
+                        <button type="submit" class="btn btn-danger px-4">
                             <i class="bi bi-archive me-1"></i> Yes, Archive
                         </button>
                     </div>
