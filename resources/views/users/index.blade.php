@@ -1,18 +1,18 @@
 @extends('layouts.user')
 
 @section('user_content')
-    <div class="page-head mb-4 d-flex justify-content-between align-items-center">
+    <div
+        class="page-head mb-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
         <div>
             <h2 class="mb-1"><i class="bi bi-people"></i> User Management</h2>
             <div class="sub">View and manage system users, profiles, and access levels in one place.</div>
         </div>
     </div>
 
-    {{-- Advanced Search & Filter Bar --}}
     <div class="card border-0 shadow-sm mb-4" style="background: var(--card); border-radius: 0.75rem;">
         <div class="card-body">
             <form action="{{ route('users.index') }}" method="GET" class="row g-3 align-items-end">
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <label class="form-label small fw-semibold text-muted">Search keyword</label>
                     <div class="input-group">
                         <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search"></i></span>
@@ -20,7 +20,7 @@
                             placeholder="Name, email...">
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-12 col-md-3">
                     <label class="form-label small fw-semibold text-muted">Status</label>
                     <select name="status" class="form-select">
                         <option value="">All Statuses</option>
@@ -28,7 +28,7 @@
                         <option value="inactive" {{ ($status ?? '') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                     </select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <label class="form-label small fw-semibold text-muted">Access Level</label>
                     <select name="access_level" class="form-select">
                         <option value="">All Access Levels</option>
@@ -37,7 +37,7 @@
                         <option value="staff" {{ ($accessLevel ?? '') == 'staff' ? 'selected' : '' }}>Staff</option>
                     </select>
                 </div>
-                <div class="col-md-1 d-grid">
+                <div class="col-12 col-md-1 d-grid">
                     <button type="submit" class="btn btn-primary" title="Filter">
                         <i class="bi bi-filter"></i> Filter
                     </button>
@@ -60,10 +60,10 @@
                     <tr>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>Role</th>
+                        <th class="d-none d-md-table-cell">Role</th>
                         <th>Status</th>
-                        <th>Gender</th>
-                        <th>Birthday</th>
+                        <th class="d-none d-lg-table-cell">Gender</th>
+                        <th class="d-none d-lg-table-cell">Birthday</th>
                         <th class="text-end">Action</th>
                     </tr>
                 </thead>
@@ -71,27 +71,31 @@
                     @forelse ($users as $user)
                         <tr>
                             <td class="fw-semibold text-brand">{{ $user->userInfo?->full_name ?? '—' }}</td>
-                            <td class="text-muted">{{ $user->email }}</td>
-                            <td>
+                            <td class="text-muted text-truncate" style="max-width: 150px;">{{ $user->email }}</td>
+                            <td class="d-none d-md-table-cell">
                                 <div class="d-flex flex-wrap gap-1">
                                     @forelse($user->roles as $role)
-                                        <span class="badge bg-primary text-white px-2 py-1">
+                                        <span class="badge bg-primary text-white px-2 py-1" style="font-size: 0.7rem;">
                                             {{ $role->display_name }}
                                         </span>
                                     @empty
-                                        <span class="badge bg-secondary text-white px-2 py-1">No Role</span>
+                                        <span class="badge bg-secondary text-white px-2 py-1" style="font-size: 0.7rem;">No
+                                            Role</span>
                                     @endforelse
                                 </div>
                             </td>
                             <td>
                                 @if ($user->status === 'active')
-                                    <span class="badge bg-success text-white px-2 py-1 text-uppercase">Active</span>
+                                    <span class="badge bg-success text-white px-2 py-1 text-uppercase"
+                                        style="font-size: 0.7rem;">Active</span>
                                 @else
-                                    <span class="badge bg-secondary text-white px-2 py-1 text-uppercase">Inactive</span>
+                                    <span class="badge bg-secondary text-white px-2 py-1 text-uppercase"
+                                        style="font-size: 0.7rem;">Inactive</span>
                                 @endif
                             </td>
-                            <td>{{ $user->userInfo?->gender ?? '—' }}</td>
-                            <td>{{ $user->userInfo?->birthday ? \Carbon\Carbon::parse($user->userInfo->birthday)->format('M d, Y') : '—' }}
+                            <td class="d-none d-lg-table-cell">{{ $user->userInfo?->gender ?? '—' }}</td>
+                            <td class="d-none d-lg-table-cell">
+                                {{ $user->userInfo?->birthday ? \Carbon\Carbon::parse($user->userInfo->birthday)->format('M d, Y') : '—' }}
                             </td>
                             <td class="text-end">
                                 <div class="btn-group btn-group-sm">
@@ -107,7 +111,7 @@
                                         data-bs-toggle="modal" data-bs-target="#archiveModal"
                                         data-action="{{ route('users.destroy', $user) }}"
                                         data-name="{{ $user->userInfo?->full_name ?? $user->email }}">
-                                        <i class="bi bi-archive"></i> Archive
+                                        <i class="bi bi-archive"></i>
                                     </button>
                                 </div>
                             </td>
@@ -128,7 +132,6 @@
 
     <div class="mt-3">{{ $users->links() }}</div>
 
-    {{-- Archive / Deactivate confirmation modal --}}
     <div class="modal fade" id="archiveModal" tabindex="-1" aria-labelledby="archiveModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <form method="POST" id="archiveForm" class="modal-content shadow"
@@ -148,7 +151,8 @@
                         them anytime.
                     </p>
                     <div class="d-flex justify-content-center gap-2">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-outline-secondary px-4"
+                            data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-danger px-4">
                             <i class="bi bi-archive me-1"></i> Yes, Archive
                         </button>

@@ -1,20 +1,20 @@
 @extends('layouts.quotation')
 
 @section('quotation_content')
-    {{-- Page Header & Actions --}}
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-stretch align-items-lg-center gap-3 mb-4">
         <div>
-            <h3 class="fw-bold  mb-1"><i class="bi bi-speedometer2 me-1"></i> Quotation Dashboard</h3>
+            <h3 class="fw-bold mb-1"><i class="bi bi-speedometer2 me-1"></i> Quotation Dashboard</h3>
             <p class="text-muted small mb-0">Overview of your business pipelines, quotations, and active statuses.</p>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex flex-column flex-sm-row align-items-center gap-2">
             @if (auth()->user()->isModuleAdmin('quotation'))
-                <a href="{{ route('quotations.index') }}" class="btn btn-outline-secondary btn-sm">
+                <a href="{{ route('quotations.index') }}"
+                    class="btn btn-outline-secondary btn-sm w-100 w-sm-auto text-nowrap">
                     <i class="bi bi-list-ul me-1"></i> All Quotations
                 </a>
             @endif
             @if (auth()->user()->hasPermission('quotations.add'))
-                <a href="{{ route('quotations.create') }}" class="btn btn-primary btn-sm">
+                <a href="{{ route('quotations.create') }}" class="btn btn-primary btn-sm w-100 w-sm-auto text-nowrap">
                     <i class="bi bi-plus-lg me-1"></i> New Quotation
                 </a>
             @endif
@@ -24,7 +24,7 @@
     {{-- Metrics Cards Row --}}
     <div class="row g-3 mb-4">
         {{-- Total Quotations --}}
-        <div class="col-md-3 col-sm-6">
+        <div class="col-md-3 col-sm-6 col-12">
             <div class="panel p-3 h-100 d-flex flex-column justify-content-between">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <span class="text-uppercase small text-muted fw-semibold" style="letter-spacing: .08em;">Total
@@ -38,7 +38,7 @@
         </div>
 
         {{-- Total Pipeline Value --}}
-        <div class="col-md-3 col-sm-6">
+        <div class="col-md-3 col-sm-6 col-12">
             <div class="panel p-3 h-100 d-flex flex-column justify-content-between">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <span class="text-uppercase small text-muted fw-semibold" style="letter-spacing: .08em;">Total
@@ -52,7 +52,7 @@
         </div>
 
         {{-- Approved Quotes --}}
-        <div class="col-md-3 col-sm-6">
+        <div class="col-md-3 col-sm-6 col-12">
             <div class="panel p-3 h-100 d-flex flex-column justify-content-between">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <span class="text-uppercase small text-muted fw-semibold" style="letter-spacing: .08em;">Approved</span>
@@ -65,7 +65,7 @@
         </div>
 
         {{-- Pending / In-Review --}}
-        <div class="col-md-3 col-sm-6">
+        <div class="col-md-3 col-sm-6 col-12">
             <div class="panel p-3 h-100 d-flex flex-column justify-content-between">
                 <div class="d-flex align-items-center justify-content-between mb-2">
                     <span class="text-uppercase small text-muted fw-semibold" style="letter-spacing: .08em;">Pending /
@@ -92,8 +92,8 @@
                     <tr>
                         <th>Quote No.</th>
                         <th>Client</th>
-                        <th>Project / Reference</th>
-                        <th>Date</th>
+                        <th class="d-none d-md-table-cell">Project / Reference</th>
+                        <th class="d-none d-md-table-cell">Date</th>
                         <th>Status</th>
                         <th class="text-end">Total</th>
                         <th class="text-center" style="width: 100px;">Actions</th>
@@ -104,13 +104,16 @@
                         <tr>
                             <td class="fw-semibold text-brand">{{ $quotation->quotation_number }}</td>
                             <td>
-                                <div class="fw-medium" style="color: var(--ink);">{{ $quotation->quoted_to }}</div>
+                                <div class="fw-medium text-truncate" style="max-width: 150px; color: var(--ink);">
+                                    {{ $quotation->quoted_to }}</div>
                                 @if ($quotation->client_company)
-                                    <div class="text-muted small">{{ $quotation->client_company }}</div>
+                                    <div class="text-muted small text-truncate" style="max-width: 150px;">
+                                        {{ $quotation->client_company }}</div>
                                 @endif
                             </td>
-                            <td class="text-muted">{{ $quotation->reference_project ?: '—' }}</td>
-                            <td class="text-muted small">{{ $quotation->quotation_date->format('M d, Y') }}</td>
+                            <td class="text-muted d-none d-md-table-cell">{{ $quotation->reference_project ?: '—' }}</td>
+                            <td class="text-muted small d-none d-md-table-cell">
+                                {{ $quotation->quotation_date->format('M d, Y') }}</td>
                             <td>
                                 @php
                                     $badgeColors = match (strtolower($quotation->status)) {

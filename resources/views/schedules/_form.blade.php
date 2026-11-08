@@ -43,7 +43,7 @@
             <div class="p-4">
                 <h6 class="fw-semibold mb-3">Status & Remarks</h6>
                 <div class="row g-3">
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <label for="status" class="form-label">Status</label>
                         <select id="status" name="status" class="form-select">
                             <option value="scheduled"
@@ -60,7 +60,7 @@
                             </option>
                         </select>
                     </div>
-                    <div class="col-md-8">
+                    <div class="col-12 col-md-8">
                         <label for="remarks" class="form-label">Remarks / Notes</label>
                         <input id="remarks" type="text" name="remarks"
                             value="{{ old('remarks', $schedule->remarks ?? '') }}" class="form-control"
@@ -83,78 +83,77 @@
         </div>
     @endif
 
-    {{-- Customer & Project Details --}}
     <div class="panel mb-4">
         <div class="p-4">
             <h6 class="fw-semibold mb-3">Customer & Project Details</h6>
             <div class="row g-3">
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <label for="scheduled_to" class="form-label">Client Name (To)</label>
                     <input id="scheduled_to" type="text" name="scheduled_to"
                         value="{{ old('scheduled_to', $schedule->scheduled_to ?? '') }}" class="form-control"
                         {{ $hasQuotation ? 'readonly' : '' }} required>
                 </div>
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <label for="client_company" class="form-label">Company Name <span
                             class="text-muted fw-normal">(optional)</span></label>
                     <input id="client_company" type="text" name="client_company"
                         value="{{ old('client_company', $schedule->client_company ?? '') }}" class="form-control"
                         {{ $hasQuotation ? 'readonly' : '' }}>
                 </div>
-                <div class="col-md-12">
+                <div class="col-12">
                     <label for="client_address" class="form-label">Address <span
                             class="text-muted fw-normal">(optional)</span></label>
                     <input id="client_address" type="text" name="client_address"
                         value="{{ old('client_address', $schedule->client_address ?? '') }}" class="form-control"
                         {{ $hasQuotation ? 'readonly' : '' }}>
                 </div>
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <label for="client_phone" class="form-label">Phone Number <span
                             class="text-muted fw-normal">(optional)</span></label>
                     <input id="client_phone" type="text" name="client_phone"
                         value="{{ old('client_phone', $schedule->client_phone ?? '') }}" class="form-control"
                         {{ $hasQuotation ? 'readonly' : '' }}>
                 </div>
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <label for="contact_email" class="form-label">Email Address <span
                             class="text-muted fw-normal">(optional)</span></label>
                     <input id="contact_email" type="email" name="contact_email"
                         value="{{ old('contact_email', $schedule->contact_email ?? '') }}" class="form-control"
                         {{ $hasQuotation ? 'readonly' : '' }}>
                 </div>
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <label for="attention" class="form-label">Contact Person (Attention)</label>
                     <input id="attention" type="text" name="attention"
                         value="{{ old('attention', $schedule->attention ?? '') }}" class="form-control"
                         {{ $hasQuotation ? 'readonly' : '' }}>
                 </div>
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <label for="prepared_by" class="form-label">Prepared By</label>
                     <input id="prepared_by" type="text" name="prepared_by"
                         value="{{ old('prepared_by', $schedule->prepared_by ?? '') }}" class="form-control"
                         {{ $hasQuotation ? 'readonly' : '' }}>
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <label for="schedule_date" class="form-label">Schedule Date & Time</label>
                     <input id="schedule_date" type="datetime-local" name="schedule_date"
                         value="{{ old('schedule_date', $isEdit && $schedule->schedule_date ? $schedule->schedule_date->format('Y-m-d\TH:i') : now()->format('Y-m-d\TH:i')) }}"
                         class="form-control" required>
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <label for="start_date" class="form-label">Start Date & Time <span
                             class="text-muted fw-normal">(optional)</span></label>
                     <input id="start_date" type="datetime-local" name="start_date"
                         value="{{ old('start_date', $isEdit && $schedule->start_date ? $schedule->start_date->format('Y-m-d\TH:i') : '') }}"
                         class="form-control">
                 </div>
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <label for="end_date" class="form-label">End Date & Time <span
                             class="text-muted fw-normal">(optional)</span></label>
                     <input id="end_date" type="datetime-local" name="end_date"
                         value="{{ old('end_date', $isEdit && $schedule->end_date ? $schedule->end_date->format('Y-m-d\TH:i') : '') }}"
                         class="form-control">
                 </div>
-                <div class="col-md-12">
+                <div class="col-12">
                     <label for="reference_project" class="form-label">Reference / Project</label>
                     <input id="reference_project" type="text" name="reference_project"
                         value="{{ old('reference_project', $schedule->reference_project ?? '') }}"
@@ -164,9 +163,9 @@
         </div>
     </div>
 
-    {{-- Scope of work & Items --}}
     <div class="panel mb-4">
-        <div class="p-4 pb-3 d-flex justify-content-between align-items-center">
+        <div
+            class="p-4 pb-3 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
             <div>
                 <h6 class="fw-semibold mb-1">Scope of Work & Services</h6>
                 <p class="text-muted small mb-0">Add services and hierarchical child sub-items.</p>
@@ -182,12 +181,12 @@
             <table class="table table-elegant align-middle" id="items-table">
                 <thead>
                     <tr>
-                        <th style="min-width: 320px;">Service / Item Description</th>
-                        <th style="width: 170px;">Unit Price ({{ $currency }})</th>
-                        <th style="width: 130px;">Quantity</th>
-                        <th style="width: 150px;" class="text-end">Total</th>
+                        <th style="min-width: 250px;">Service / Item Description</th>
+                        <th style="width: 150px;">Unit Price ({{ $currency }})</th>
+                        <th style="width: 110px;">Quantity</th>
+                        <th style="width: 130px;" class="text-end">Total</th>
                         @if (!$hasQuotation)
-                            <th style="width: 110px;" class="text-end">Actions</th>
+                            <th style="width: 100px;" class="text-end">Actions</th>
                         @endif
                     </tr>
                 </thead>
@@ -206,7 +205,6 @@
         </div>
     </div>
 
-    {{-- Rich Text Notes --}}
     <div class="panel mb-4">
         <div class="p-4">
             <h6 class="fw-semibold mb-2">Other Information / Notes</h6>
@@ -218,9 +216,9 @@
         </div>
     </div>
 
-    <div class="d-flex justify-content-end gap-2 mb-4">
-        <a href="{{ route('schedules.index') }}" class="btn btn-outline-secondary">Cancel</a>
-        <button type="submit" class="btn btn-brand">
+    <div class="d-flex flex-column-reverse flex-md-row justify-content-end gap-2 mb-4">
+        <a href="{{ route('schedules.index') }}" class="btn btn-outline-secondary w-100 w-md-auto">Cancel</a>
+        <button type="submit" class="btn btn-brand w-100 w-md-auto">
             <i class="bi bi-check2-circle me-1"></i> {{ $isEdit ? 'Update Schedule' : 'Save Schedule' }}
         </button>
     </div>

@@ -1,23 +1,25 @@
 @extends('layouts.quotation')
 
 @section('quotation_content')
-    <div class="d-flex justify-content-between align-items-center mb-4 d-print-none">
+    <div
+        class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2 mb-4 d-print-none">
         <a href="{{ route('quotations.index') }}" class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-arrow-left me-1"></i> Back to list
         </a>
-        <div class="d-flex align-items-center">
+        <div class="d-flex flex-column flex-md-row align-items-stretch align-items-md-center gap-2">
             @if (auth()->user()->hasPermission('quotations.update'))
-                <a href="{{ route('quotations.edit', $quotation->id) }}" class="btn btn-warning btn-sm me-2">
+                <a href="{{ route('quotations.edit', $quotation->id) }}" class="btn btn-warning btn-sm">
                     <i class="bi bi-pencil-square me-1"></i> Edit Quotation
                 </a>
-                <div class="btn-group">
+                <div class="d-flex gap-2">
                     @if (auth()->user()->hasPermission('quotations.generate.pdf'))
-                        <a href="{{ route('quotations.prepare', $quotation->id) }}" class="btn btn-sm btn-primary">
+                        <a href="{{ route('quotations.prepare', $quotation->id) }}" class="btn btn-sm btn-primary flex-fill">
                             <i class="bi bi-file-earmark-pdf me-1"></i> Prepare Quote
                         </a>
                     @endif
                     @if ($quotation->status === 'approved' && auth()->user()->hasPermission('schedules.add'))
-                        <a href="{{ route('schedules.from-quote', $quotation->id) }}" class="btn btn-sm btn-success">
+                        <a href="{{ route('schedules.from-quote', $quotation->id) }}"
+                            class="btn btn-sm btn-success flex-fill">
                             <i class="bi bi-calendar-check me-1"></i> Create Schedule
                         </a>
                     @endif
@@ -41,7 +43,7 @@
                         <div class="text-muted small">Phone: {{ config('company.phone') }}</div>
                     @endif
                 </div>
-                <div class="text-md-end">
+                <div class="text-start text-md-end">
                     <h2 class="mb-1">QUOTATION</h2>
                     <div class="fw-semibold text-brand">No: {{ $quotation->quotation_number }}</div>
                     <div class="text-muted small">Date: {{ $quotation->quotation_date->format('F d, Y') }}</div>
@@ -57,7 +59,7 @@
             <div class="card border mb-4 p-3 rounded-3"
                 style="background-color: var(--surface); border-color: var(--line) !important;">
                 <div class="row align-items-center g-3">
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-4">
                         <span class="text-uppercase small text-muted d-block mb-1"
                             style="letter-spacing: .08em;">Status</span>
                         @php
@@ -76,7 +78,7 @@
                             {{ ucfirst($quotation->status) }}
                         </span>
                     </div>
-                    <div class="col-md-8">
+                    <div class="col-12 col-md-8">
                         <span class="text-uppercase small text-muted d-block mb-1" style="letter-spacing: .08em;">Remarks /
                             Audit Info</span>
                         <div class="fw-medium mb-1" style="color: var(--ink);">
@@ -97,7 +99,7 @@
 
             {{-- Customer & Project Details Grid --}}
             <div class="row g-4 mb-5">
-                <div class="col-md-6">
+                <div class="col-12 col-md-6">
                     <div class="text-uppercase small text-muted mb-1" style="letter-spacing: .08em;">Quote To</div>
                     <div class="fw-semibold fs-5">{{ $quotation->quoted_to }}</div>
                     @if ($quotation->client_company)
@@ -115,7 +117,7 @@
                         </div>
                     @endif
                 </div>
-                <div class="col-md-6 text-md-end">
+                <div class="col-12 col-md-6 text-md-end">
                     @if ($quotation->reference_project)
                         <div class="mb-2">
                             <span class="text-uppercase small text-muted d-block" style="letter-spacing: .08em;">Reference /

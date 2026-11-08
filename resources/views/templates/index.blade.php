@@ -1,11 +1,44 @@
 @extends('layouts.templates')
 
 @section('template_content')
-    <div class="card shadow-sm border-0 rounded-4 p-4" style="background: var(--card); color: var(--ink);">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="card shadow-sm border-0 rounded-4 p-3 p-md-4 mb-5 mb-md-0"
+        style="background: var(--card); color: var(--ink);">
+        <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-3">
             <div>
-                <h3 class="fw-bold mb-0">Template Viewer Dashboard</h3>
-                <p class="text-muted small mb-0">Select a template from the left sidebar to preview it live.</p>
+                <h3 class="fw-bold mb-0 fs-4 fs-md-3">Template Viewer Dashboard</h3>
+                <p class="text-muted small mb-0">Select a template from the sidebar or dropdown to preview it live.</p>
+            </div>
+
+            {{-- Mobile Template Dropdown Selector --}}
+            <div class="w-100 d-md-none">
+                <label class="form-label small fw-semibold text-muted mb-1">Select Template to View:</label>
+                <select id="mobileTemplateSelect"
+                    class="form-select form-select-sm border-primary text-primary fw-bold bg-body"
+                    onchange="if(this.value) window.location.href=this.value;">
+                    <option value="">📁 Choose template...</option>
+                    @php
+                        $navGroupsMobile = $groupedTemplates ?? ($sidebarGroups ?? ($templates ?? []));
+                    @endphp
+                    @forelse ($navGroupsMobile as $category => $items)
+                        <optgroup label="{{ strtoupper($category) }}">
+                            @foreach ($items as $name => $viewPathOption)
+                                @php
+                                    $routeUrl = route('templates.index', [
+                                        'view' => $viewPathOption,
+                                        'type' => $category,
+                                    ]);
+                                @endphp
+                                <option value="{{ $routeUrl }}"
+                                    {{ request()->input('view') === $viewPathOption ? 'selected' : '' }}>
+                                    {{ Str::headline($name) }}
+                                </option>
+                            @endforeach
+                        </optgroup>
+                    @empty
+                        <option value="" disabled>No templates available</option>
+                    @endforelse
+                </select>
             </div>
         </div>
 
@@ -24,12 +57,12 @@
                     </div>
                 </div>
 
-                <div class="ratio ratio-16x9 w-100 h-100">
+                <div class="ratio ratio-16x9 w-100 h-100" style="min-height: 600px;">
                     @php
                         $route = $type === 'pdf' ? 'templates.stream.pdf' : 'templates.render';
                     @endphp
                     <iframe id="template-iframe" src="{{ route($route, ['view' => $viewPath]) }}"
-                        class="w-100 h-100 border-0 bg-white"></iframe>
+                        class="w-100 h-100 border-0 bg-white" style="pointer-events: none;"></iframe>
                 </div>
             </div>
         @else

@@ -97,6 +97,6 @@ class TemplateManagerController extends Controller
 
         $pdf->getDomPDF()->set_option('isPhpEnabled', true);
 
-        return $pdf->stream('template-preview.pdf');
+        return $pdf->stream('template-preview.pdf', ['Attachment' => false]);
     }
 }

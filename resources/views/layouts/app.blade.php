@@ -16,7 +16,7 @@
                 @endif
 
                 @if (config('company.show_name') || !config('company.logo'))
-                    <span>{{ config('company.app_name') }}</span>
+                    <span class="d-none d-md-inline">{{ config('company.app_name') }}</span>
                 @endif
             </a>
 
@@ -67,12 +67,13 @@
     </main>
 
     <!-- Back to Top Button -->
-    <button id="backToTopBtn" type="button" class="btn btn-primary rounded-circle shadow-lg" aria-label="Back to top">
+    <button id="backToTopBtn" type="button"
+        class="btn btn-primary rounded-circle shadow-lg d-none d-md-flex align-items-center justify-content-center"
+        aria-label="Back to top">
         <i class="bi bi-arrow-up fs-5"></i>
     </button>
 
     @stack('scripts')
-
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

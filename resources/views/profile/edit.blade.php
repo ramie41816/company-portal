@@ -1,19 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container py-4">
-        {{-- Fixed alignment: added d-flex justify-content-between align-items-center --}}
-        <div class="page-head mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div class="container py-4" style="max-width: 900px;">
+        {{-- Page Header --}}
+        <div
+            class="page-head mb-4 d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center gap-3">
             <div>
-                <h2 class="mb-1 fw-bold" style="color: var(--ink);">My Profile</h2>
-                <div class="text-muted">Manage your personal details and account security settings.</div>
+                <h2 class="mb-1 fw-bold fs-3" style="color: var(--ink);">Edit Profile</h2>
+                <div class="text-muted small">Update your personal information and security credentials.</div>
             </div>
-            <div class="btn-group">
-                <a href="{{ route('home') }}" class="btn btn-outline-primary px-4">
-                    <i class="bi bi-arrow-left me-1"></i> Back to Service List
-                </a>
-                <a href="{{ route('profile.show') }}" class="btn btn-outline-info px-4">
-                    <i class="bi bi-eye me-1"></i> Back to View
+            <div>
+                <a href="{{ route('profile.show') }}" class="btn btn-outline-secondary px-3 text-nowrap w-100 w-sm-auto">
+                    <i class="bi bi-eye me-1"></i> View Profile
                 </a>
             </div>
         </div>
@@ -21,8 +19,8 @@
         {{-- Update Profile Form Card --}}
         <div class="card border-0 shadow-sm mb-4"
             style="background: var(--card); color: var(--ink); border: 1px solid var(--line) !important; border-radius: 1rem;">
-            <div class="card-body p-4">
-                <h5 class="fw-semibold mb-3 pb-2 border-bottom"
+            <div class="card-body p-4 p-md-5">
+                <h5 class="fw-semibold mb-4 pb-2 border-bottom fs-5"
                     style="color: var(--ink); border-color: var(--line) !important;">
                     <i class="bi bi-person-badge me-2 text-primary"></i> Personal Information
                 </h5>
@@ -32,7 +30,7 @@
                     @method('PUT')
 
                     <div class="row g-3">
-                        <div class="col-md-3 col-sm-6">
+                        <div class="col-12 col-sm-6">
                             <label class="form-label small fw-semibold text-muted">First Name *</label>
                             <input type="text" name="first_name"
                                 value="{{ old('first_name', $user->userInfo?->first_name) }}"
@@ -42,13 +40,13 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-3 col-sm-6">
+                        <div class="col-12 col-sm-6">
                             <label class="form-label small fw-semibold text-muted">Middle Name</label>
                             <input type="text" name="middle_name"
                                 value="{{ old('middle_name', $user->userInfo?->middle_name) }}" class="form-control">
                         </div>
 
-                        <div class="col-md-3 col-sm-6">
+                        <div class="col-12 col-sm-6">
                             <label class="form-label small fw-semibold text-muted">Last Name *</label>
                             <input type="text" name="last_name"
                                 value="{{ old('last_name', $user->userInfo?->last_name) }}"
@@ -58,13 +56,13 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-3 col-sm-6">
+                        <div class="col-12 col-sm-6">
                             <label class="form-label small fw-semibold text-muted">Suffix</label>
                             <input type="text" name="suffix" value="{{ old('suffix', $user->userInfo?->suffix) }}"
                                 class="form-control" placeholder="Jr., III">
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-12 col-sm-6">
                             <label class="form-label small fw-semibold text-muted">Gender</label>
                             <select name="gender" class="form-select @error('gender') is-invalid @enderror">
                                 <option value="">Select Gender</option>
@@ -82,7 +80,7 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-6">
+                        <div class="col-12 col-sm-6">
                             <label class="form-label small fw-semibold text-muted">Birthday</label>
                             <input type="date" name="birthday" value="{{ old('birthday', $user->userInfo?->birthday) }}"
                                 class="form-control @error('birthday') is-invalid @enderror">
@@ -91,7 +89,7 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-12">
+                        <div class="col-12">
                             <label class="form-label small fw-semibold text-muted">Email Address *</label>
                             <input type="email" name="email" value="{{ old('email', $user->email) }}"
                                 class="form-control @error('email') is-invalid @enderror" required>
@@ -101,8 +99,8 @@
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-end mt-4">
-                        <button type="submit" class="btn btn-primary px-4">Save Changes</button>
+                    <div class="d-flex justify-content-end mt-4 pt-2">
+                        <button type="submit" class="btn btn-primary px-4 w-100 w-sm-auto">Save Changes</button>
                     </div>
                 </form>
             </div>
@@ -111,8 +109,8 @@
         {{-- Update Password Form Card --}}
         <div class="card border-0 shadow-sm mb-4"
             style="background: var(--card); color: var(--ink); border: 1px solid var(--line) !important; border-radius: 1rem;">
-            <div class="card-body p-4">
-                <h5 class="fw-semibold mb-3 pb-2 border-bottom"
+            <div class="card-body p-4 p-md-5">
+                <h5 class="fw-semibold mb-4 pb-2 border-bottom fs-5"
                     style="color: var(--ink); border-color: var(--line) !important;">
                     <i class="bi bi-shield-lock me-2 text-primary"></i> Change Password
                 </h5>
@@ -130,7 +128,7 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-12 col-sm-6">
                             <label class="form-label small fw-semibold text-muted">New Password *</label>
                             <input type="password" name="password"
                                 class="form-control @error('password') is-invalid @enderror" required>
@@ -138,14 +136,15 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-12 col-sm-6">
                             <label class="form-label small fw-semibold text-muted">Confirm New Password *</label>
                             <input type="password" name="password_confirmation" class="form-control" required>
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-end mt-4">
-                        <button type="submit" class="btn btn-warning text-dark px-4 fw-medium">Update Password</button>
+                    <div class="d-flex justify-content-end mt-4 pt-2">
+                        <button type="submit" class="btn btn-warning text-dark px-4 fw-medium w-100 w-sm-auto">Update
+                            Password</button>
                     </div>
                 </form>
             </div>

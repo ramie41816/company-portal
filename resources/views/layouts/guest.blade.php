@@ -23,17 +23,18 @@
     @endif
 </head>
 
-<body>
+<body class="bg-body" style="color: var(--ink);">
 
-    <button type="button" class="btn theme-toggle position-fixed top-0 end-0 m-3" style="z-index: 10;" data-theme-toggle
-        aria-label="Toggle dark mode">
+    {{-- Theme Toggle Button --}}
+    <button type="button" class="btn theme-toggle position-fixed top-0 end-0 m-3 shadow-sm" style="z-index: 10;"
+        data-theme-toggle aria-label="Toggle dark mode">
         <i data-theme-icon class="bi bi-moon-stars"></i>
     </button>
 
     <div class="container-fluid">
         <div class="row min-vh-100">
 
-            {{-- Brand panel (banner) --}}
+            {{-- Brand panel (banner) - Visible on large screens --}}
             <div
                 class="col-lg-6 auth-side d-none d-lg-flex p-5 {{ $loginBg ? 'has-bg align-items-end justify-content-start' : 'align-items-center justify-content-center' }}">
                 <div class="position-relative" style="max-width: 460px; z-index: 1;">
@@ -45,19 +46,22 @@
                     @endif
 
                     @if (config('company.show_name') || !config('company.logo'))
-                        <h1 class="display-5 mb-3">{{ config('company.name') }}</h1>
+                        <h1 class="display-5 mb-3 fw-bold text-white">{{ config('company.name') }}</h1>
                     @endif
 
                     <div class="auth-accent-line mb-3"></div>
-                    <p class="lead opacity-75 mb-0">{{ config('company.tagline') }}</p>
+                    <p class="lead opacity-75 mb-0 text-white-50">{{ config('company.tagline') }}</p>
                 </div>
             </div>
 
             {{-- Form panel --}}
-            <div class="col-lg-6 d-flex align-items-center justify-content-center p-4 auth-form-side">
+            <div class="col-lg-6 d-flex align-items-center justify-content-center p-3 p-md-4 auth-form-side">
                 <div class="w-100" style="max-width: 480px;">
+
+                    {{-- Session Success Alert --}}
                     @if (session('success'))
-                        <div class="alert alert-success alert-dismissible fade show small p-3 pe-5 mb-3" role="alert">
+                        <div class="alert alert-success alert-dismissible fade show small p-3 pe-5 mb-3 rounded-4 shadow-sm"
+                            role="alert">
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-check-circle-fill me-2 flex-shrink-0"></i>
                                 <span>{{ session('success') }}</span>
@@ -66,8 +70,11 @@
                                 aria-label="Close"></button>
                         </div>
                     @endif
+
+                    {{-- Session Error Alert --}}
                     @if (session('error'))
-                        <div class="alert alert-danger alert-dismissible fade show small p-3 pe-5 mb-3" role="alert">
+                        <div class="alert alert-danger alert-dismissible fade show small p-3 pe-5 mb-3 rounded-4 shadow-sm"
+                            role="alert">
                             <div class="d-flex align-items-center">
                                 <i class="bi bi-exclamation-triangle-fill me-2 flex-shrink-0"></i>
                                 <span>{{ session('error') }}</span>
@@ -76,21 +83,27 @@
                                 aria-label="Close"></button>
                         </div>
                     @endif
-                    <div class="d-lg-none text-center mb-4">
+
+                    {{-- Mobile Branding Header --}}
+                    <div class="d-lg-none text-center mb-4 pt-3">
                         @if (config('company.logo'))
                             <img src="{{ asset(config('company.logo')) }}" alt="{{ config('company.name') }}"
-                                height="56" class="brand-logo mx-auto mb-2">
+                                height="80" class="brand-logo mx-auto mb-2 shadow-sm rounded-3 p-2 bg-white">
                         @endif
 
                         @if (config('company.show_name') || !config('company.logo'))
-                            <h3 class="text-brand mb-0">{{ config('company.name') }}</h3>
+                            <h3 class="fw-bold mb-1" style="color: var(--ink);">{{ config('company.name') }}</h3>
                         @endif
+                        <p class="text-muted small mb-0">{{ config('company.tagline') }}</p>
                     </div>
 
-                    <div class="card border shadow-sm rounded-4 p-4 p-md-5 bg-body">
+                    {{-- Main Login Form Card with Portal CSS Variables --}}
+                    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5"
+                        style="background: var(--card); color: var(--ink); border: 1px solid var(--line) !important;">
                         @yield('content')
                     </div>
 
+                    {{-- Footer Copyright --}}
                     <p class="text-center text-muted small mt-4 mb-0">
                         &copy; {{ date('Y') }} {{ config('company.name') }}
                     </p>

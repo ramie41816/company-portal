@@ -58,12 +58,6 @@
         object-fit: contain;
     }
 
-    [data-bs-theme="dark"] .brand-logo {
-        background: #ffffff;
-        padding: .25rem .5rem;
-        border-radius: .5rem;
-    }
-
     .hero {
         background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('{{ config('company.login_bg') }}') !important;
         background-position: center !important;

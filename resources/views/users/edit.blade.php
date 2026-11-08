@@ -6,7 +6,6 @@
         <div class="text-muted">Update account details, role access, and status configuration.</div>
     </div>
 
-    {{-- Separate Security / Password Reset Card --}}
     <div class="card border-0 shadow-sm mb-4"
         style="background: var(--card); border: 1px solid var(--line); border-radius: 1rem;">
         <div class="card-body p-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
@@ -18,10 +17,11 @@
                     user.</p>
             </div>
 
-            <form action="{{ route('users.reset-password', $user) }}" method="POST" id="resetPasswordForm">
+            <form action="{{ route('users.reset-password', $user) }}" method="POST" id="resetPasswordForm"
+                class="w-100 w-md-auto">
                 @csrf
                 @method('PUT')
-                <button type="submit" class="btn btn-warning fw-medium px-4 text-nowrap shadow-sm">
+                <button type="submit" class="btn btn-warning fw-medium px-4 text-nowrap shadow-sm w-100">
                     <i class="bi bi-key me-1"></i> Send Temporary Password
                 </button>
             </form>
@@ -32,7 +32,6 @@
         @csrf
         @method('PUT')
 
-        {{-- Personal Information Panel --}}
         <div class="card border-0 shadow-sm mb-4"
             style="background: var(--card); border: 1px solid var(--line); border-radius: 1rem;">
             <div class="card-body p-4">
@@ -42,7 +41,7 @@
                 </h5>
 
                 <div class="row g-3">
-                    <div class="col-md-3 col-sm-6">
+                    <div class="col-12 col-md-3 col-sm-6">
                         <label class="form-label small fw-semibold text-muted">First Name *</label>
                         <input type="text" name="first_name"
                             value="{{ old('first_name', $user->userInfo?->first_name) }}"
@@ -52,13 +51,13 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-3 col-sm-6">
+                    <div class="col-12 col-md-3 col-sm-6">
                         <label class="form-label small fw-semibold text-muted">Middle Name</label>
                         <input type="text" name="middle_name"
                             value="{{ old('middle_name', $user->userInfo?->middle_name) }}" class="form-control">
                     </div>
 
-                    <div class="col-md-3 col-sm-6">
+                    <div class="col-12 col-md-3 col-sm-6">
                         <label class="form-label small fw-semibold text-muted">Last Name *</label>
                         <input type="text" name="last_name" value="{{ old('last_name', $user->userInfo?->last_name) }}"
                             class="form-control @error('last_name') is-invalid @enderror" required>
@@ -67,13 +66,13 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-3 col-sm-6">
+                    <div class="col-12 col-md-3 col-sm-6">
                         <label class="form-label small fw-semibold text-muted">Suffix</label>
                         <input type="text" name="suffix" value="{{ old('suffix', $user->userInfo?->suffix) }}"
                             class="form-control" placeholder="Jr., III">
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label small fw-semibold text-muted">Gender</label>
                         <select name="gender" class="form-select @error('gender') is-invalid @enderror">
                             <option value="">Select Gender</option>
@@ -89,7 +88,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label small fw-semibold text-muted">Birthday</label>
                         <input type="date" name="birthday" value="{{ old('birthday', $user->userInfo?->birthday) }}"
                             class="form-control @error('birthday') is-invalid @enderror">
@@ -101,7 +100,6 @@
             </div>
         </div>
 
-        {{-- Account Credentials & Access Panel --}}
         <div class="card border-0 shadow-sm mb-4"
             style="background: var(--card); border: 1px solid var(--line); border-radius: 1rem;">
             <div class="card-body p-4">
@@ -111,7 +109,7 @@
                 </h5>
 
                 <div class="row g-3">
-                    <div class="col-md-12">
+                    <div class="col-12">
                         <label class="form-label small fw-semibold text-muted">Email Address *</label>
                         <input type="email" name="email" value="{{ old('email', $user->email) }}"
                             class="form-control @error('email') is-invalid @enderror" required>
@@ -120,7 +118,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label small fw-semibold text-muted">User Role *</label>
                         <select name="role_id" class="form-select @error('role_id') is-invalid @enderror" required>
                             <option value="">Select Role</option>
@@ -136,7 +134,7 @@
                         @enderror
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-12 col-md-6">
                         <label class="form-label small fw-semibold text-muted">Account Status *</label>
                         <select name="status" class="form-select @error('status') is-invalid @enderror" required>
                             <option value="active" {{ old('status', $user->status) == 'active' ? 'selected' : '' }}>Active
@@ -152,10 +150,9 @@
             </div>
         </div>
 
-        {{-- Form Actions --}}
-        <div class="d-flex justify-content-end gap-2 mb-4">
-            <a href="{{ route('users.index') }}" class="btn btn-outline-secondary px-4">Cancel</a>
-            <button type="submit" class="btn btn-primary px-4">
+        <div class="d-flex flex-column-reverse flex-md-row justify-content-end gap-2 mb-4">
+            <a href="{{ route('users.index') }}" class="btn btn-outline-secondary px-4 w-100 w-md-auto">Cancel</a>
+            <button type="submit" class="btn btn-primary px-4 w-100 w-md-auto">
                 <i class="bi bi-check2-circle me-1"></i> Update User
             </button>
         </div>
