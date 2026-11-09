@@ -16,13 +16,15 @@ import { Calendar } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import listPlugin from '@fullcalendar/list';
 
 // Make FullCalendar globally available
 window.FullCalendar = {
     Calendar,
     dayGridPlugin,
     timeGridPlugin,
-    interactionPlugin
+    interactionPlugin,
+    listPlugin
 };
 
 // Function to update theme toggle icons based on current mode
