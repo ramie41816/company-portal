@@ -61,8 +61,10 @@
                     @php
                         $route = $type === 'pdf' ? 'templates.stream.pdf' : 'templates.render';
                     @endphp
+
                     <iframe id="template-iframe" src="{{ route($route, ['view' => $viewPath]) }}"
-                        class="w-100 h-100 border-0 bg-white" style="pointer-events: none;"></iframe>
+                        class="w-100 h-100 border-0 bg-white {{ $type === 'pdf' ? '' : 'pe-none' }}">
+                    </iframe>
                 </div>
             </div>
         @else

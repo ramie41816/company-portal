@@ -2,6 +2,7 @@
     $isEdit = isset($schedule) && $schedule->exists;
     $currency = config('company.currency_symbol');
     $hasQuotation = isset($schedule->quotation_id) && !empty($schedule->quotation_id);
+    $currentStatus = strtolower(old('status', $schedule->status ?? 'scheduled'));
 
     if (!isset($savedItems)) {
         $savedItems = (isset($schedule) && $schedule->relationLoaded('items') ? $schedule->items : collect())
@@ -206,6 +207,81 @@
     </div>
 
     <div class="panel mb-4">
+        <div
+            class="p-4 pb-3 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+            <div>
+                <h6 class="fw-semibold mb-1">Assigned Staff & Payment Monitoring</h6>
+                <p class="text-muted small mb-0">Staff payment amounts and paid statuses can only be edited when status
+                    is Ongoing or Completed.</p>
+            </div>
+            <button type="button" id="add-personnel-row" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-plus-lg me-1"></i> Add Staff
+            </button>
+        </div>
+
+        <div class="table-responsive px-4 pb-4">
+            <table class="table table-elegant align-middle" id="personnel-table">
+                <thead>
+                    <tr>
+                        <th style="min-width: 180px;">Staff Name</th>
+                        <th style="width: 150px;">Role / Assignment</th>
+                        <th>Notes / Remarks</th>
+                        <th style="width: 130px;" class="text-end">Payment ({{ $currency }})</th>
+                        <th style="width: 90px;" class="text-center">Paid Status</th>
+                        <th style="width: 80px;" class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end fw-semibold pt-3">Total Staff Payout</td>
+                        <td class="text-end fw-bold fs-5 text-brand pt-3" id="personnel-grand-total">
+                            {{ $currency }}0.00</td>
+                        <td colspan="2"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    @if (!$isEdit || in_array($currentStatus, ['ongoing', 'completed']))
+        <div class="panel mb-4">
+            <div
+                class="p-4 pb-3 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
+                <div>
+                    <h6 class="fw-semibold mb-1">Operational Expenses (Fuel, Tolls, Supplies, Etc.)</h6>
+                    <p class="text-muted small mb-0">Record travel and on-site expenses incurred during execution.</p>
+                </div>
+                <button type="button" id="add-expense-row" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-plus-lg me-1"></i> Add Expense
+                </button>
+            </div>
+
+            <div class="table-responsive px-4 pb-4">
+                <table class="table table-elegant align-middle" id="expenses-table">
+                    <thead>
+                        <tr>
+                            <th style="min-width: 200px;">Expense Type</th>
+                            <th>Notes / Description</th>
+                            <th style="width: 150px;" class="text-end">Amount ({{ $currency }})</th>
+                            <th style="width: 80px;" class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="2" class="text-end fw-semibold pt-3">Total Operational Expenses</td>
+                            <td class="text-end fw-bold fs-5 text-brand pt-3" id="expenses-grand-total">
+                                {{ $currency }}0.00</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    @endif
+
+    <div class="panel mb-4">
         <div class="p-4">
             <h6 class="fw-semibold mb-2">Other Information / Notes</h6>
             <div id="editor-container" style="height: 180px;">
@@ -263,6 +339,49 @@
         const tbody = document.querySelector('#items-table tbody');
         let globalIndex = 0;
 
+        const statusSelect = document.getElementById('status');
+
+        function canEditPaymentAndStatus() {
+            const currentStatus = statusSelect ? statusSelect.value : 'scheduled';
+            return currentStatus === 'ongoing' || currentStatus === 'completed';
+        }
+
+        function updatePaymentAndStatusState() {
+            const enabled = canEditPaymentAndStatus();
+            document.querySelectorAll('#personnel-table .personnel-payment, #personnel-table .form-check-input')
+                .forEach(el => {
+                    el.disabled = !enabled;
+                    if (!enabled) {
+                        el.title =
+                            "Payment and paid status can only be modified when status is Ongoing or Completed.";
+                        if (el.classList.contains('personnel-payment') && (el.value === '' || el.value ===
+                                null)) {
+                            el.value = '0';
+                        }
+                    } else {
+                        el.removeAttribute('title');
+                    }
+                });
+        }
+
+        if (statusSelect) {
+            statusSelect.addEventListener('change', () => {
+                updatePaymentAndStatusState();
+                // If switching back to a locked state, reset any empty payment inputs to 0
+                if (!canEditPaymentAndStatus()) {
+                    document.querySelectorAll('#personnel-table .personnel-payment').forEach(input => {
+                        if (input.value === '' || isNaN(input.value)) {
+                            input.value = '0';
+                        }
+                    });
+                    document.querySelectorAll('#personnel-table .form-check-input').forEach(chk => {
+                        chk.checked = false;
+                    });
+                    recalcPersonnel();
+                }
+            });
+        }
+
         document.getElementById('scheduleForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -272,6 +391,28 @@
                 hiddenInput.value = (htmlContent === '<p><br></p>' || htmlContent.trim() === '') ? '' :
                     htmlContent;
             }
+
+            // Fallback: If status is not ongoing/completed, ensure payment defaults to 0 and is_paid is 0 so validation passes seamlessly
+            const enabled = canEditPaymentAndStatus();
+            document.querySelectorAll('#personnel-table tr').forEach(tr => {
+                const paymentInput = tr.querySelector('.personnel-payment');
+                const checkbox = tr.querySelector('.form-check-input');
+                if (!enabled) {
+                    if (paymentInput) {
+                        paymentInput.disabled = false;
+                        if (paymentInput.value === '' || isNaN(paymentInput.value)) {
+                            paymentInput.value = '0';
+                        }
+                    }
+                    if (checkbox) {
+                        checkbox.disabled = false;
+                        checkbox.checked = false;
+                    }
+                } else {
+                    if (paymentInput) paymentInput.disabled = false;
+                    if (checkbox) checkbox.disabled = false;
+                }
+            });
 
             const isEdit = @json($isEdit);
             const actionText = isEdit ? 'update this schedule' : 'save this new schedule';
@@ -304,6 +445,8 @@
                         }
                     });
                     e.target.submit();
+                } else {
+                    updatePaymentAndStatusState();
                 }
             });
         });
@@ -421,6 +564,166 @@
             });
         } else {
             renderRow();
+        }
+
+        const savedPersonnel = @json(old('personnel', isset($schedule) && $schedule->relationLoaded('personnel') ? $schedule->personnel : []));
+        const personnelTableBody = document.querySelector('#personnel-table tbody');
+        let personnelGlobalIndex = 0;
+
+        function formatPersonnelMoney(amount) {
+            return currency + amount.toLocaleString('en-PH', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function renderPersonnelRow(person = {}) {
+            const i = personnelGlobalIndex++;
+            const tr = document.createElement('tr');
+            tr.dataset.index = i;
+
+            const safeName = (person.name ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            const safeRole = (person.role_in_schedule ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            const safeNotes = (person.notes ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+            const editable = canEditPaymentAndStatus();
+            let paymentVal = person.payment ?? '';
+            if (!editable && (paymentVal === '' || paymentVal === null)) {
+                paymentVal = 0;
+            }
+
+            const isPaidChecked = (editable && person.is_paid) ? 'checked' : '';
+            const isPaymentDisabled = !editable ? 'disabled' : '';
+
+            tr.innerHTML = `
+                <td class="p-2">
+                    <input type="text" name="personnel[${i}][name]" class="form-control form-control-sm" placeholder="Staff Name..." value="${safeName}" required>
+                </td>
+                <td class="p-2">
+                    <input type="text" name="personnel[${i}][role_in_schedule]" class="form-control form-control-sm" placeholder="e.g. Lead Tech" value="${safeRole}">
+                </td>
+                <td class="p-2">
+                    <input type="text" name="personnel[${i}][notes]" class="form-control form-control-sm" placeholder="Optional notes..." value="${safeNotes}">
+                </td>
+                <td class="p-2 align-middle">
+                    <input type="number" step="0.01" min="0" name="personnel[${i}][payment]" class="form-control form-control-sm personnel-payment" value="${paymentVal}" ${isPaymentDisabled} required>
+                </td>
+                <td class="p-2 text-center align-middle">
+                    <div class="form-check form-switch d-inline-block">
+                        <input type="hidden" name="personnel[${i}][is_paid]" value="0">
+                        <input class="form-check-input" type="checkbox" role="switch" name="personnel[${i}][is_paid]" value="1" ${isPaidChecked} ${isPaymentDisabled}>
+                    </div>
+                </td>
+                <td class="p-2 text-end align-middle">
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-personnel" title="Remove"><i class="bi bi-x-lg"></i></button>
+                </td>
+            `;
+
+            personnelTableBody.appendChild(tr);
+            recalcPersonnel();
+            updatePaymentAndStatusState();
+        }
+
+        function recalcPersonnel() {
+            let grand = 0;
+            personnelTableBody.querySelectorAll('tr').forEach(tr => {
+                const payment = parseFloat(tr.querySelector('.personnel-payment').value) || 0;
+                grand += payment;
+            });
+            document.getElementById('personnel-grand-total').textContent = formatPersonnelMoney(grand);
+        }
+
+        personnelTableBody.addEventListener('input', recalcPersonnel);
+
+        personnelTableBody.addEventListener('click', e => {
+            if (e.target.closest('.remove-personnel')) {
+                e.target.closest('tr').remove();
+                recalcPersonnel();
+            }
+        });
+
+        const addPersonnelBtn = document.getElementById('add-personnel-row');
+        if (addPersonnelBtn) {
+            addPersonnelBtn.addEventListener('click', () => renderPersonnelRow({
+                payment: canEditPaymentAndStatus() ? '' : 0,
+                is_paid: 0
+            }));
+        }
+
+        if (savedPersonnel.length > 0) {
+            savedPersonnel.forEach(person => {
+                renderPersonnelRow(person);
+            });
+        }
+
+        const expensesTableBody = document.querySelector('#expenses-table tbody');
+        if (expensesTableBody) {
+            const savedExpenses = @json(old('expenses', isset($schedule) && $schedule->relationLoaded('expenses') ? $schedule->expenses : []));
+            let expenseGlobalIndex = 0;
+
+            function formatExpenseMoney(amount) {
+                return currency + amount.toLocaleString('en-PH', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
+            function renderExpenseRow(exp = {}) {
+                const i = expenseGlobalIndex++;
+                const tr = document.createElement('tr');
+                tr.dataset.index = i;
+
+                const safeType = (exp.expense_type ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                const safeNotes = (exp.notes ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                const amountVal = exp.amount ?? '';
+
+                tr.innerHTML = `
+                    <td class="p-2">
+                        <input type="text" name="expenses[${i}][expense_type]" class="form-control form-control-sm" placeholder="e.g. Fuel, Tolls" value="${safeType}" required>
+                    </td>
+                    <td class="p-2">
+                        <input type="text" name="expenses[${i}][notes]" class="form-control form-control-sm" placeholder="Optional notes/receipt ref..." value="${safeNotes}">
+                    </td>
+                    <td class="p-2 align-middle">
+                        <input type="number" step="0.01" min="0" name="expenses[${i}][amount]" class="form-control form-control-sm expense-amount" value="${amountVal}" required>
+                    </td>
+                    <td class="p-2 text-end align-middle">
+                        <button type="button" class="btn btn-sm btn-outline-danger remove-expense" title="Remove"><i class="bi bi-x-lg"></i></button>
+                    </td>
+                `;
+
+                expensesTableBody.appendChild(tr);
+                recalcExpenses();
+            }
+
+            function recalcExpenses() {
+                let grand = 0;
+                expensesTableBody.querySelectorAll('tr').forEach(tr => {
+                    const amount = parseFloat(tr.querySelector('.expense-amount').value) || 0;
+                    grand += amount;
+                });
+                document.getElementById('expenses-grand-total').textContent = formatExpenseMoney(grand);
+            }
+
+            expensesTableBody.addEventListener('input', recalcExpenses);
+
+            expensesTableBody.addEventListener('click', e => {
+                if (e.target.closest('.remove-expense')) {
+                    e.target.closest('tr').remove();
+                    recalcExpenses();
+                }
+            });
+
+            const addExpenseBtn = document.getElementById('add-expense-row');
+            if (addExpenseBtn) {
+                addExpenseBtn.addEventListener('click', () => renderExpenseRow());
+            }
+
+            if (savedExpenses.length > 0) {
+                savedExpenses.forEach(exp => {
+                    renderExpenseRow(exp);
+                });
+            }
         }
     });
 </script>

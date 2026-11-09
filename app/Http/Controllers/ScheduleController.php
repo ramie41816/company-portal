@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Schedule;
 use App\Models\ScheduleItem;
+use App\Models\SchedulePersonnel;
+use App\Models\ScheduleExpense;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Quotation;
 use Illuminate\Http\Request;
@@ -159,6 +161,16 @@ class ScheduleController extends Controller
             'items.*.unit_price'  => 'required|numeric|min:0',
             'items.*.quantity'    => 'required|numeric|min:0.01',
             'items.*.is_sub'      => 'nullable|boolean',
+            'personnel'             => 'nullable|array',
+            'personnel.*.name'      => 'required|string|max:255',
+            'personnel.*.payment'   => 'required|numeric|min:0',
+            'personnel.*.is_paid'   => 'nullable|boolean',
+            'personnel.*.role_in_schedule' => 'nullable|string|max:255',
+            'personnel.*.notes'     => 'nullable|string',
+            'expenses'              => 'nullable|array',
+            'expenses.*.expense_type' => 'required|string|max:255',
+            'expenses.*.amount'     => 'required|numeric|min:0',
+            'expenses.*.notes'      => 'nullable|string',
         ]);
 
         $validated['schedule_number'] = 'SCH-' . strtoupper(uniqid());
@@ -192,6 +204,30 @@ class ScheduleController extends Controller
 
         $schedule->update(['total' => $grandTotal]);
 
+        if ($request->has('personnel')) {
+            foreach ($request->personnel as $personnelData) {
+                SchedulePersonnel::create([
+                    'schedule_id'      => $schedule->id,
+                    'name'             => $personnelData['name'],
+                    'payment'          => (float) $personnelData['payment'],
+                    'is_paid'          => isset($personnelData['is_paid']) && $personnelData['is_paid'] == '1',
+                    'role_in_schedule' => $personnelData['role_in_schedule'] ?? null,
+                    'notes'            => $personnelData['notes'] ?? null,
+                ]);
+            }
+        }
+
+        if ($request->has('expenses')) {
+            foreach ($request->expenses as $expenseData) {
+                ScheduleExpense::create([
+                    'schedule_id'  => $schedule->id,
+                    'expense_type' => $expenseData['expense_type'],
+                    'amount'       => (float) $expenseData['amount'],
+                    'notes'        => $expenseData['notes'] ?? null,
+                ]);
+            }
+        }
+
         return redirect()->route('schedules.show', $schedule)
             ->with('success', 'Schedule successfully created.');
     }
@@ -202,7 +238,7 @@ class ScheduleController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $schedule->load('items.subItems', 'quotation');
+        $schedule->load('items.subItems', 'quotation', 'personnel.user', 'expenses');
         return view('schedules.show', compact('schedule'));
     }
 
@@ -212,7 +248,7 @@ class ScheduleController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $schedule->load('items');
+        $schedule->load('items', 'personnel', 'expenses');
         return view('schedules.edit', [
             'schedule' => $schedule,
             'action' => route('schedules.update', $schedule)
@@ -245,6 +281,16 @@ class ScheduleController extends Controller
             'items.*.unit_price'  => 'required|numeric|min:0',
             'items.*.quantity'    => 'required|numeric|min:0.01',
             'items.*.is_sub'      => 'nullable|boolean',
+            'personnel'             => 'nullable|array',
+            'personnel.*.name'      => 'required|string|max:255',
+            'personnel.*.payment'   => 'required|numeric|min:0',
+            'personnel.*.is_paid'   => 'nullable|boolean',
+            'personnel.*.role_in_schedule' => 'nullable|string|max:255',
+            'personnel.*.notes'     => 'nullable|string',
+            'expenses'              => 'nullable|array',
+            'expenses.*.expense_type' => 'required|string|max:255',
+            'expenses.*.amount'     => 'required|numeric|min:0',
+            'expenses.*.notes'      => 'nullable|string',
         ]);
 
         if ($schedule->quotation_id) {
@@ -282,6 +328,34 @@ class ScheduleController extends Controller
         }
 
         $schedule->update(['total' => $grandTotal]);
+
+        $schedule->personnel()->delete();
+
+        if ($request->has('personnel')) {
+            foreach ($request->personnel as $personnelData) {
+                SchedulePersonnel::create([
+                    'schedule_id'      => $schedule->id,
+                    'name'             => $personnelData['name'],
+                    'payment'          => (float) $personnelData['payment'],
+                    'is_paid'          => isset($personnelData['is_paid']) && $personnelData['is_paid'] == '1',
+                    'role_in_schedule' => $personnelData['role_in_schedule'] ?? null,
+                    'notes'            => $personnelData['notes'] ?? null,
+                ]);
+            }
+        }
+
+        $schedule->expenses()->delete();
+
+        if ($request->has('expenses')) {
+            foreach ($request->expenses as $expenseData) {
+                ScheduleExpense::create([
+                    'schedule_id'  => $schedule->id,
+                    'expense_type' => $expenseData['expense_type'],
+                    'amount'       => (float) $expenseData['amount'],
+                    'notes'        => $expenseData['notes'] ?? null,
+                ]);
+            }
+        }
 
         return redirect()->route('schedules.show', $schedule)
             ->with('success', 'Schedule successfully updated.');
@@ -335,6 +409,8 @@ class ScheduleController extends Controller
         }
 
         $schedule->items()->delete();
+        $schedule->personnel()->delete();
+        $schedule->expenses()->delete();
         $schedule->forceDelete();
         return redirect()->route('schedules.archives')->with('success', 'Schedule permanently deleted.');
     }
@@ -465,5 +541,60 @@ class ScheduleController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Failed to send email: ' . $e->getMessage());
         }
+    }
+
+    public function prepareReport(Schedule $schedule)
+    {
+        if (!auth()->user()->isModuleAdmin('schedule') && $schedule->created_by != auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $schedule->load(['items' => function ($query) {
+            $query->orderBy('parent_id')->orderBy('id');
+        }, 'personnel', 'expenses', 'quotation']);
+
+        return view('schedules.prepare-report', compact('schedule'));
+    }
+
+    public function generateReportPdf(Request $request, Schedule $schedule)
+    {
+        if (!auth()->user()->isModuleAdmin('schedule') && $schedule->created_by != auth()->id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validator = \Validator::make($request->all(), [
+            'executed_by' => ['nullable', 'string', 'max:255'],
+            'signature_file' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+        ]);
+
+        if ($validator->fails()) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            return back()->withErrors($validator)->withInput();
+        }
+
+        $schedule->load(['items', 'personnel', 'expenses', 'quotation']);
+
+        $executedBy = trim($request->input('executed_by')) ?: ($schedule->prepared_by ?? config('company.name'));
+
+        $signatureDataUri = null;
+        if ($request->hasFile('signature_file')) {
+            $file = $request->file('signature_file');
+            $signatureDataUri = 'data:' . $file->getMimeType() . ';base64,' . base64_encode(file_get_contents($file->getRealPath()));
+        }
+
+        $pdf = Pdf::loadView('templates.pdf.schedule-report-template', compact(
+            'schedule',
+            'executedBy',
+            'signatureDataUri'
+        ));
+
+        $pdf->getDomPDF()->set_option('isPhpEnabled', true);
+
+        return $pdf->stream('Schedule-Report-' . $schedule->schedule_number . '.pdf');
     }
 }

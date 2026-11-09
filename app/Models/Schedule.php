@@ -73,4 +73,14 @@ class Schedule extends Model
     {
         return $this->hasMany(ScheduleItem::class);
     }
+
+    public function personnel(): HasMany
+    {
+        return $this->hasMany(SchedulePersonnel::class);
+    }
+
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(ScheduleExpense::class);
+    }
 }

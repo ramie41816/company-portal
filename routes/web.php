@@ -112,12 +112,19 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{schedule}', [ScheduleController::class, 'destroy'])->name('destroy');
             Route::patch('/{id}/restore', [ScheduleController::class, 'restore'])->name('restore');
             Route::get('/{schedule}/prepare/coc', [ScheduleController::class, 'prepareCoc'])->name('coc');
+            Route::get('/{schedule}/prepare/report', [ScheduleController::class, 'prepareReport'])->name('report.prepare');
         });
 
-        // Generate PDF
+        // Generate CoC PDF
         Route::middleware('permission:schedules.coc.generate.pdf')->group(function () {
             Route::post('/{schedule}/coc/pdf', [ScheduleController::class, 'generateCocPdf'])->name('coc-generate.pdf');
         });
+
+        /// Generate Report PDF
+        Route::middleware('permission:schedules.report.generate.pdf')->group(function () {
+            Route::post('/{schedule}/report/pdf', [ScheduleController::class, 'generateReportPdf'])->name('report-generate.pdf');
+        });
+
         // Sending of Email
         Route::middleware('permission:schedules.coc.send.email')->group(function () {
             Route::post('/{schedule}/coc/email', [ScheduleController::class, 'sendCocEmail'])->name('coc-email');
