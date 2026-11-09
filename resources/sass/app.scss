@@ -421,6 +421,81 @@ h3,
     border-radius: 10px;
 }
 
+/* FullCalendar List View Dark & Light Mode Adaptability */
+
+/* Light mode defaults */
+.fc-theme-standard .fc-list {
+    border-color: var(--line, #dee2e6);
+    background-color: var(--card, #ffffff);
+}
+
+.fc .fc-list-day-cals,
+.fc .fc-list-day-top {
+    background-color: var(--card-muted, #f8f9fa) !important;
+    color: var(--ink, #212529) !important;
+}
+
+.fc .fc-list-table th,
+.fc .fc-list-table td {
+    border-color: var(--line, #dee2e6) !important;
+}
+
+.fc .fc-list-event:hover td {
+    background-color: rgba(var(--bs-primary-rgb, 13, 110, 253), 0.075) !important;
+}
+
+.fc .fc-list-event-title a {
+    color: var(--ink, #212529);
+    text-decoration: none;
+}
+
+/* Dark mode overrides (automatically hooks into your app's dark mode selectors, e.g., [data-bs-theme="dark"] or body.dark) */
+[data-bs-theme="dark"] .fc-theme-standard .fc-list,
+body.dark .fc-theme-standard .fc-list {
+    background-color: var(--card, #1a1d20);
+    border-color: var(--line, #2c3034);
+}
+
+[data-bs-theme="dark"] .fc .fc-list-day-top,
+body.dark .fc .fc-list-day-top {
+    background-color: var(--card-muted, #212529) !important;
+    color: var(--ink, #f8f9fa) !important;
+}
+
+[data-bs-theme="dark"] .fc .fc-list-table th,
+[data-bs-theme="dark"] .fc .fc-list-table td,
+body.dark .fc .fc-list-table th,
+body.dark .fc .fc-list-table td {
+    border-color: var(--line, #2c3034) !important;
+    color: var(--ink, #f8f9fa);
+}
+
+[data-bs-theme="dark"] .fc .fc-list-event-title a,
+body.dark .fc .fc-list-event-title a {
+    color: var(--ink, #f8f9fa);
+}
+
+[data-bs-theme="dark"] .fc .fc-list-event:hover td,
+body.dark .fc .fc-list-event:hover td {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ---------- Mobile screens ---------- */
+@media (max-width: 768px) {
+    #scheduleCalendar {
+        font-size: 0.85rem;
+    }
+
+    .fc .fc-toolbar-title {
+        font-size: 1rem !important;
+    }
+
+    .fc .fc-button {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
+
 /* ---------- Small screens ---------- */
 @media (max-width: 575.98px) {
     .hero {

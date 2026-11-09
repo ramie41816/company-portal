@@ -193,7 +193,32 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const schedulesData = @json($calendarSchedules);
+                // 1. Map raw backend data and dynamically apply status colors
+                const rawSchedules = @json($calendarSchedules);
+                const schedulesData = rawSchedules.map(item => {
+                    let bgColor = '#6c757d'; // Default secondary
+                    let textColor = '#ffffff';
+
+                    const status = (item.status || '').toLowerCase();
+                    if (status === 'completed') {
+                        bgColor = '#198754'; // Success Green
+                    } else if (status === 'ongoing') {
+                        bgColor = '#ffc107'; // Warning Yellow
+                        textColor = '#000000'; // Dark text for yellow background
+                    } else if (status === 'scheduled') {
+                        bgColor = '#0d6efd'; // Primary Blue
+                    } else if (status === 'cancelled') {
+                        bgColor = '#dc3545'; // Danger Red
+                    }
+
+                    return {
+                        ...item,
+                        backgroundColor: bgColor,
+                        borderColor: bgColor,
+                        textColor: textColor
+                    };
+                });
+
                 const calendarEl = document.getElementById('scheduleCalendar');
                 const dateLabel = document.getElementById('selectedDateLabel');
                 const listContainer = document.getElementById('dateSchedulesList');
@@ -251,17 +276,33 @@
                 const todayStr = new Date().toISOString().split('T')[0];
                 loadSchedulesForDate(todayStr);
 
+                // 2. Responsive view & toolbar handlers (switches to listWeek on mobile <= 768px)
+                const getResponsiveView = () => window.innerWidth <= 768 ? 'listWeek' : 'dayGridMonth';
+                const getResponsiveToolbar = () => window.innerWidth <= 768 ? {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: 'today'
+                } : {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,listWeek'
+                };
+
                 const calendar = new window.FullCalendar.Calendar(calendarEl, {
                     plugins: [
                         window.FullCalendar.dayGridPlugin,
                         window.FullCalendar.timeGridPlugin,
-                        window.FullCalendar.interactionPlugin
+                        window.FullCalendar.interactionPlugin,
+                        window.FullCalendar.listPlugin
                     ],
-                    initialView: 'dayGridMonth',
-                    headerToolbar: {
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'dayGridMonth,timeGridWeek'
+                    initialView: getResponsiveView(),
+                    headerToolbar: getResponsiveToolbar(),
+                    windowResize: function(arg) {
+                        const newView = window.innerWidth <= 768 ? 'listWeek' : 'dayGridMonth';
+                        if (calendar.view.type !== newView) {
+                            calendar.changeView(newView);
+                        }
+                        calendar.setOption('headerToolbar', getResponsiveToolbar());
                     },
                     events: schedulesData,
                     dateClick: function(info) {
