@@ -13,9 +13,14 @@
                 </a>
             @endif
             @if (auth()->user()->hasPermission('schedules.coc.generate.pdf') && $schedule->status === 'completed')
-                <a href="{{ route('schedules.coc', $schedule->id) }}" class="btn btn-sm btn-success">
-                    <i class="bi bi-file-earmark-check me-1"></i> Prepare CoC/CoT
-                </a>
+                <div class="btn-group">
+                    <a href="{{ route('schedules.report.prepare', $schedule->id) }}" class="btn btn-sm btn-info text-white">
+                        <i class="bi bi-file-earmark-bar-graph me-1"></i> Execution Report
+                    </a>
+                    <a href="{{ route('schedules.coc', $schedule->id) }}" class="btn btn-sm btn-success">
+                        <i class="bi bi-file-earmark-check me-1"></i> Prepare CoC/CoT
+                    </a>
+                </div>
             @endif
         </div>
     </div>
@@ -167,6 +172,136 @@
                     </tfoot>
                 </table>
             </div>
+
+            <div class="text-uppercase small text-muted mb-2 mt-5" style="letter-spacing: .08em;">Assigned Staff & Payment
+                Monitoring</div>
+
+            <div class="table-responsive mb-4">
+                <table class="table table-elegant align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Staff Name</th>
+                            <th>Role / Assignment</th>
+                            <th>Notes</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-end">Payment</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($schedule->personnel as $index => $p)
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                <td class="fw-medium">{{ $p->personnel_name }}</td>
+                                <td>{{ $p->role_in_schedule ?: '—' }}</td>
+                                <td class="text-muted small">{{ $p->notes ?: '—' }}</td>
+                                <td class="text-center">
+                                    @if ($p->is_paid)
+                                        <span class="badge bg-success text-white">Paid</span>
+                                    @else
+                                        <span class="badge bg-warning text-dark">Unpaid</span>
+                                    @endif
+                                </td>
+                                <td class="text-end fw-semibold text-brand">PHP {{ number_format($p->payment, 2) }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-3">No staff assigned to this schedule.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                    @if ($schedule->personnel->count() > 0)
+                        <tfoot>
+                            <tr>
+                                <td colspan="5" class="text-end fw-semibold">Total Staff Payout</td>
+                                <td class="text-end fw-bold fs-5 text-brand">PHP
+                                    {{ number_format($schedule->personnel->sum('payment'), 2) }}</td>
+                            </tr>
+                        </tfoot>
+                    @endif
+                </table>
+            </div>
+
+            @if (in_array(strtolower($schedule->status), ['ongoing', 'completed']))
+                <div class="text-uppercase small text-muted mb-2 mt-5" style="letter-spacing: .08em;">Operational Expenses
+                    (Fuel, Tolls, Supplies, Etc.)</div>
+
+                <div class="table-responsive mb-4">
+                    <table class="table table-elegant align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">#</th>
+                                <th>Expense Type</th>
+                                <th>Notes / Reference</th>
+                                <th class="text-end">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($schedule->expenses as $index => $exp)
+                                <tr>
+                                    <td>{{ $index + 1 }}</td>
+                                    <td class="fw-medium">{{ $exp->expense_type }}</td>
+                                    <td class="text-muted small">{{ $exp->notes ?: '—' }}</td>
+                                    <td class="text-end fw-semibold text-brand">PHP {{ number_format($exp->amount, 2) }}
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-3">No operational expenses
+                                        recorded.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                        @if ($schedule->expenses->count() > 0)
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end fw-semibold">Total Operational Expenses</td>
+                                    <td class="text-end fw-bold fs-5 text-brand">PHP
+                                        {{ number_format($schedule->expenses->sum('amount'), 2) }}</td>
+                                </tr>
+                            </tfoot>
+                        @endif
+                    </table>
+                </div>
+            @endif
+
+            @if (strtolower($schedule->status) === 'completed')
+                @php
+                    $totalRevenue = $schedule->total;
+                    $totalPersonnelCost = $schedule->personnel->where('is_paid', true)->sum('payment');
+                    $totalExpensesCost = $schedule->expenses->sum('amount');
+                    $netJobProfit = $totalRevenue - $totalPersonnelCost - $totalExpensesCost;
+                @endphp
+
+                <div class="card border mb-4 p-4 rounded-3"
+                    style="background-color: var(--surface); border-color: var(--line) !important;">
+                    <h6 class="text-uppercase small text-muted mb-3" style="letter-spacing: .08em;">Schedule Financial
+                        Summary (Paid Payouts Only)</h6>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-3">
+                            <span class="text-muted small d-block">Total Revenue</span>
+                            <span class="fw-bold fs-5 text-brand">PHP {{ number_format($totalRevenue, 2) }}</span>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <span class="text-muted small d-block">Paid Staff Payouts (-)</span>
+                            <span class="fw-semibold fs-5 text-danger">PHP
+                                {{ number_format($totalPersonnelCost, 2) }}</span>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <span class="text-muted small d-block">Operational Expenses (-)</span>
+                            <span class="fw-semibold fs-5 text-danger">PHP
+                                {{ number_format($totalExpensesCost, 2) }}</span>
+                        </div>
+                        <div class="col-12 col-md-3 border-start">
+                            <span class="text-muted small d-block">Net Job Profit</span>
+                            <span class="fw-bold fs-5 {{ $netJobProfit >= 0 ? 'text-success' : 'text-danger' }}">
+                                PHP {{ number_format($netJobProfit, 2) }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             @if (!empty($schedule->other_info))
                 <div class="mt-4 pt-3 border-top">
