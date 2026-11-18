@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use App\Mail\PasswordChangedMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -13,9 +14,6 @@ use App\Models\User;
 
 class ResetPasswordController extends Controller
 {
-    /**
-     * Show the reset password form view.
-     */
     public function create(Request $request, string $token)
     {
         return view('auth.reset-password', [
@@ -24,16 +22,29 @@ class ResetPasswordController extends Controller
         ]);
     }
 
-    /**
-     * Handle updating the user's password.
-     */
     public function store(Request $request)
     {
-        // 1. Validate the input fields
+        // 1. Check Honeypot
+        if ($request->filled('website')) {
+            return back()->withInput($request->only('email'))->with('error', 'Spam detected.');
+        }
+
+        // 2. Validate input fields and Turnstile
         $request->validate([
             'token' => ['required'],
             'email' => ['required', 'email', 'exists:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'cf-turnstile-response' => ['required', function ($attribute, $value, $fail) use ($request) {
+                $response = Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
+                    'secret' => config('services.turnstile.secret_key'),
+                    'response' => $value,
+                    'remoteip' => $request->ip(),
+                ]);
+
+                if (! $response->json('success')) {
+                    $fail('The security captcha verification failed. Please try again.');
+                }
+            }],
         ]);
 
         try {
@@ -52,23 +63,17 @@ class ResetPasswordController extends Controller
             }
 
             $user = User::where('email', $request->email)->first();
-
-            // Keep track of the unhashed plain password for the notification email
             $plainPassword = $request->password;
 
-            // 5. Update the user's password in the users table
             $user->forceFill([
                 'password' => Hash::make($plainPassword),
                 'remember_token' => Str::random(60),
             ])->save();
 
-            // 6. Delete the token record so it can't be reused
             DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
-            // 7. Send confirmation email with the new plain text password for safekeeping
             Mail::to($user->email)->send(new PasswordChangedMail($user, $plainPassword));
 
-            // 8. Redirect to login with success session key
             return redirect()->route('login')->with('success', 'Your password has been successfully reset! Check your email for your new credentials.');
         } catch (\Exception $e) {
             return back()

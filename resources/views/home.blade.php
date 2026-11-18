@@ -13,6 +13,19 @@
         @php
             $services = [];
 
+            if (
+                auth()->user()->hasPermission('portal.view') ||
+                auth()->user()->hasPermission('portal.services.index')
+            ) {
+                $services[] = [
+                    'title' => 'Portal Management',
+                    'desc' => 'Manage public client website services, contents, and inquiries.',
+                    'icon' => 'bi-globe-americas',
+                    'url' => route('portal.dashboard'),
+                    'available' => true,
+                ];
+            }
+
             if (auth()->user()->hasPermission('quotations.view')) {
                 $services[] = [
                     'title' => 'Quotation',

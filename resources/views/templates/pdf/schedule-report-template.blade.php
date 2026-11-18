@@ -90,52 +90,17 @@
     <style>
         @page {
             size: A4 portrait;
-            margin: 32mm 15mm 28mm 15mm;
+            margin: 14mm 14mm 16mm 14mm;
         }
 
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            color: #2d3748;
-            font-size: 10px;
+            color: #1e293b;
+            font-size: 8.5px;
             line-height: 1.45;
             margin: 0;
             padding: 0;
-        }
-
-        .header-banner-fixed {
-            position: fixed;
-            top: -32mm;
-            left: -15mm;
-            right: -15mm;
-            width: calc(100% + 30mm);
-            height: 100px;
-            overflow: hidden;
-            z-index: -1000;
-        }
-
-        .header-banner-fixed img {
-            width: 100%;
-            height: 100px;
-            object-fit: cover;
-            display: block;
-        }
-
-        .footer-banner-fixed {
-            position: fixed;
-            bottom: -28mm;
-            left: -15mm;
-            right: -15mm;
-            width: calc(100% + 30mm);
-            height: 100px;
-            overflow: hidden;
-            z-index: -1000;
-        }
-
-        .footer-banner-fixed img {
-            width: 100%;
-            height: 100px;
-            object-fit: cover;
-            display: block;
+            background: #ffffff;
         }
 
         .w-full {
@@ -148,46 +113,36 @@
         }
 
         .schedule-main-title {
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 800;
-            color: #0f3460;
+            color: #0f172a;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            margin: 0 0 2px 0;
-        }
-
-        .company-tagline {
-            font-size: 9.5px;
-            color: #166534;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 4px;
+            margin: 0 0 3px 0;
         }
 
         .company-meta-box {
-            font-size: 9.5px;
-            color: #4a5568;
+            font-size: 8.5px;
+            color: #475569;
             line-height: 1.35;
         }
 
         .section-box {
-            background-color: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 4px;
-            padding: 10px 12px;
+            padding: 8px 10px;
             margin-bottom: 12px;
         }
 
         .section-title {
-            font-size: 10px;
+            font-size: 8.5px;
             font-weight: 700;
-            color: #0f3460;
+            color: #0f172a;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             margin-bottom: 6px;
-            border-bottom: 1px solid #cbd5e1;
             padding-bottom: 3px;
+            border-bottom: 1px solid #e2e8f0;
         }
 
         .info-grid {
@@ -206,27 +161,27 @@
         }
 
         .field-table td {
-            padding-bottom: 2px;
+            padding: 2.5px 0;
             vertical-align: top;
-            font-size: 9.5px;
+            font-size: 8.5px;
         }
 
         .field-label {
             font-weight: 600;
-            color: #4a5568;
-            width: 90px;
+            color: #64748b;
+            width: 85px;
             white-space: nowrap;
         }
 
         .field-label-right {
             font-weight: 600;
-            color: #4a5568;
-            width: 110px;
+            color: #64748b;
+            width: 95px;
             white-space: nowrap;
         }
 
         .field-val {
-            color: #1a202c;
+            color: #0f172a;
         }
 
         .items-table {
@@ -236,38 +191,38 @@
         }
 
         .items-table th {
-            background-color: #0f3460;
-            color: #ffffff;
-            font-size: 9px;
+            background-color: #ffffff;
+            color: #475569;
+            font-size: 7.5px;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 6px 8px;
+            letter-spacing: 0.04em;
+            padding: 5px 6px;
             text-align: left;
-            font-weight: bold;
+            font-weight: 700;
+            border-bottom: 1.5px solid #cbd5e1;
         }
 
         .items-table td {
-            padding: 6px 8px;
-            border-bottom: 1px solid #e2e8f0;
-            font-size: 9.5px;
-            color: #2d3748;
-            vertical-align: top;
+            padding: 5px 6px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 8.5px;
+            color: #1e293b;
+            vertical-align: middle;
         }
 
         .items-table tfoot td {
-            background-color: #f8fafc;
+            background-color: #ffffff;
             font-weight: bold;
-            color: #0f3460;
-            border-top: 1px solid #cbd5e1;
+            color: #0f172a;
+            border-top: 1.5px solid #cbd5e1;
             border-bottom: 1px solid #cbd5e1;
-            padding: 6px 8px;
+            padding: 5px 6px;
         }
 
         .financial-summary-box {
-            background-color: #f1f5f9;
-            border: 1px solid #cbd5e1;
+            border: 1px solid #e2e8f0;
             border-radius: 4px;
-            padding: 10px 12px;
+            padding: 8px 10px;
             margin-bottom: 12px;
         }
 
@@ -284,90 +239,75 @@
 
         .fin-card {
             background: #ffffff;
-            border: 1px solid #e2e8f0;
-            padding: 8px;
-            border-radius: 4px;
+            border: 1px solid #cbd5e1;
+            border-radius: 3px;
+            padding: 5px 6px;
             text-align: center;
         }
 
         .badge-pill {
-            font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 8px;
+            font-weight: 700;
+            padding: 1px 4px;
+            font-size: 7.5px;
             letter-spacing: 0.03em;
             display: inline-block;
-        }
-
-        .badge-completed {
-            color: #166534;
-            background-color: #dcfce7;
-            border: 1px solid #bbf7d0;
-        }
-
-        .badge-pending {
-            color: #9a3412;
-            background-color: #ffedd5;
-            border: 1px solid #fed7aa;
+            border: 1px solid #94a3b8;
+            border-radius: 2px;
+            color: #1e293b;
+            background: #ffffff;
         }
 
         .notes-box {
-            font-size: 9.5px;
+            font-size: 8.5px;
             line-height: 1.4;
-            color: #2d3748;
-            background: #fdfdfd;
+            color: #334155;
+            background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-left: 3px solid #0f3460;
-            padding: 8px 10px;
-            border-radius: 4px;
+            border-left: 3px solid #64748b;
+            padding: 6px 8px;
+            border-radius: 2px;
             margin-bottom: 12px;
         }
 
         .signatory-container {
             width: 100%;
             text-align: center;
-            margin-top: 25px;
+            margin-top: 16px;
             page-break-inside: avoid;
         }
 
         .signatory-box {
             display: inline-block;
-            width: 240px;
+            width: 200px;
+            text-align: center;
+        }
+
+        .text-center {
             text-align: center;
         }
     </style>
 </head>
 
 <body>
-    {{-- Fixed Header Banner --}}
-    <div class="header-banner-fixed">
-        <img src="{{ public_path('images/banner/header.jpg') }}" alt="Header Banner">
-    </div>
-
-    {{-- Fixed Footer Banner --}}
-    <div class="footer-banner-fixed">
-        <img src="{{ public_path('images/banner/footer.jpg') }}" alt="Footer Banner">
-    </div>
 
     {{-- Header Section --}}
-    <table class="w-full header-table" style="margin-bottom: 12px;">
+    <table class="w-full header-table"
+        style="margin-bottom: 10px; border-bottom: 1px solid #0f172a; padding-bottom: 6px;">
         <tr>
             <td>
-                <div class="schedule-main-title">Schedule Execution & Audit Report</div>
-                @if (config('company.tagline'))
-                    <div class="company-tagline">{{ config('company.tagline') }}</div>
-                @endif
+                <div class="schedule-main-title">Schedule Execution Report</div>
                 <div class="company-meta-box">
                     <div><strong>{{ strtoupper(config('company.name')) }}</strong></div>
-                    <div>{{ config('company.address') }}</div>
-                    <div>Phone: {{ config('company.phone') }} | Email: {{ config('company.email') }}</div>
+                    <div>{{ config('company.address') }} | Phone: {{ config('company.phone') }} | Email:
+                        {{ config('company.email') }}</div>
                 </div>
             </td>
-            <td style="text-align: right;">
-                @if (config('company.logo'))
-                    <img src="{{ public_path(config('company.logo')) }}" alt="Logo" height="60"
-                        style="display: inline-block;">
-                @endif
+            <td style="text-align: right; vertical-align: top;">
+                <div style="font-weight: bold; font-size: 9.5px; color: #0f172a;">REF:
+                    {{ $schedule->schedule_number ?? 'SCH-8AECB25HB5231' }}</div>
+                <div style="font-size: 8px; color: #64748b;">DATE:
+                    {{ isset($schedule->schedule_date) ? \Carbon\Carbon::parse($schedule->schedule_date)->format('Y-m-d H:i') : '—' }}
+                </div>
             </td>
         </tr>
     </table>
@@ -377,14 +317,14 @@
         <table class="info-grid">
             <tr>
                 <td style="padding-right: 8px;">
-                    <div class="section-title">Client Information</div>
+                    <div class="section-title">Client Details</div>
                     <table class="field-table">
                         <tr>
                             <td class="field-label">Client Name:</td>
                             <td class="field-val">{{ $schedule->scheduled_to ?? '—' }}</td>
                         </tr>
                         <tr>
-                            <td class="field-label">Company Name:</td>
+                            <td class="field-label">Company:</td>
                             <td class="field-val">{{ $schedule->client_company ?? '—' }}</td>
                         </tr>
                         <tr>
@@ -397,12 +337,12 @@
                         </tr>
                     </table>
                 </td>
-                <td style="padding-left: 8px; border-left: 1px solid #cbd5e1;">
-                    <div class="section-title">Execution Overview</div>
+                <td style="padding-left: 8px; border-left: 1px solid #f1f5f9;">
+                    <div class="section-title">Schedule Details</div>
                     <table class="field-table">
                         <tr>
-                            <td class="field-label-right">Schedule Number:</td>
-                            <td class="field-val" style="font-weight: bold; color: #0f3460;">
+                            <td class="field-label-right">Schedule No:</td>
+                            <td class="field-val" style="font-weight: bold;">
                                 {{ $schedule->schedule_number ?? 'SCH-8AECB25HB5231' }}</td>
                         </tr>
                         <tr>
@@ -412,14 +352,13 @@
                             </td>
                         </tr>
                         <tr>
-                            <td class="field-label-right">Project Reference:</td>
+                            <td class="field-label-right">Project Ref:</td>
                             <td class="field-val">{{ $schedule->reference_project ?? '—' }}</td>
                         </tr>
                         <tr>
-                            <td class="field-label-right">Operational Status:</td>
+                            <td class="field-label-right">Status:</td>
                             <td class="field-val">
-                                <span
-                                    class="badge-pill {{ strtolower($schedule->status ?? '') === 'completed' ? 'badge-completed' : 'badge-pending' }}">
+                                <span class="badge-pill">
                                     {{ strtoupper($schedule->status ?? 'SCHEDULED') }}
                                 </span>
                             </td>
@@ -430,42 +369,41 @@
         </table>
     </div>
 
-    {{-- Financial Audit Summary Cards --}}
+    {{-- Financial Summary Cards --}}
     <div class="financial-summary-box">
-        <div class="section-title" style="margin-bottom: 8px;">Job Financial & Cost Audit Summary</div>
+        <div class="section-title" style="margin-bottom: 6px;">Schedule Financial Summary</div>
         <table class="financial-grid">
             <tr>
                 <td>
                     <div class="fin-card">
-                        <div style="font-size: 8.5px; color: #64748b; text-transform: uppercase; font-weight: bold;">
-                            Total Revenue</div>
-                        <div style="font-size: 11px; font-weight: bold; color: #0f3460; margin-top: 2px;">PHP
+                        <div style="font-size: 7px; text-transform: uppercase; font-weight: bold; color: #64748b;">Total
+                            Revenue</div>
+                        <div style="font-size: 9px; font-weight: bold; margin-top: 2px;">PHP
                             {{ number_format($totalRevenue, 2) }}</div>
                     </div>
                 </td>
                 <td>
                     <div class="fin-card">
-                        <div style="font-size: 8.5px; color: #64748b; text-transform: uppercase; font-weight: bold;">
-                            Staff Payouts (Paid)</div>
-                        <div style="font-size: 11px; font-weight: bold; color: #b91c1c; margin-top: 2px;">PHP
+                        <div style="font-size: 7px; text-transform: uppercase; font-weight: bold; color: #64748b;">Staff
+                            Payouts (Paid)</div>
+                        <div style="font-size: 9px; font-weight: bold; margin-top: 2px;">PHP
                             {{ number_format($totalPaidPersonnel, 2) }}</div>
                     </div>
                 </td>
                 <td>
                     <div class="fin-card">
-                        <div style="font-size: 8.5px; color: #64748b; text-transform: uppercase; font-weight: bold;">
+                        <div style="font-size: 7px; text-transform: uppercase; font-weight: bold; color: #64748b;">
                             Operational Expenses</div>
-                        <div style="font-size: 11px; font-weight: bold; color: #b91c1c; margin-top: 2px;">PHP
+                        <div style="font-size: 9px; font-weight: bold; margin-top: 2px;">PHP
                             {{ number_format($totalExpenses, 2) }}</div>
                     </div>
                 </td>
                 <td>
-                    <div class="fin-card" style="background: {{ $netJobProfit >= 0 ? '#f0fdf4' : '#fef2f2' }};">
-                        <div style="font-size: 8.5px; color: #64748b; text-transform: uppercase; font-weight: bold;">Net
-                            Job Profit</div>
-                        <div
-                            style="font-size: 11px; font-weight: bold; color: {{ $netJobProfit >= 0 ? '#166534' : '#b91c1c' }}; margin-top: 2px;">
-                            PHP {{ number_format($netJobProfit, 2) }}</div>
+                    <div class="fin-card">
+                        <div style="font-size: 7px; text-transform: uppercase; font-weight: bold; color: #64748b;">Net
+                            Profit</div>
+                        <div style="font-size: 9px; font-weight: bold; margin-top: 2px;">PHP
+                            {{ number_format($netJobProfit, 2) }}</div>
                     </div>
                 </td>
             </tr>
@@ -473,16 +411,16 @@
     </div>
 
     {{-- Scope of Work Executed --}}
-    <div style="font-size: 10px; font-weight: 700; color: #0f3460; text-transform: uppercase; margin-bottom: 4px;">Scope
-        of Work & Services Rendered</div>
+    <div style="font-size: 8.5px; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; color: #0f172a;">
+        Scope of Work & Services Rendered</div>
     <table class="items-table">
         <thead>
             <tr>
-                <th style="width: 30px;">#</th>
+                <th style="width: 20px;">#</th>
                 <th>Description</th>
-                <th class="text-center" style="width: 45px;">Qty</th>
-                <th style="width: 85px; text-align: right;">Unit Price</th>
-                <th style="width: 95px; text-align: right;">Total</th>
+                <th class="text-center" style="width: 35px;">Qty</th>
+                <th style="width: 75px; text-align: right;">Unit Price</th>
+                <th style="width: 80px; text-align: right;">Total</th>
             </tr>
         </thead>
         <tbody>
@@ -508,10 +446,10 @@
                     @php $numbering = $x . '.' . $y; @endphp
                     <tr>
                         <td></td>
-                        <td style="padding-left: 12px;">
+                        <td style="padding-left: 10px;">
                             <span
-                                style="color: #166534; font-weight: bold; margin-right: 4px;">{{ $numbering }}</span>
-                            <span style="color: #4a5568;">{{ $subItem->description ?? 'Sub-item description' }}</span>
+                                style="font-weight: bold; margin-right: 3px; color: #64748b;">{{ $numbering }}</span>
+                            <span>{{ $subItem->description ?? 'Sub-item description' }}</span>
                         </td>
                         <td class="text-center">{{ rtrim(rtrim(number_format($subItem->quantity ?? 1, 2), '0'), '.') }}
                         </td>
@@ -531,18 +469,20 @@
         </tfoot>
     </table>
 
-    {{-- Assigned Staff & Payouts --}}
-    <div style="font-size: 10px; font-weight: 700; color: #0f3460; text-transform: uppercase; margin-bottom: 4px;">
-        Assigned Staff & Compensation Audit</div>
+    {{-- Assigned Staff & Compensation --}}
+    <div style="font-size: 8.5px; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; color: #0f172a;">
+        Assigned Staff & Compensation</div>
     <table class="items-table">
         <thead>
             <tr>
-                <th style="width: 30px;">#</th>
+                <th style="width: 20px;">#</th>
                 <th>Staff Name</th>
                 <th>Role / Assignment</th>
                 <th>Notes</th>
-                <th style="width: 75px; text-align: center;">Payment Status</th>
-                <th style="width: 85px; text-align: right;">Amount</th>
+                <th style="width: 60px; text-align: center;">Status</th>
+                <th style="width: 70px; text-align: right;">Amount</th>
+                <th style="width: 90px; text-align: center;">Signature</th>
+                <th style="width: 65px; text-align: center;">Date Signed</th>
             </tr>
         </thead>
         <tbody>
@@ -554,42 +494,51 @@
                     <td>{{ $p->notes ?? '—' }}</td>
                     <td class="text-center">
                         @if (!empty($p->is_paid))
-                            <span class="badge-pill badge-completed">PAID</span>
+                            <span class="badge-pill">PAID</span>
                         @else
-                            <span class="badge-pill badge-pending">UNPAID</span>
+                            <span class="badge-pill">UNPAID</span>
                         @endif
                     </td>
-                    <td style="text-align: right; font-weight: bold;">PHP {{ number_format($p->payment ?? 0, 2) }}</td>
+                    <td style="text-align: right; font-weight: bold;">PHP {{ number_format($p->payment ?? 0, 2) }}
+                    </td>
+                    <td></td>
+                    <td></td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" style="text-align: center; color: #64748b;">No staff assigned to this schedule.
+                    <td colspan="8"
+                        style="text-align: center; color: #64748b; font-style: italic; padding: 8px 5px;">
+                        No staff assigned to this schedule.
                     </td>
                 </tr>
             @endforelse
         </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="5" style="text-align: right;">Total Staff Payout (Overall):</td>
-                <td style="text-align: right;">PHP {{ number_format($totalPersonnelOverall, 2) }}</td>
-            </tr>
-            <tr>
-                <td colspan="5" style="text-align: right;">Total Staff Payout (Paid Only):</td>
-                <td style="text-align: right;">PHP {{ number_format($totalPaidPersonnel, 2) }}</td>
-            </tr>
-        </tfoot>
+        @if (collect($schedule->personnel ?? [])->isNotEmpty())
+            <tfoot>
+                <tr>
+                    <td colspan="5" style="text-align: right;">Total Staff Payout (Overall):</td>
+                    <td style="text-align: right;">PHP {{ number_format($totalPersonnelOverall, 2) }}</td>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td colspan="5" style="text-align: right;">Total Staff Payout (Paid Only):</td>
+                    <td style="text-align: right;">PHP {{ number_format($totalPaidPersonnel, 2) }}</td>
+                    <td colspan="2"></td>
+                </tr>
+            </tfoot>
+        @endif
     </table>
 
     {{-- Operational Expenses --}}
-    <div style="font-size: 10px; font-weight: 700; color: #0f3460; text-transform: uppercase; margin-bottom: 4px;">
+    <div style="font-size: 8.5px; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; color: #0f172a;">
         Operational Expenses (Fuel, Tolls, Supplies, Etc.)</div>
     <table class="items-table">
         <thead>
             <tr>
-                <th style="width: 30px;">#</th>
+                <th style="width: 20px;">#</th>
                 <th>Expense Type</th>
                 <th>Reference / Notes</th>
-                <th style="width: 95px; text-align: right;">Amount</th>
+                <th style="width: 80px; text-align: right;">Amount</th>
             </tr>
         </thead>
         <tbody>
@@ -603,17 +552,21 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="4" style="text-align: center; color: #64748b;">No operational expenses recorded.
+                    <td colspan="4"
+                        style="text-align: center; color: #64748b; font-style: italic; padding: 8px 5px;">
+                        No operational expenses recorded.
                     </td>
                 </tr>
             @endforelse
         </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="3" style="text-align: right;">Total Operational Expenses:</td>
-                <td style="text-align: right;">PHP {{ number_format($totalExpenses, 2) }}</td>
-            </tr>
-        </tfoot>
+        @if (collect($schedule->expenses ?? [])->isNotEmpty())
+            <tfoot>
+                <tr>
+                    <td colspan="3" style="text-align: right;">Total Operational Expenses:</td>
+                    <td style="text-align: right;">PHP {{ number_format($totalExpenses, 2) }}</td>
+                </tr>
+            </tfoot>
+        @endif
     </table>
 
     {{-- General Remarks / Notes --}}
@@ -624,23 +577,23 @@
         </div>
     @endif
 
-    {{-- Signatory Section (Centered, Clean Background) --}}
+    {{-- Signatory Section --}}
     <div class="signatory-container">
         <div class="signatory-box">
             <div
-                style="font-size: 9.5px; font-weight: 700; color: #0f3460; text-transform: uppercase; margin-bottom: 6px;">
-                Prepared / Audited By
+                style="font-size: 8px; font-weight: bold; text-transform: uppercase; margin-bottom: 3px; color: #475569;">
+                Prepared By
             </div>
-            <div style="width: 180px; height: 40px; text-align: center; margin: 2px auto 0 auto;">
+            <div style="width: 150px; height: 30px; text-align: center; margin: 0 auto;">
                 @if (!empty($signatureDataUri))
                     <img src="{{ $signatureDataUri }}" alt="eSignature"
-                        style="max-height: 38px; max-width: 180px; width: auto; display: inline-block;">
+                        style="max-height: 28px; max-width: 150px; width: auto; display: inline-block;">
                 @endif
             </div>
-            <div style="border-bottom: 1px solid #4a5568; width: 100%; margin-bottom: 4px; margin-top: 2px;"></div>
-            <div style="font-weight: bold; color: #1a202c; font-size: 9.5px;">
+            <div style="border-bottom: 1px solid #475569; width: 100%; margin-bottom: 3px; margin-top: 2px;"></div>
+            <div style="font-weight: bold; font-size: 8px; color: #0f172a;">
                 {{ $executedBy ?? config('company.name') }}</div>
-            <div style="color: #4a5568; font-size: 9px;">Operations Management</div>
+            <div style="font-size: 7.5px; color: #64748b;">Operations Management</div>
         </div>
     </div>
 
@@ -648,15 +601,15 @@
     <script type="text/php">
         if (isset($pdf)) {
             $font = $fontMetrics->getFont("Helvetica", "normal");
-            $size = 9;
-            $color = array(0, 0, 0, 0);
+            $size = 7.5;
+            $color = array(0.39, 0.45, 0.55);
             
             $companyText = "{{ config('company.name') }}";
-            $pdf->page_text(25, 795, $companyText, $font, $size, $color);
+            $pdf->page_text(40, 810, $companyText, $font, $size, $color);
             
             $scheduleNumber = "{{ $schedule->schedule_number ?? 'SCH-8AECB25HB5231' }}";
             $pageText = "Page {PAGE_NUM} of {PAGE_COUNT} | " . $scheduleNumber;
-            $pdf->page_text(420, 795, $pageText, $font, $size, $color);
+            $pdf->page_text(440, 810, $pageText, $font, $size, $color);
         }
     </script>
 </body>
