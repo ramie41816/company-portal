@@ -1,7 +1,6 @@
 @extends('layouts.guest')
 
 @section('content')
-    {{-- Welcome Header Section --}}
     <div class="mb-4">
         <h3 class="fw-bold text-brand mb-1">Welcome Back!</h3>
         <p class="text-muted small mb-0">Please sign in to access your dashboard.</p>
@@ -9,6 +8,12 @@
 
     <form method="POST" action="{{ route('login') }}" id="loginForm">
         @csrf
+
+        {{-- Honeypot Spam Trap (Hidden from users) --}}
+        <div style="display: none !important;" aria-hidden="true">
+            <label for="website">Website</label>
+            <input type="text" id="website" name="website" value="" tabindex="-1" autocomplete="off">
+        </div>
 
         {{-- Email Field --}}
         <div class="mb-3">
@@ -26,7 +31,7 @@
             @enderror
         </div>
 
-        {{-- Password Field with Forgot Password Link --}}
+        {{-- Password Field --}}
         <div class="mb-3">
             <div class="d-flex justify-content-between align-items-center mb-1">
                 <label for="password" class="form-label mb-0">Password</label>
@@ -51,8 +56,8 @@
             @enderror
         </div>
 
-        {{-- Remember Me & Submit --}}
-        <div class="d-flex align-items-center justify-content-between mb-4">
+        {{-- Remember Me --}}
+        <div class="d-flex align-items-center justify-content-between mb-3">
             <div class="form-check mb-0">
                 <input type="checkbox" class="form-check-input" id="remember" name="remember"
                     {{ old('remember') ? 'checked' : '' }}>
@@ -60,7 +65,15 @@
             </div>
         </div>
 
-        {{-- Submit Button with Loading State --}}
+        {{-- Cloudflare Turnstile Widget --}}
+        <div class="mb-3">
+            <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}"></div>
+            @error('cf-turnstile-response')
+                <div class="invalid-feedback d-block mt-1">{{ $message }}</div>
+            @enderror
+        </div>
+
+        {{-- Submit Button --}}
         <button type="submit" id="submitBtn" class="btn btn-brand w-100 py-2 fw-semibold position-relative">
             <span id="btnText">
                 <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
@@ -73,13 +86,13 @@
     </form>
 
     @push('scripts')
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
         <script>
             document.getElementById('loginForm').addEventListener('submit', function() {
                 const btn = document.getElementById('submitBtn');
                 const btnText = document.getElementById('btnText');
                 const btnSpinner = document.getElementById('btnSpinner');
 
-                // Disable button and swap text with spinner
                 btn.disabled = true;
                 btnText.classList.add('d-none');
                 btnSpinner.classList.remove('d-none');

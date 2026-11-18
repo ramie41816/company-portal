@@ -1,5 +1,5 @@
 <?php
-
+// Admin Management
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
@@ -10,6 +10,13 @@ use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\TemplateManagerController;
+// Portal Management
+use App\Http\Controllers\Portal\DashboardController;
+use App\Http\Controllers\Portal\ServiceController;
+use App\Http\Controllers\Portal\InquiryController;
+use App\Http\Controllers\InquiryController as PublicInquiryController;
+// Other Sercices
+use App\Models\Service;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => redirect()->route(auth()->check() ? 'home' : 'login'));
@@ -46,6 +53,52 @@ Route::middleware('auth')->group(function () {
         Route::get('/edit', [ProfileController::class, 'edit'])->name('edit');
         Route::put('/update', [ProfileController::class, 'update'])->name('update');
         Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password');
+    });
+
+    // Portal Management Module
+    Route::prefix('portal-management')->name('portal.')->group(function () {
+
+        // Create / Add
+        Route::middleware('permission:portal.add')->group(function () {
+            Route::get('/services/create', [ServiceController::class, 'create'])->name('services.create');
+            Route::post('/services', [ServiceController::class, 'store'])->name('services.store');
+        });
+
+        // Read / View
+        Route::middleware('permission:portal.view')->group(function () {
+            Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+            // Services Sub-module
+            Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
+            Route::get('/services/archives', [ServiceController::class, 'archives'])->name('services.archives');
+            Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
+
+            // Inquiries Sub-module
+            Route::get('/inquiries', [InquiryController::class, 'index'])->name('inquiries.index');
+            Route::get('/inquiries/archives', [InquiryController::class, 'archives'])->name('inquiries.archives');
+            Route::get('/inquiries/{inquiry}', [InquiryController::class, 'show'])->name('inquiries.show');
+        });
+
+        // Update / Edit
+        Route::middleware('permission:portal.update')->group(function () {
+            // Services
+            Route::get('/services/{service}/edit', [ServiceController::class, 'edit'])->name('services.edit');
+            Route::put('/services/{service}', [ServiceController::class, 'update'])->name('services.update');
+            Route::delete('/services/{service}', [ServiceController::class, 'destroy'])->name('services.destroy');
+            Route::put('/services/{id}/restore', [ServiceController::class, 'restore'])->name('services.restore');
+            Route::post('/services/{service}/delete-image', [ServiceController::class, 'destroyImage'])->name('services.delete-image');
+
+            // Inquiries
+            Route::put('/inquiries/{inquiry}/status', [InquiryController::class, 'updateStatus'])->name('inquiries.update-status');
+            Route::delete('/inquiries/{inquiry}', [InquiryController::class, 'destroy'])->name('inquiries.destroy');
+            Route::put('/inquiries/{id}/restore', [InquiryController::class, 'restore'])->name('inquiries.restore');
+        });
+
+        // Delete (Hard Delete)
+        Route::middleware('permission:portal.delete')->group(function () {
+            Route::delete('/services/{id}/force-delete', [ServiceController::class, 'forceDelete'])->name('services.force-delete');
+            Route::delete('/inquiries/{id}/force-delete', [InquiryController::class, 'forceDelete'])->name('inquiries.force-delete');
+        });
     });
 
     // Quotations Module

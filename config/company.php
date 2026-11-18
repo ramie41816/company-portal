@@ -2,6 +2,7 @@
 
 return [
     'app_name' => env('APP_NAME', 'Application Title'),
+    'app_portal_name' => env('PORTAL_APP_NAME', 'Portal Title'),
     'name' => env('COMPANY_NAME', 'Your Company'),
     'tagline' => env('COMPANY_TAGLINE', 'Internal Portal'),
     'address' => env('COMPANY_ADDRESS', 'Complete Street Address, City, State, ZIP'),

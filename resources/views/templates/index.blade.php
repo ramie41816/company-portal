@@ -59,11 +59,14 @@
 
                 <div class="ratio ratio-16x9 w-100 h-100" style="min-height: 600px;">
                     @php
-                        $route = $type === 'pdf' ? 'templates.stream.pdf' : 'templates.render';
+                        $pdfParams = '#toolbar=0&navpanes=0&scrollbar=0';
+                        $iframeSrc =
+                            route($type === 'pdf' ? 'templates.stream.pdf' : 'templates.render', [
+                                'view' => $viewPath,
+                            ]) . ($type === 'pdf' ? $pdfParams : '');
                     @endphp
 
-                    <iframe id="template-iframe" src="{{ route($route, ['view' => $viewPath]) }}"
-                        class="w-100 h-100 border-0 bg-white {{ $type === 'pdf' ? '' : 'pe-none' }}">
+                    <iframe id="template-iframe" src="{{ $iframeSrc }}" class="w-100 h-100 border-0 bg-white">
                     </iframe>
                 </div>
             </div>
@@ -80,14 +83,41 @@
             document.addEventListener('DOMContentLoaded', function() {
                 const iframe = document.getElementById('template-iframe');
                 const loader = document.getElementById('iframe-loader');
+                const isPdf = "{{ $type }}" === 'pdf';
 
                 if (iframe && loader) {
-                    // Hide loader once the iframe finishes loading
                     iframe.addEventListener('load', function() {
+                        // Hide loader with smooth fade-out
                         loader.style.opacity = '0';
-                        setTimeout(() => loader.remove(), 300); // Smooth fade out
+                        setTimeout(() => loader.remove(), 300);
+
+                        // Disable interactive elements inside non-PDF templates
+                        if (!isPdf) {
+                            try {
+                                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+                                const style = iframeDoc.createElement('style');
+                                style.textContent = `
+                                    button, input, select, textarea, a, .btn {
+                                        pointer-events: none !important;
+                                        user-select: none !important;
+                                        opacity: 0.7 !important;
+                                        cursor: not-allowed !important;
+                                    }
+                                `;
+                                iframeDoc.head.appendChild(style);
+
+                                // Prevent form submissions inside the preview
+                                iframeDoc.querySelectorAll('form').forEach(form => {
+                                    form.addEventListener('submit', e => e.preventDefault());
+                                });
+                            } catch (e) {
+                                console.warn('Could not inject styles into iframe:', e);
+                            }
+                        }
                     });
 
+                    // Fallback loader removal
                     setTimeout(function() {
                         if (loader && loader.parentNode) {
                             loader.style.opacity = '0';

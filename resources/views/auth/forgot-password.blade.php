@@ -1,7 +1,6 @@
 @extends('layouts.guest')
 
 @section('content')
-    {{-- Header Section --}}
     <div class="mb-4">
         <h3 class="fw-bold text-brand mb-1">Reset Password</h3>
         <p class="text-muted small mb-0">Enter your email address and we'll send you a password reset link.</p>
@@ -9,6 +8,12 @@
 
     <form method="POST" action="{{ route('password.email') }}" id="forgotForm">
         @csrf
+
+        {{-- Honeypot Spam Trap --}}
+        <div style="display: none !important;" aria-hidden="true">
+            <label for="website">Website</label>
+            <input type="text" id="website" name="website" value="" tabindex="-1" autocomplete="off">
+        </div>
 
         {{-- Email Field --}}
         <div class="mb-3">
@@ -26,7 +31,15 @@
             @enderror
         </div>
 
-        {{-- Submit Button with Loading State --}}
+        {{-- Cloudflare Turnstile Widget --}}
+        <div class="mb-3">
+            <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}"></div>
+            @error('cf-turnstile-response')
+                <div class="invalid-feedback d-block mt-1">{{ $message }}</div>
+            @enderror
+        </div>
+
+        {{-- Submit Button --}}
         <button type="submit" id="submitBtn" class="btn btn-brand w-100 py-2 fw-semibold mb-3 position-relative">
             <span id="btnText">
                 <i class="bi bi-envelope-paper me-1"></i> Send Password Reset Link
@@ -37,7 +50,6 @@
             </span>
         </button>
 
-        {{-- Back to Login Link --}}
         <div class="text-center">
             <a href="{{ route('login') }}" class="small text-decoration-none text-muted">
                 <i class="bi bi-arrow-left me-1"></i> Back to Sign In
@@ -46,13 +58,13 @@
     </form>
 
     @push('scripts')
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
         <script>
             document.getElementById('forgotForm').addEventListener('submit', function() {
                 const btn = document.getElementById('submitBtn');
                 const btnText = document.getElementById('btnText');
                 const btnSpinner = document.getElementById('btnSpinner');
 
-                // Disable button and swap text with spinner
                 btn.disabled = true;
                 btnText.classList.add('d-none');
                 btnSpinner.classList.remove('d-none');

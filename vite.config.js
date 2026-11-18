@@ -19,5 +19,19 @@ export default defineConfig({
                 ],
             },
         },
+    },
+    build: {
+        // Increases the bundle warning size limit from 500kB to 1MB
+        chunkSizeWarningLimit: 1000,
+        // Separates third-party node_modules into a dedicated vendor chunk for better browser caching
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    if (id.includes('node_modules')) {
+                        return 'vendor';
+                    }
+                }
+            }
+        }
     }
 });
