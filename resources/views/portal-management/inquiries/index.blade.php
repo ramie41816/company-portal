@@ -5,7 +5,7 @@
         class="page-head mb-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
         <div>
             <h2 class="mb-1" style="color: var(--ink);"><i class="bi bi-envelope-paper"></i> Client Inquiries</h2>
-            <div class="sub text-muted">View and manage customer service requests submitted online.</div>
+            <div class="sub text-muted">View and manage customer inquiries submitted online.</div>
         </div>
     </div>
 
@@ -17,7 +17,7 @@
                     <div class="input-group">
                         <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search"></i></span>
                         <input type="text" id="searchInput" name="search" value="{{ $search ?? '' }}"
-                            class="form-control border-start-0" placeholder="Name, email, phone, address...">
+                            class="form-control border-start-0" placeholder="Reference ID, name, email, phone...">
                     </div>
                 </div>
 
@@ -45,7 +45,7 @@
                 </div>
 
                 <div class="col-12 col-sm-6 col-md-3">
-                    <label for="serviceTypeSelect" class="form-label small fw-semibold text-muted">Service Type</label>
+                    <label for="serviceTypeSelect" class="form-label small fw-semibold text-muted">Topic / Service</label>
                     <select id="serviceTypeSelect" name="service_type" class="form-select">
                         <option value="">All Services</option>
                         @foreach ($serviceTypes ?? [] as $type)
@@ -91,9 +91,10 @@
             <table class="table table-elegant align-middle mb-0" style="color: var(--ink);">
                 <thead>
                     <tr>
-                        <th class="px-3">Customer</th>
+                        <th class="px-3">Reference ID</th>
+                        <th>Customer</th>
                         <th>Phone</th>
-                        <th class="d-none d-md-table-cell">Service Type</th>
+                        <th class="d-none d-md-table-cell">Topic / Service</th>
                         <th>Status</th>
                         <th class="d-none d-lg-table-cell">Date</th>
                         <th class="text-end px-3">Action</th>
@@ -102,7 +103,12 @@
                 <tbody>
                     @forelse ($inquiries as $inquiry)
                         <tr>
-                            <td class="fw-semibold px-3" style="color: var(--ink);">{{ $inquiry->name }}</td>
+                            <td class="px-3">
+                                <span class="badge bg-light text-dark border font-monospace" style="font-size: 0.75rem;">
+                                    {{ $inquiry->reference_id ?? 'N/A' }}
+                                </span>
+                            </td>
+                            <td class="fw-semibold" style="color: var(--ink);">{{ $inquiry->name }}</td>
                             <td class="text-muted small">{{ $inquiry->phone }}</td>
                             <td class="d-none d-md-table-cell">
                                 <span class="badge bg-secondary text-white px-2 py-1" style="font-size: 0.7rem;">
@@ -134,7 +140,7 @@
                                         <button type="button" class="btn btn-outline-danger" title="Archive Inquiry"
                                             data-bs-toggle="modal" data-bs-target="#archiveModal"
                                             data-action="{{ route('portal.inquiries.destroy', $inquiry) }}"
-                                            data-name="{{ $inquiry->name }}">
+                                            data-name="{{ $inquiry->reference_id ? $inquiry->name . ' (' . $inquiry->reference_id . ')' : $inquiry->name }}">
                                             <i class="bi bi-archive"></i>
                                         </button>
                                     @endif
@@ -143,7 +149,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center py-5">
+                            <td colspan="7" class="text-center py-5">
                                 <i class="bi bi-inbox fs-1 text-muted d-block mb-2"></i>
                                 <div class="fw-medium">No inquiries found</div>
                                 @if (request()->anyFilled(['search', 'status', 'service_type']))

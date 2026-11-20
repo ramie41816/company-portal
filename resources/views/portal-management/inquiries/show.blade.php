@@ -13,9 +13,14 @@
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 pb-4 mb-4 border-bottom"
                 style="border-color: var(--line) !important;">
                 <div>
-                    <h3 class="mb-1 fw-bold" style="color: var(--ink);">
-                        <i class="bi bi-person-lines-fill text-primary me-2"></i> Inquiry Details
-                    </h3>
+                    <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
+                        <h3 class="mb-0 fw-bold" style="color: var(--ink);">
+                            <i class="bi bi-person-lines-fill text-primary me-2"></i> Inquiry Details
+                        </h3>
+                        <span class="badge bg-light text-dark border font-monospace px-2 py-1" style="font-size: 0.8rem;">
+                            {{ $inquiry->reference_id ?? 'N/A' }}
+                        </span>
+                    </div>
                     <div class="text-muted small">
                         Submitted on {{ $inquiry->created_at->format('F d, Y \a\t g:i A') }}
                     </div>
@@ -42,13 +47,19 @@
                             <h6 class="text-uppercase small text-muted fw-semibold mb-3" style="letter-spacing: .08em;">
                                 <i class="bi bi-person me-1 text-primary"></i> Customer Information
                             </h6>
+                            <div class="mb-2"><strong style="color: var(--ink);">Reference ID:</strong>
+                                <span class="font-monospace">{{ $inquiry->reference_id ?? 'N/A' }}</span>
+                            </div>
                             <div class="mb-2"><strong style="color: var(--ink);">Name:</strong> {{ $inquiry->name }}</div>
                             <div class="mb-2"><strong style="color: var(--ink);">Phone:</strong> <a
                                     href="tel:{{ $inquiry->phone }}" class="text-decoration-none">{{ $inquiry->phone }}</a>
                             </div>
                             <div class="mb-2"><strong style="color: var(--ink);">Email:</strong>
                                 {{ $inquiry->email ?? 'Not provided' }}</div>
-                            <div class="mb-0"><strong style="color: var(--ink);">Address:</strong> {{ $inquiry->address }}
+                            <div class="mb-2"><strong style="color: var(--ink);">Address:</strong> {{ $inquiry->address }}
+                            </div>
+                            <div class="mb-0"><strong style="color: var(--ink);">IP Address:</strong>
+                                <span class="font-monospace text-muted">{{ $inquiry->ip_address ?? 'Not recorded' }}</span>
                             </div>
                         </div>
                     </div>
@@ -60,7 +71,7 @@
                         <div class="card-body p-4 d-flex flex-column justify-content-between">
                             <div>
                                 <h6 class="text-uppercase small text-muted fw-semibold mb-3" style="letter-spacing: .08em;">
-                                    <i class="bi bi-tools me-1 text-primary"></i> Requested Service
+                                    <i class="bi bi-tools me-1 text-primary"></i> Topic / Service
                                 </h6>
                                 <div class="mb-3">
                                     <span class="badge bg-primary text-white px-3 py-2" style="font-size: 0.85rem;">
@@ -70,11 +81,12 @@
                             </div>
 
                             @if (auth()->user()->hasPermission('portal.update'))
-                                <form id="updateStatusForm" action="{{ route('portal.inquiries.update-status', $inquiry) }}"
-                                    method="POST" class="mt-3">
+                                <form id="updateStatusForm"
+                                    action="{{ route('portal.inquiries.update-status', $inquiry) }}" method="POST"
+                                    class="mt-3">
                                     @csrf
                                     @method('PUT')
-                                    <label class="form-label small fw-semibold text-muted">Update Request Status</label>
+                                    <label class="form-label small fw-semibold text-muted">Update Status</label>
                                     <div class="input-group">
                                         <select id="statusSelect" name="status" class="form-select"
                                             data-current-status="{{ $inquiry->status }}">

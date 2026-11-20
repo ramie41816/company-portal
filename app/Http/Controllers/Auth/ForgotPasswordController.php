@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ForgotPasswordMail;
+use App\Models\User;
+use App\Rules\ValidTurnstileToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Http;
-use App\Models\User;
-use App\Mail\ForgotPasswordMail;
+use Illuminate\Support\Str;
 
 class ForgotPasswordController extends Controller
 {
@@ -21,25 +21,13 @@ class ForgotPasswordController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Check Honeypot
         if ($request->filled('website')) {
             return back()->withInput($request->only('email'))->with('error', 'Spam detected.');
         }
 
-        // 2. Validate email and Turnstile
         $request->validate([
             'email' => ['required', 'email', 'exists:users,email'],
-            'cf-turnstile-response' => ['required', function ($attribute, $value, $fail) use ($request) {
-                $response = Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
-                    'secret' => config('services.turnstile.secret_key'),
-                    'response' => $value,
-                    'remoteip' => $request->ip(),
-                ]);
-
-                if (! $response->json('success')) {
-                    $fail('The security captcha verification failed. Please try again.');
-                }
-            }],
+            'cf-turnstile-response' => [new ValidTurnstileToken()],
         ]);
 
         try {

@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('inquiries', function (Blueprint $table) {
             $table->id();
+            $table->string('reference_id')->nullable()->unique();
             $table->string('name');
             $table->string('phone');
             $table->string('email')->nullable();
@@ -20,6 +21,7 @@ return new class extends Migration
             $table->text('address');
             $table->text('notes')->nullable();
             $table->enum('status', ['pending', 'facilitated'])->default('pending');
+            $table->string('ip_address', 45)->nullable()->index();
             $table->softDeletes();
             $table->timestamps();
         });

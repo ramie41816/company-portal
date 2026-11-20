@@ -78,16 +78,18 @@
         ];
     @endphp
 
-    <style>
-        .service-card {
-            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-        }
+    @push('styles')
+        <style>
+            .service-card {
+                transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+            }
 
-        .service-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.15) !important;
-        }
-    </style>
+            .service-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.15) !important;
+            }
+        </style>
+    @endpush
 
     <div class="container py-3 py-md-4 px-3 px-md-4">
         <div class="hero mb-4 mb-md-5 text-center text-md-start">
@@ -113,7 +115,7 @@
         <div class="row g-3 g-md-4">
             @forelse ($services as $service)
                 <div class="col-12 col-md-6 col-lg-4 d-flex">
-                    <div class="service-card p-3 p-md-4 p-lg-5 d-flex flex-column text-center justify-content-between shadow-sm w-100 h-100"
+                    <div class="service-card p-4 p-lg-5 d-flex flex-column text-center justify-content-between shadow-sm w-100 h-100"
                         style="background: var(--card, var(--bs-body-bg)); border: 1px solid var(--line, var(--bs-border-color)); border-radius: 1rem;">
 
                         <div>

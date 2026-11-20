@@ -11,7 +11,7 @@ class InquiryConfirmationMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $inquiry;
+    public Inquiry $inquiry;
 
     public function __construct(Inquiry $inquiry)
     {
@@ -20,19 +20,28 @@ class InquiryConfirmationMail extends Mailable
 
     public function build()
     {
-        // Map inquiry data to fit the template variables structure
-        $schedule = (object) [
-            'schedule_number' => 'INQ-' . $this->inquiry->id,
-            'scheduled_to' => $this->inquiry->name,
-            'reference_project' => $this->inquiry->service_type,
-        ];
+        $referenceId = $this->inquiry->reference_id ?? ('INQ-' . $this->inquiry->id);
 
-        return $this->subject('Inquiry Received - ' . config('company.app_portal_name', 'Company Portal'))
+        $mail = $this->subject('Inquiry Received [' . $referenceId . '] - ' . config('company.app_portal_name', 'Company Portal'))
             ->view('templates.emails.inquiry-confirmation')
             ->with([
-                'schedule' => $schedule,
+                'inquiry' => $this->inquiry,
                 'executedBy' => 'Customer Support Team',
                 'generalRemarks' => $this->inquiry->notes,
             ]);
+
+        $bcc = config('company.email');
+
+        if (! empty($bcc)) {
+            $recipients = is_array($bcc)
+                ? $bcc
+                : array_filter(array_map('trim', explode(',', (string) $bcc)));
+
+            if (! empty($recipients)) {
+                $mail->bcc($recipients);
+            }
+        }
+
+        return $mail;
     }
 }

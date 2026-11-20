@@ -69,6 +69,16 @@
             @enderror
         </div>
 
+        @if (config('services.turnstile.enabled'))
+            <div class="mb-3 cf-turnstile-wrapper">
+                <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}" data-size="flexible">
+                </div>
+                @error('cf-turnstile-response')
+                    <div class="invalid-feedback d-block mt-1">{{ $message }}</div>
+                @enderror
+            </div>
+        @endif
+
         {{-- Submit Button --}}
         <button type="submit" id="submitBtn" class="btn btn-brand w-100 py-2 fw-semibold mb-3 position-relative">
             <span id="btnText">
@@ -82,7 +92,9 @@
     </form>
 
     @push('scripts')
-        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        @if (config('services.turnstile.enabled'))
+            <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        @endif
         <script>
             document.getElementById('resetForm').addEventListener('submit', function() {
                 const btn = document.getElementById('submitBtn');

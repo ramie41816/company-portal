@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Inquiry;
 use App\Mail\InquiryConfirmationMail;
+use App\Models\Inquiry;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use Exception;
 
 class InquiryApiController extends Controller
 {
@@ -23,17 +23,48 @@ class InquiryApiController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        $phone = trim($validated['phone']);
+        $email = !empty($validated['email']) ? strtolower(trim($validated['email'])) : null;
+
+        $forwardedIp = $request->header('X-Client-IP')
+            ?: explode(',', (string) $request->header('X-Forwarded-For'))[0];
+        $forwardedIp = trim((string) $forwardedIp);
+        $ipAddress = filter_var($forwardedIp, FILTER_VALIDATE_IP) ? $forwardedIp : $request->ip();
+
+        $alreadySubmittedToday = Inquiry::query()
+            ->whereDate('created_at', today())
+            ->where(function ($q) use ($phone, $email, $ipAddress) {
+                $q->where('phone', $phone);
+
+                if ($email) {
+                    $q->orWhereRaw('LOWER(email) = ?', [$email]);
+                }
+
+                if ($ipAddress) {
+                    $q->orWhere('ip_address', $ipAddress);
+                }
+            })
+            ->exists();
+
+        if ($alreadySubmittedToday) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You have already submitted an inquiry today. Please try again tomorrow.',
+            ], 429);
+        }
+
         try {
             DB::beginTransaction();
 
             $inquiry = Inquiry::create([
                 'name' => $validated['name'],
-                'phone' => $validated['phone'],
-                'email' => $validated['email'] ?? null,
+                'phone' => $phone,
+                'email' => $email,
                 'service_type' => $validated['service_type'],
                 'address' => $validated['address'],
                 'notes' => $validated['notes'] ?? null,
                 'status' => 'pending',
+                'ip_address' => $ipAddress,
             ]);
 
             DB::commit();

@@ -29,7 +29,8 @@ class InquiryController extends Controller
             ->when($search, function ($query, $search) {
                 $escaped = addcslashes($search, '%_\\');
                 $query->where(function ($q) use ($escaped) {
-                    $q->where('name', 'like', "%{$escaped}%")
+                    $q->where('reference_id', 'like', "%{$escaped}%")
+                        ->orWhere('name', 'like', "%{$escaped}%")
                         ->orWhere('email', 'like', "%{$escaped}%")
                         ->orWhere('phone', 'like', "%{$escaped}%")
                         ->orWhere('address', 'like', "%{$escaped}%")
@@ -42,10 +43,7 @@ class InquiryController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view(
-            'portal-management.inquiries.index',
-            compact('inquiries', 'search', 'status', 'serviceType', 'serviceTypes')
-        );
+        return view('portal-management.inquiries.index', compact('inquiries', 'search', 'status', 'serviceType', 'serviceTypes'));
     }
 
     /**
