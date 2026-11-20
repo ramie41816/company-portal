@@ -138,40 +138,43 @@
             </button>
         </div>
     </form>
-    <script>
-        document.getElementById('createUserForm').addEventListener('submit', function(e) {
-            e.preventDefault();
 
-            Swal.fire({
-                title: 'Create new user account?',
-                text: 'This will create the user and send a temporary password via email. Are you sure?',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#2b3a67',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, create user!',
-                cancelButtonText: 'Cancel',
-                customClass: {
-                    popup: 'rounded-4 shadow'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        title: 'Processing...',
-                        text: 'Please wait while we create the account and send the email.',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        },
-                        customClass: {
-                            popup: 'rounded-4 shadow'
-                        }
-                    });
-                    e.target.submit();
-                }
+    @push('scripts')
+        <script>
+            document.getElementById('createUserForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    title: 'Create new user account?',
+                    text: 'This will create the user and send a temporary password via email. Are you sure?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#2b3a67',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, create user!',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        popup: 'rounded-4 shadow'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Processing...',
+                            text: 'Please wait while we create the account and send the email.',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            },
+                            customClass: {
+                                popup: 'rounded-4 shadow'
+                            }
+                        });
+                        e.target.submit();
+                    }
+                });
             });
-        });
-    </script>
+        </script>
+    @endpush
 @endsection

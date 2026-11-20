@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\PortalService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -18,7 +19,6 @@ class Inquiry extends Model
         'address',
         'notes',
         'status',
-        'assigned_staff_id',
     ];
 
     protected $casts = [
@@ -26,11 +26,9 @@ class Inquiry extends Model
         'updated_at' => 'datetime',
     ];
 
-    /**
-     * Optional Relationship: Staff assigned to this inquiry
-     */
-    public function assignedStaff()
+    protected static function booted(): void
     {
-        return $this->belongsTo(User::class, 'assigned_staff_id');
+        static::saved(fn() => PortalService::clearPendingInquiriesCache());
+        static::deleted(fn() => PortalService::clearPendingInquiriesCache());
     }
 }

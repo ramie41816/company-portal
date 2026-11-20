@@ -4,29 +4,53 @@
     <div class="page-head mb-4 d-flex justify-content-between align-items-center">
         <div>
             <h2 class="mb-1" style="color: var(--ink);"><i class="bi bi-archive"></i> Archived Inquiries</h2>
-            <div class="sub text-muted">View and manage soft-deleted client inquiries.</div>
+            <div class="sub">View and manage archived client inquiries.</div>
         </div>
     </div>
 
     <div class="card border-0 shadow-sm mb-4" style="background: var(--card); border-radius: 0.75rem;">
         <div class="card-body">
             <form action="{{ route('portal.inquiries.archives') }}" method="GET" class="row g-3 align-items-end">
-                <div class="col-12 col-md-8">
-                    <label class="form-label small fw-semibold text-muted">Search keyword</label>
+                <div class="col-12 col-md-5">
+                    <label for="archiveSearchInput" class="form-label small fw-semibold text-muted">Search keyword</label>
                     <div class="input-group">
                         <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search"></i></span>
-                        <input type="text" name="search" value="{{ $search ?? '' }}" class="form-control border-start-0"
-                            placeholder="Name, email, phone...">
+                        <input type="text" id="archiveSearchInput" name="search" value="{{ $search ?? '' }}"
+                            class="form-control border-start-0" placeholder="Name, email, phone, address...">
                     </div>
                 </div>
-                <div class="col-12 col-md-4 d-grid">
+
+                <div class="col-12 col-md-4">
+                    <label for="archiveServiceTypeSelect" class="form-label small fw-semibold text-muted">Service
+                        Type</label>
+                    <select id="archiveServiceTypeSelect" name="service_type" class="form-select">
+                        <option value="">All Services</option>
+                        @foreach ($serviceTypes ?? [] as $type)
+                            <option value="{{ $type }}"
+                                {{ ($serviceType ?? request()->query('service_type')) === $type ? 'selected' : '' }}>
+                                {{ $type }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-3 d-grid">
                     <button type="submit" class="btn btn-primary" title="Filter">
                         <i class="bi bi-filter"></i> Filter
                     </button>
                 </div>
             </form>
-            @if (request()->anyFilled(['search']))
-                <div class="mt-2">
+
+            @if (request()->anyFilled(['search', 'service_type']))
+                <div class="mt-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <div class="d-flex flex-wrap gap-2 small">
+                        @if (!empty($search))
+                            <span class="badge bg-light text-dark border">Search: "{{ $search }}"</span>
+                        @endif
+                        @if (!empty($serviceType))
+                            <span class="badge bg-light text-dark border">Service: {{ $serviceType }}</span>
+                        @endif
+                    </div>
                     <a href="{{ route('portal.inquiries.archives') }}" class="small text-decoration-none text-danger">
                         <i class="bi bi-x-circle me-1"></i> Clear filters
                     </a>
@@ -65,7 +89,8 @@
                                     Archived
                                 </span>
                             </td>
-                            <td class="d-none d-lg-table-cell text-muted small">{{ $inquiry->deleted_at->format('M d, Y') }}
+                            <td class="d-none d-lg-table-cell text-muted small">
+                                {{ $inquiry->deleted_at->format('M d, Y') }}
                             </td>
                             <td class="text-end px-3">
                                 <div class="btn-group btn-group-sm">
@@ -89,6 +114,10 @@
                             <td colspan="6" class="text-center py-5">
                                 <i class="bi bi-archive fs-1 text-muted d-block mb-2"></i>
                                 <div class="fw-medium">No archived inquiries found</div>
+                                @if (request()->anyFilled(['search', 'service_type']))
+                                    <a href="{{ route('portal.inquiries.archives') }}"
+                                        class="btn btn-sm btn-outline-secondary mt-2">Reset Filters</a>
+                                @endif
                             </td>
                         </tr>
                     @endforelse
@@ -150,23 +179,25 @@
         </div>
     </div>
 
-    <script>
-        const restoreModal = document.getElementById('restoreModal');
-        if (restoreModal) {
-            restoreModal.addEventListener('show.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                document.getElementById('restoreForm').action = button.getAttribute('data-action');
-                document.getElementById('restoreName').textContent = button.getAttribute('data-name');
-            });
-        }
+    @push('scripts')
+        <script>
+            const restoreModal = document.getElementById('restoreModal');
+            if (restoreModal) {
+                restoreModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    document.getElementById('restoreForm').action = button.getAttribute('data-action');
+                    document.getElementById('restoreName').textContent = button.getAttribute('data-name');
+                });
+            }
 
-        const forceDeleteModal = document.getElementById('forceDeleteModal');
-        if (forceDeleteModal) {
-            forceDeleteModal.addEventListener('show.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                document.getElementById('forceDeleteForm').action = button.getAttribute('data-action');
-                document.getElementById('forceDeleteName').textContent = button.getAttribute('data-name');
-            });
-        }
-    </script>
+            const forceDeleteModal = document.getElementById('forceDeleteModal');
+            if (forceDeleteModal) {
+                forceDeleteModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    document.getElementById('forceDeleteForm').action = button.getAttribute('data-action');
+                    document.getElementById('forceDeleteName').textContent = button.getAttribute('data-name');
+                });
+            }
+        </script>
+    @endpush
 @endsection

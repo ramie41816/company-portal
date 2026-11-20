@@ -3,6 +3,8 @@
 
 <head>
     @include('partials.head')
+
+    @stack('styles')
 </head>
 
 <body>
@@ -102,20 +104,13 @@
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 Swal.fire({
-                    toast: true,
-                    position: 'bottom-end',
                     icon: 'success',
-                    title: "{{ session('success') }}",
-                    showConfirmButton: false,
-                    timer: 4000,
-                    timerProgressBar: true,
-                    width: '450px',
+                    title: 'Success',
+                    text: "{{ session('success') }}",
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#0d6efd',
                     customClass: {
-                        popup: 'rounded-4 shadow px-3 py-2'
-                    },
-                    didOpen: (toast) => {
-                        toast.onmouseenter = Swal.stopTimer;
-                        toast.onmouseleave = Swal.resumeTimer;
+                        popup: 'rounded-4 shadow p-4'
                     }
                 });
             });
@@ -126,20 +121,30 @@
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 Swal.fire({
-                    toast: true,
-                    position: 'bottom-end',
                     icon: 'info',
-                    title: "{{ session('info') }}",
-                    showConfirmButton: false,
-                    timer: 5000,
-                    timerProgressBar: true,
-                    width: '450px',
+                    title: 'Notice',
+                    text: "{{ session('info') }}",
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#0d6efd',
                     customClass: {
-                        popup: 'rounded-4 shadow px-3 py-2'
-                    },
-                    didOpen: (toast) => {
-                        toast.onmouseenter = Swal.stopTimer;
-                        toast.onmouseleave = Swal.resumeTimer;
+                        popup: 'rounded-4 shadow p-4'
+                    }
+                });
+            });
+        </script>
+    @endif
+
+    @if (session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: "{{ session('error') }}",
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#dc3545',
+                    customClass: {
+                        popup: 'rounded-4 shadow p-4'
                     }
                 });
             });

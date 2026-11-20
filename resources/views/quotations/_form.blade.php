@@ -1,3 +1,11 @@
+@push('styles')
+    <style>
+        .sub-item-row td {
+            background-color: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.02));
+        }
+    </style>
+@endpush
+
 @php
     $isEdit = isset($quotation);
     $currency = config('company.currency_symbol');
@@ -214,118 +222,113 @@
     </div>
 </form>
 
-<style>
-    .sub-item-row td {
-        background-color: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.02));
-    }
-</style>
+@push('scripts')
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const editorEl = document.querySelector('#editor-container');
+            let quill = null;
+            if (typeof Quill !== 'undefined' && editorEl && !editorEl.classList.contains('ql-container')) {
+                quill = new Quill('#editor-container', {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: [
+                            ['bold', 'italic', 'underline', 'strike'],
+                            ['blockquote'],
+                            [{
+                                'list': 'ordered'
+                            }, {
+                                'list': 'bullet'
+                            }],
+                            [{
+                                'header': [1, 2, 3, false]
+                            }],
+                            ['clean']
+                        ]
+                    }
+                });
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const editorEl = document.querySelector('#editor-container');
-        let quill = null;
-        if (typeof Quill !== 'undefined' && editorEl && !editorEl.classList.contains('ql-container')) {
-            quill = new Quill('#editor-container', {
-                theme: 'snow',
-                modules: {
-                    toolbar: [
-                        ['bold', 'italic', 'underline', 'strike'],
-                        ['blockquote'],
-                        [{
-                            'list': 'ordered'
-                        }, {
-                            'list': 'bullet'
-                        }],
-                        [{
-                            'header': [1, 2, 3, false]
-                        }],
-                        ['clean']
-                    ]
-                }
-            });
-
-            const hiddenInput = document.querySelector('#other_info');
-            quill.on('text-change', function() {
-                const htmlContent = quill.root.innerHTML;
-                hiddenInput.value = (htmlContent === '<p><br></p>' || htmlContent.trim() === '') ? '' :
-                    htmlContent;
-            });
-        }
-
-        const oldItems = @json($oldItems);
-        const currency = @json($currency);
-        const tbody = document.querySelector('#items-table tbody');
-        let globalIndex = 0;
-
-        document.getElementById('quotationForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            if (quill) {
                 const hiddenInput = document.querySelector('#other_info');
-                const htmlContent = quill.root.innerHTML;
-                hiddenInput.value = (htmlContent === '<p><br></p>' || htmlContent.trim() === '') ? '' :
-                    htmlContent;
+                quill.on('text-change', function() {
+                    const htmlContent = quill.root.innerHTML;
+                    hiddenInput.value = (htmlContent === '<p><br></p>' || htmlContent.trim() === '') ? '' :
+                        htmlContent;
+                });
             }
 
-            const isEdit = @json($isEdit);
-            const actionText = isEdit ? 'update this quotation' : 'save this new quotation';
+            const oldItems = @json($oldItems);
+            const currency = @json($currency);
+            const tbody = document.querySelector('#items-table tbody');
+            let globalIndex = 0;
 
-            Swal.fire({
-                title: 'Are you sure?',
-                text: `Do you want to ${actionText}?`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#2b3a67',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, proceed!',
-                cancelButtonText: 'Cancel',
-                customClass: {
-                    popup: 'rounded-4 shadow'
+            document.getElementById('quotationForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                if (quill) {
+                    const hiddenInput = document.querySelector('#other_info');
+                    const htmlContent = quill.root.innerHTML;
+                    hiddenInput.value = (htmlContent === '<p><br></p>' || htmlContent.trim() === '') ? '' :
+                        htmlContent;
                 }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        title: 'Processing...',
-                        text: 'Please wait while we save your changes.',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        },
-                        customClass: {
-                            popup: 'rounded-4 shadow'
-                        }
-                    });
-                    e.target.submit();
-                }
-            });
-        });
 
-        function formatMoney(amount) {
-            return currency + amount.toLocaleString('en-PH', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-            });
-        }
+                const isEdit = @json($isEdit);
+                const actionText = isEdit ? 'update this quotation' : 'save this new quotation';
 
-        function renderRow(item = {}, isSubItem = false, insertAfterRow = null) {
-            const i = globalIndex++;
-            const tr = document.createElement('tr');
-            tr.className = isSubItem ? 'sub-item-row main-item-sub' : 'main-item-row';
-            tr.dataset.index = i;
-            if (isSubItem) {
-                tr.dataset.isSub = "1";
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: `Do you want to ${actionText}?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#2b3a67',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, proceed!',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        popup: 'rounded-4 shadow'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Processing...',
+                            text: 'Please wait while we save your changes.',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            },
+                            customClass: {
+                                popup: 'rounded-4 shadow'
+                            }
+                        });
+                        e.target.submit();
+                    }
+                });
+            });
+
+            function formatMoney(amount) {
+                return currency + amount.toLocaleString('en-PH', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                });
             }
 
-            const paddingLeft = isSubItem ? 'ps-4' : '';
-            const badgeIcon = isSubItem ?
-                '<span class="text-muted small me-2"><i class="bi bi-arrow-return-right"></i> Sub:</span>' :
-                '<span class="badge bg-secondary me-2">Main</span>';
+            function renderRow(item = {}, isSubItem = false, insertAfterRow = null) {
+                const i = globalIndex++;
+                const tr = document.createElement('tr');
+                tr.className = isSubItem ? 'sub-item-row main-item-sub' : 'main-item-row';
+                tr.dataset.index = i;
+                if (isSubItem) {
+                    tr.dataset.isSub = "1";
+                }
 
-            const safeDescription = (item.description ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                const paddingLeft = isSubItem ? 'ps-4' : '';
+                const badgeIcon = isSubItem ?
+                    '<span class="text-muted small me-2"><i class="bi bi-arrow-return-right"></i> Sub:</span>' :
+                    '<span class="badge bg-secondary me-2">Main</span>';
 
-            tr.innerHTML = `
+                const safeDescription = (item.description ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+                tr.innerHTML = `
                 <td class="p-2 ${paddingLeft}">
                     <div class="d-flex align-items-center">
                         ${badgeIcon}
@@ -348,66 +351,67 @@
                 </td>
             `;
 
-            if (insertAfterRow && insertAfterRow.parentNode) {
-                insertAfterRow.parentNode.insertBefore(tr, insertAfterRow.nextSibling);
-            } else {
-                tbody.appendChild(tr);
-            }
-            recalc();
-        }
-
-        function recalc() {
-            let grand = 0;
-            tbody.querySelectorAll('tr').forEach(tr => {
-                const price = parseFloat(tr.querySelector('.price').value) || 0;
-                const qty = parseFloat(tr.querySelector('.qty').value) || 0;
-                const total = price * qty;
-                tr.querySelector('.line-total').textContent = formatMoney(total);
-                grand += total;
-            });
-            document.getElementById('grand-total').textContent = formatMoney(grand);
-        }
-
-        tbody.addEventListener('input', recalc);
-
-        tbody.addEventListener('click', e => {
-            if (e.target.closest('.remove')) {
-                const tr = e.target.closest('tr');
-                if (!tr.classList.contains('main-item-sub')) {
-                    let next = tr.nextElementSibling;
-                    while (next && next.classList.contains('main-item-sub')) {
-                        let toRemove = next;
-                        next = next.nextElementSibling;
-                        toRemove.remove();
-                    }
+                if (insertAfterRow && insertAfterRow.parentNode) {
+                    insertAfterRow.parentNode.insertBefore(tr, insertAfterRow.nextSibling);
+                } else {
+                    tbody.appendChild(tr);
                 }
-                tr.remove();
                 recalc();
             }
-            if (e.target.closest('.add-sub')) {
-                const mainTr = e.target.closest('tr');
 
-                let insertTarget = mainTr;
-                let nextRow = mainTr.nextElementSibling;
-                while (nextRow && nextRow.classList.contains('main-item-sub')) {
-                    insertTarget = nextRow;
-                    nextRow = nextRow.nextElementSibling;
+            function recalc() {
+                let grand = 0;
+                tbody.querySelectorAll('tr').forEach(tr => {
+                    const price = parseFloat(tr.querySelector('.price').value) || 0;
+                    const qty = parseFloat(tr.querySelector('.qty').value) || 0;
+                    const total = price * qty;
+                    tr.querySelector('.line-total').textContent = formatMoney(total);
+                    grand += total;
+                });
+                document.getElementById('grand-total').textContent = formatMoney(grand);
+            }
+
+            tbody.addEventListener('input', recalc);
+
+            tbody.addEventListener('click', e => {
+                if (e.target.closest('.remove')) {
+                    const tr = e.target.closest('tr');
+                    if (!tr.classList.contains('main-item-sub')) {
+                        let next = tr.nextElementSibling;
+                        while (next && next.classList.contains('main-item-sub')) {
+                            let toRemove = next;
+                            next = next.nextElementSibling;
+                            toRemove.remove();
+                        }
+                    }
+                    tr.remove();
+                    recalc();
                 }
+                if (e.target.closest('.add-sub')) {
+                    const mainTr = e.target.closest('tr');
 
-                renderRow({}, true, insertTarget);
+                    let insertTarget = mainTr;
+                    let nextRow = mainTr.nextElementSibling;
+                    while (nextRow && nextRow.classList.contains('main-item-sub')) {
+                        insertTarget = nextRow;
+                        nextRow = nextRow.nextElementSibling;
+                    }
+
+                    renderRow({}, true, insertTarget);
+                }
+            });
+
+            document.getElementById('add-row').addEventListener('click', () => renderRow());
+
+            if (oldItems.length > 0) {
+                oldItems.forEach(item => {
+                    const isSub = item.parent_id !== null && item.parent_id !== undefined && item
+                        .parent_id !== "";
+                    renderRow(item, isSub, tbody.lastElementChild);
+                });
+            } else {
+                renderRow();
             }
         });
-
-        document.getElementById('add-row').addEventListener('click', () => renderRow());
-
-        if (oldItems.length > 0) {
-            oldItems.forEach(item => {
-                const isSub = item.parent_id !== null && item.parent_id !== undefined && item
-                    .parent_id !== "";
-                renderRow(item, isSub, tbody.lastElementChild);
-            });
-        } else {
-            renderRow();
-        }
-    });
-</script>
+    </script>
+@endpush

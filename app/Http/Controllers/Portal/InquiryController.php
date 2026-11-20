@@ -16,23 +16,36 @@ class InquiryController extends Controller
     {
         $search = $request->input('search');
         $status = $request->input('status');
+        $serviceType = $request->input('service_type');
+
+        $serviceTypes = Inquiry::query()
+            ->whereNotNull('service_type')
+            ->where('service_type', '!=', '')
+            ->distinct()
+            ->orderBy('service_type')
+            ->pluck('service_type');
 
         $inquiries = Inquiry::query()
             ->when($search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
-                        ->orWhere('phone', 'like', "%{$search}%")
-                        ->orWhere('address', 'like', "%{$search}%")
-                        ->orWhere('service_type', 'like', "%{$search}%");
+                $escaped = addcslashes($search, '%_\\');
+                $query->where(function ($q) use ($escaped) {
+                    $q->where('name', 'like', "%{$escaped}%")
+                        ->orWhere('email', 'like', "%{$escaped}%")
+                        ->orWhere('phone', 'like', "%{$escaped}%")
+                        ->orWhere('address', 'like', "%{$escaped}%")
+                        ->orWhere('service_type', 'like', "%{$escaped}%");
                 });
             })
             ->when($status, fn($q, $status) => $q->where('status', $status))
+            ->when($serviceType, fn($q, $serviceType) => $q->where('service_type', $serviceType))
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
-        return view('portal-management.inquiries.index', compact('inquiries', 'search', 'status'));
+        return view(
+            'portal-management.inquiries.index',
+            compact('inquiries', 'search', 'status', 'serviceType', 'serviceTypes')
+        );
     }
 
     /**
@@ -40,8 +53,6 @@ class InquiryController extends Controller
      */
     public function show(Inquiry $inquiry)
     {
-        $inquiry->load('assignedStaff');
-
         return view('portal-management.inquiries.show', compact('inquiry'));
     }
 
@@ -51,7 +62,7 @@ class InquiryController extends Controller
     public function updateStatus(Request $request, Inquiry $inquiry)
     {
         $validated = $request->validate([
-            'status' => ['required', 'string', 'in:pending,scheduled,completed,cancelled'],
+            'status' => ['required', 'string', 'in:pending,facilitated,completed,cancelled'],
         ]);
 
         $inquiry->update([
@@ -77,21 +88,35 @@ class InquiryController extends Controller
     public function archives(Request $request)
     {
         $search = $request->input('search');
+        $serviceType = $request->input('service_type');
+
+        $serviceTypes = Inquiry::onlyTrashed()
+            ->whereNotNull('service_type')
+            ->where('service_type', '!=', '')
+            ->distinct()
+            ->orderBy('service_type')
+            ->pluck('service_type');
 
         $inquiries = Inquiry::onlyTrashed()
             ->when($search, function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
-                        ->orWhere('phone', 'like', "%{$search}%")
-                        ->orWhere('address', 'like', "%{$search}%");
+                $escaped = addcslashes($search, '%_\\');
+                $query->where(function ($q) use ($escaped) {
+                    $q->where('name', 'like', "%{$escaped}%")
+                        ->orWhere('email', 'like', "%{$escaped}%")
+                        ->orWhere('phone', 'like', "%{$escaped}%")
+                        ->orWhere('address', 'like', "%{$escaped}%")
+                        ->orWhere('service_type', 'like', "%{$escaped}%");
                 });
             })
+            ->when($serviceType, fn($q, $serviceType) => $q->where('service_type', $serviceType))
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
-        return view('portal-management.inquiries.archives', compact('inquiries', 'search'));
+        return view(
+            'portal-management.inquiries.archives',
+            compact('inquiries', 'search', 'serviceType', 'serviceTypes')
+        );
     }
 
     /**

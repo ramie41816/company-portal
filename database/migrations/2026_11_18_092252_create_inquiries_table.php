@@ -19,8 +19,7 @@ return new class extends Migration
             $table->string('service_type');
             $table->text('address');
             $table->text('notes')->nullable();
-            $table->enum('status', ['pending', 'scheduled', 'completed', 'cancelled'])->default('pending');
-            $table->foreignId('assigned_staff_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->enum('status', ['pending', 'facilitated'])->default('pending');
             $table->softDeletes();
             $table->timestamps();
         });

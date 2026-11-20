@@ -109,14 +109,14 @@
                             </td>
                             <td>
                                 @if ($inquiry->status === 'pending')
-                                    <span class="badge px-2 py-1 shadow-sm text-uppercase"
-                                        style="background-color: #ffc107; color: #000000; font-size: 0.7rem;">Pending</span>
-                                @elseif ($inquiry->status === 'completed')
-                                    <span class="badge px-2 py-1 shadow-sm text-uppercase"
-                                        style="background-color: #198754; color: #ffffff; font-size: 0.7rem;">Completed</span>
+                                    <span class="badge bg-warning text-dark px-2 py-1 shadow-sm text-uppercase"
+                                        style="font-size: 0.7rem;">Pending</span>
+                                @elseif ($inquiry->status === 'facilitated')
+                                    <span class="badge bg-success px-2 py-1 shadow-sm text-uppercase"
+                                        style="font-size: 0.7rem;">Facilitated</span>
                                 @else
-                                    <span class="badge px-2 py-1 shadow-sm text-uppercase"
-                                        style="background-color: #0d6efd; color: #ffffff; font-size: 0.7rem;">{{ ucfirst($inquiry->status) }}</span>
+                                    <span class=badge bg-secondary text-white px-2 py-1 text-uppercase"
+                                        style="font-size: 0.7rem;">{{ ucfirst($inquiry->status) }}</span>
                                 @endif
                             </td>
                             <td class="text-muted small d-none d-md-table-cell">

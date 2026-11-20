@@ -24,9 +24,9 @@
                     @if ($inquiry->status === 'pending')
                         <span class="badge bg-warning text-dark px-3 py-2 text-uppercase"
                             style="font-size: 0.8rem;">Pending</span>
-                    @elseif ($inquiry->status === 'completed')
+                    @elseif ($inquiry->status === 'facilitated')
                         <span class="badge bg-success text-white px-3 py-2 text-uppercase"
-                            style="font-size: 0.8rem;">Completed</span>
+                            style="font-size: 0.8rem;">Facilitated</span>
                     @else
                         <span class="badge bg-secondary text-white px-3 py-2 text-uppercase"
                             style="font-size: 0.8rem;">{{ ucfirst($inquiry->status) }}</span>
@@ -70,23 +70,22 @@
                             </div>
 
                             @if (auth()->user()->hasPermission('portal.update'))
-                                <form action="{{ route('portal.inquiries.update-status', $inquiry) }}" method="POST"
-                                    class="mt-3">
+                                <form id="updateStatusForm" action="{{ route('portal.inquiries.update-status', $inquiry) }}"
+                                    method="POST" class="mt-3">
                                     @csrf
                                     @method('PUT')
                                     <label class="form-label small fw-semibold text-muted">Update Request Status</label>
                                     <div class="input-group">
-                                        <select name="status" class="form-select">
+                                        <select id="statusSelect" name="status" class="form-select"
+                                            data-current-status="{{ $inquiry->status }}">
                                             <option value="pending" {{ $inquiry->status === 'pending' ? 'selected' : '' }}>
                                                 Pending</option>
-                                            <option value="scheduled"
-                                                {{ $inquiry->status === 'scheduled' ? 'selected' : '' }}>Scheduled</option>
-                                            <option value="completed"
-                                                {{ $inquiry->status === 'completed' ? 'selected' : '' }}>Completed</option>
-                                            <option value="cancelled"
-                                                {{ $inquiry->status === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                            <option value="facilitated"
+                                                {{ $inquiry->status === 'facilitated' ? 'selected' : '' }}>Facilitated
+                                            </option>
                                         </select>
-                                        <button type="submit" class="btn btn-primary">Save Status</button>
+                                        <button type="button" id="saveStatusBtn" class="btn btn-primary">Save
+                                            Status</button>
                                     </div>
                                 </form>
                             @endif
@@ -109,3 +108,52 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const saveBtn = document.getElementById('saveStatusBtn');
+            const select = document.getElementById('statusSelect');
+            const form = document.getElementById('updateStatusForm');
+
+            if (saveBtn && select && form) {
+                saveBtn.addEventListener('click', function() {
+                    const currentStatus = select.dataset.currentStatus;
+                    const selectedStatus = select.value;
+
+                    if (currentStatus === selectedStatus) {
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'No change detected',
+                            text: `Status is already set to ${selectedStatus.toUpperCase()}.`,
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#0d6efd',
+                            customClass: {
+                                popup: 'rounded-4 shadow p-4'
+                            }
+                        });
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: 'Update Status?',
+                        text: `Change status to ${selectedStatus.toUpperCase()}?`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, update',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#0d6efd',
+                        customClass: {
+                            popup: 'rounded-4 shadow p-4'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+@endpush

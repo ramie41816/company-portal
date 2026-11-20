@@ -125,16 +125,18 @@
         </div>
     </div>
 
-    <script>
-        document.getElementById('restoreModal').addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            document.getElementById('restoreForm').action = button.dataset.action;
-            document.getElementById('restoreName').textContent = button.dataset.name;
-        });
-        document.getElementById('forceDeleteModal').addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            document.getElementById('forceDeleteForm').action = button.dataset.action;
-            document.getElementById('forceDeleteName').textContent = button.dataset.name;
-        });
-    </script>
+    @push('scripts')
+        <script>
+            document.getElementById('restoreModal').addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                document.getElementById('restoreForm').action = button.dataset.action;
+                document.getElementById('restoreName').textContent = button.dataset.name;
+            });
+            document.getElementById('forceDeleteModal').addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                document.getElementById('forceDeleteForm').action = button.dataset.action;
+                document.getElementById('forceDeleteName').textContent = button.dataset.name;
+            });
+        </script>
+    @endpush
 @endsection
