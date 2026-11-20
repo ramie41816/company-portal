@@ -94,8 +94,8 @@
                 <div id="scheduleCalendar"></div>
             </div>
         </div>
-        <div class="col-lg-4">
-            <div class="panel p-4 h-100 d-flex flex-column shadow-sm border-0">
+        <div class="col-lg-4 d-none d-lg-block">
+            <div class="panel p-4 h-100 d-none d-lg-flex flex-column shadow-sm border-0">
                 <h5 class="fw-semibold mb-1"><i class="bi bi-list-task me-1"></i> Schedules on <span
                         class="text-brand fw-bold mb-3 fs-5" id="selectedDateLabel">Today</span>
                 </h5>
@@ -276,7 +276,7 @@
                 const todayStr = new Date().toISOString().split('T')[0];
                 loadSchedulesForDate(todayStr);
 
-                // 2. Responsive view & toolbar handlers (switches to listWeek on mobile <= 768px)
+                // 2. Responsive view & toolbar handlers
                 const getResponsiveView = () => window.innerWidth <= 768 ? 'listWeek' : 'dayGridMonth';
                 const getResponsiveToolbar = () => window.innerWidth <= 768 ? {
                     left: 'prev,next',
@@ -285,7 +285,7 @@
                 } : {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,listWeek'
+                    right: 'dayGridMonth,timeGridWeek'
                 };
 
                 const calendar = new window.FullCalendar.Calendar(calendarEl, {

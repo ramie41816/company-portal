@@ -9,7 +9,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/services', [ServiceApiController::class, 'index']);
 
     // Protected Inquiry Submission
-    Route::middleware('api.key')->group(function () {
+    Route::middleware(['api.key', 'throttle:5,1'])->group(function () {
         Route::post('/inquiries', [InquiryApiController::class, 'store']);
     });
 });

@@ -1,11 +1,11 @@
 @php
     if (isset($template_viewing) && $template_viewing):
-        $schedule =
-            $schedule ??
+        $inquiry =
+            $inquiry ??
             (object) [
-                'schedule_number' => 'INQ-SAMPLE-000',
-                'scheduled_to' => 'Valued Client',
-                'reference_project' => 'Sample Service',
+                'reference_id' => 'INQ-20261121-ABC12',
+                'name' => 'Valued Client',
+                'service_type' => 'Sample Service',
             ];
         $executedBy = $executedBy ?? 'Customer Support Team';
         $generalRemarks = $generalRemarks ?? null;
@@ -18,7 +18,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inquiry Confirmation - {{ $schedule->schedule_number ?? 'SAMPLE' }}</title>
+    <title>Inquiry Confirmation - {{ $inquiry->reference_id ?? 'SAMPLE' }}</title>
     <style>
         body {
             background-color: #f8fafc;
@@ -149,7 +149,7 @@
             </div>
 
             <div class="email-body">
-                <p>Dear <strong>{{ $schedule->scheduled_to ?? 'Valued Client' }}</strong>,</p>
+                <p>Dear <strong>{{ $inquiry->name ?? 'Valued Client' }}</strong>,</p>
 
                 <p>Thank you for reaching out to us! We have successfully received your inquiry and our team is
                     currently reviewing your request.</p>
@@ -158,11 +158,11 @@
                     <table>
                         <tr>
                             <td class="label">Inquiry Ref:</td>
-                            <td class="value" style="color: #0f3460;">{{ $schedule->schedule_number ?? '—' }}</td>
+                            <td class="value" style="color: #0f3460;">{{ $inquiry->reference_id ?? '—' }}</td>
                         </tr>
                         <tr>
                             <td class="label">Service Requested:</td>
-                            <td class="value">{{ $schedule->reference_project ?? '—' }}</td>
+                            <td class="value">{{ $inquiry->service_type ?? '—' }}</td>
                         </tr>
                         <tr>
                             <td class="label">Handled By:</td>

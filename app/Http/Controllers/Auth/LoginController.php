@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Rules\ValidTurnstileToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Http;
 
 class LoginController extends Controller
 {
@@ -16,26 +16,14 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        // 1. Check Honeypot
         if ($request->filled('website')) {
             return back()->withErrors(['email' => 'Spam detected.'])->onlyInput('email');
         }
 
-        // 2. Validate standard inputs & Turnstile response
         $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
-            'cf-turnstile-response' => ['required', function ($attribute, $value, $fail) use ($request) {
-                $response = Http::asForm()->post('https://challenges.cloudflare.com/turnstile/v0/siteverify', [
-                    'secret' => config('services.turnstile.secret_key'),
-                    'response' => $value,
-                    'remoteip' => $request->ip(),
-                ]);
-
-                if (! $response->json('success')) {
-                    $fail('The security captcha verification failed. Please try again.');
-                }
-            }],
+            'cf-turnstile-response' => [new ValidTurnstileToken()],
         ]);
 
         $credentials = $request->only('email', 'password');
