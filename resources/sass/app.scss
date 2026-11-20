@@ -1,9 +1,32 @@
 @import 'bootstrap/scss/bootstrap';
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 @import 'quill/dist/quill.snow.css';
-
-/* ---------- Base & Fonts ---------- */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+    --brand: #0d6efd;
+    --accent: #0d6efd;
+    --brand-dark: color-mix(in srgb, var(--brand) 78%, black);
+    --brand-soft: color-mix(in srgb, var(--brand) 8%, white);
+    --brand-text: var(--brand);
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --line: #e8eaee;
+    --surface: #f6f7f9;
+    --card: #ffffff;
+    --field: #ffffff;
+}
+
+[data-bs-theme="dark"] {
+    --brand-soft: color-mix(in srgb, var(--brand) 35%, var(--card));
+    --brand-text: color-mix(in srgb, var(--brand) 40%, white);
+    --ink: #e5e7eb;
+    --muted: #9ca3af;
+    --line: #2a3340;
+    --surface: #0f1620;
+    --card: #161e2a;
+    --field: #0f1620;
+}
 
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
@@ -28,8 +51,19 @@ h3,
     color: var(--ink) !important;
 }
 
+.text-muted {
+    color: var(--muted) !important;
+}
+
 .bg-brand {
     background: var(--brand) !important;
+}
+
+.brand-logo {
+    display: block;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
 }
 
 .input-group:focus-within {
@@ -45,7 +79,28 @@ h3,
     box-shadow: none;
 }
 
-/* ---------- Buttons ---------- */
+.form-label {
+    font-weight: 500;
+    font-size: .875rem;
+}
+
+.form-control,
+.form-select {
+    border-radius: .65rem;
+    padding: .7rem .95rem;
+    border-color: var(--line);
+    background-color: var(--field);
+    color: var(--ink);
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: var(--field);
+    color: var(--ink);
+    border-color: var(--brand);
+    box-shadow: 0 0 0 .22rem color-mix(in srgb, var(--brand) 25%, transparent);
+}
+
 .btn {
     --bs-btn-padding-y: .6rem;
     --bs-btn-padding-x: 1.25rem;
@@ -84,30 +139,6 @@ h3,
     --bs-btn-disabled-border-color: var(--line);
 }
 
-/* ---------- Forms ---------- */
-.form-label {
-    font-weight: 500;
-    font-size: .875rem;
-}
-
-.form-control,
-.form-select {
-    border-radius: .65rem;
-    padding: .7rem .95rem;
-    border-color: var(--line);
-    background-color: var(--field);
-    color: var(--ink);
-}
-
-.form-control:focus,
-.form-select:focus {
-    background-color: var(--field);
-    color: var(--ink);
-    border-color: var(--brand);
-    box-shadow: 0 0 0 .22rem color-mix(in srgb, var(--brand) 25%, transparent);
-}
-
-/* ---------- Theme toggle ---------- */
 .theme-toggle {
     width: 38px;
     height: 38px;
@@ -125,7 +156,6 @@ h3,
     color: var(--accent);
 }
 
-/* ---------- Login (split screen) ---------- */
 .auth-side {
     position: relative;
     overflow: hidden;
@@ -155,7 +185,6 @@ h3,
     background: var(--card);
 }
 
-/* ---------- Top bar ---------- */
 .topbar {
     background: var(--card);
     border-top: 3px solid var(--accent);
@@ -173,14 +202,17 @@ h3,
     color: var(--brand-text);
 }
 
-/* ---------- Landing ---------- */
 .hero {
     position: relative;
     overflow: hidden;
-    color: #fff;
+    color: #ffffff;
     border-radius: 1.25rem;
     padding: 2.75rem;
-    background: linear-gradient(120deg, var(--brand), var(--brand-dark));
+    background-color: var(--brand);
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
 .hero::after {
@@ -203,12 +235,16 @@ h3,
     background: var(--card);
     border: 1px solid var(--line);
     border-radius: 1rem;
-    transition: transform .2s ease, box-shadow .2s ease;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
 }
 
 .service-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 .9rem 2rem rgba(0, 0, 0, .12);
+    box-shadow: 0 .9rem 2rem rgba(0, 0, 0, .14);
+}
+
+[data-bs-theme="dark"] .service-card:hover {
+    box-shadow: 0 .9rem 2rem rgba(0, 0, 0, .35);
 }
 
 .service-icon {
@@ -229,7 +265,6 @@ h3,
     font-weight: 500;
 }
 
-/* ---------- Module sidebar ---------- */
 .side-nav {
     background: var(--card);
     border: 1px solid var(--line);
@@ -267,7 +302,24 @@ h3,
     box-shadow: inset 3px 0 0 var(--accent);
 }
 
-/* ---------- Panels & tables ---------- */
+.sticky-sidebar {
+    position: sticky;
+    top: 100px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    z-index: 1020;
+    align-self: flex-start;
+}
+
+.sticky-sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sticky-sidebar::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--ink) 18%, transparent);
+    border-radius: 10px;
+}
+
 .page-head .sub {
     color: var(--muted);
     font-size: .9rem;
@@ -319,6 +371,11 @@ h3,
     white-space: nowrap;
 }
 
+.sub-item-row,
+.sub-item-row td {
+    background-color: var(--surface) !important;
+}
+
 .ql-toolbar.ql-snow {
     background-color: #f8f9fa !important;
     border-color: #dee2e6 !important;
@@ -359,19 +416,10 @@ h3,
     border-color: #dee2e6 !important;
 }
 
-.sub-item-row td {
-    background-color: rgba(0, 0, 0, 0.015);
-}
-
-.sub-item-row {
-    background-color: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.02)) !important;
-}
-
 #backToTopBtn {
     position: fixed;
     bottom: 30px;
     left: 30px;
-    /* Positioned on the lower left */
     right: auto;
     width: 48px;
     height: 48px;
@@ -388,7 +436,6 @@ h3,
     transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease, background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Active state visible on scroll */
 #backToTopBtn.show {
     opacity: 1;
     visibility: visible;
@@ -402,28 +449,6 @@ h3,
     border-color: var(--brand, #0d6efd);
 }
 
-.sticky-sidebar {
-    position: sticky;
-    top: 100px;
-    max-height: calc(100vh - 120px);
-    overflow-y: auto;
-    z-index: 1020;
-    align-self: flex-start;
-}
-
-/* Optional: Custom scrollbar styling for the sidebar for a smoother look */
-.sticky-sidebar::-webkit-scrollbar {
-    width: 5px;
-}
-
-.sticky-sidebar::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-}
-
-/* FullCalendar List View Dark & Light Mode Adaptability */
-
-/* Light mode defaults */
 .fc-theme-standard .fc-list {
     border-color: var(--line, #dee2e6);
     background-color: var(--card, #ffffff);
@@ -431,7 +456,7 @@ h3,
 
 .fc .fc-list-day-cals,
 .fc .fc-list-day-top {
-    background-color: var(--card-muted, #f8f9fa) !important;
+    background-color: var(--surface, #f8f9fa) !important;
     color: var(--ink, #212529) !important;
 }
 
@@ -449,7 +474,6 @@ h3,
     text-decoration: none;
 }
 
-/* Dark mode overrides (automatically hooks into your app's dark mode selectors, e.g., [data-bs-theme="dark"] or body.dark) */
 [data-bs-theme="dark"] .fc-theme-standard .fc-list,
 body.dark .fc-theme-standard .fc-list {
     background-color: var(--card, #1a1d20);
@@ -458,7 +482,7 @@ body.dark .fc-theme-standard .fc-list {
 
 [data-bs-theme="dark"] .fc .fc-list-day-top,
 body.dark .fc .fc-list-day-top {
-    background-color: var(--card-muted, #212529) !important;
+    background-color: var(--surface, #212529) !important;
     color: var(--ink, #f8f9fa) !important;
 }
 
@@ -480,8 +504,11 @@ body.dark .fc .fc-list-event:hover td {
     background-color: rgba(255, 255, 255, 0.05) !important;
 }
 
-/* ---------- Mobile screens ---------- */
 @media (max-width: 768px) {
+    .hero {
+        background-attachment: scroll;
+    }
+
     #scheduleCalendar {
         font-size: 0.85rem;
     }
@@ -496,14 +523,12 @@ body.dark .fc .fc-list-event:hover td {
     }
 }
 
-/* ---------- Small screens ---------- */
 @media (max-width: 575.98px) {
     .hero {
         padding: 1.75rem;
     }
 }
 
-/* ---------- Printing ---------- */
 @media print {
     .table-elegant {
         min-width: 0;

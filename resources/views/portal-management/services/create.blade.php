@@ -123,40 +123,42 @@
         </div>
     </form>
 
-    <script>
-        document.getElementById('createServiceForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+    @push('scripts')
+        <script>
+            document.getElementById('createServiceForm').addEventListener('submit', function(e) {
+                e.preventDefault();
 
-            Swal.fire({
-                title: 'Save new service?',
-                text: 'This service will be saved and added to your website options.',
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#0d6efd',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, save service!',
-                cancelButtonText: 'Cancel',
-                customClass: {
-                    popup: 'rounded-4 shadow'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        title: 'Saving...',
-                        text: 'Please wait while we save your service information.',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        },
-                        customClass: {
-                            popup: 'rounded-4 shadow'
-                        }
-                    });
-                    e.target.submit();
-                }
+                Swal.fire({
+                    title: 'Save new service?',
+                    text: 'This service will be saved and added to your website options.',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#0d6efd',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, save service!',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        popup: 'rounded-4 shadow'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Saving...',
+                            text: 'Please wait while we save your service information.',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            },
+                            customClass: {
+                                popup: 'rounded-4 shadow'
+                            }
+                        });
+                        e.target.submit();
+                    }
+                });
             });
-        });
-    </script>
+        </script>
+    @endpush
 @endsection

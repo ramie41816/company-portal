@@ -1,43 +1,6 @@
 @extends('layouts.user')
 
 @section('user_content')
-    <style>
-        @media print {
-            html[data-bs-theme] {
-                --card: #ffffff;
-                --surface: #ffffff;
-                --ink: #111111;
-                --muted: #555555;
-                --line: #dddddd;
-            }
-
-            body {
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-
-            .topbar,
-            .d-print-none {
-                display: none !important;
-            }
-
-            .col-md-3 {
-                display: none !important;
-            }
-
-            .col-md-9 {
-                flex: 0 0 100% !important;
-                max-width: 100% !important;
-                width: 100% !important;
-            }
-
-            .panel {
-                box-shadow: none !important;
-                border: 0 !important;
-            }
-        }
-    </style>
-
     <div
         class="d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2 mb-4 d-print-none">
         <a href="{{ route('users.index') }}" class="btn btn-outline-secondary btn-sm">

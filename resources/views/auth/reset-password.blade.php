@@ -69,14 +69,6 @@
             @enderror
         </div>
 
-        {{-- Cloudflare Turnstile Widget --}}
-        <div class="mb-3">
-            <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}"></div>
-            @error('cf-turnstile-response')
-                <div class="invalid-feedback d-block mt-1">{{ $message }}</div>
-            @enderror
-        </div>
-
         {{-- Submit Button --}}
         <button type="submit" id="submitBtn" class="btn btn-brand w-100 py-2 fw-semibold mb-3 position-relative">
             <span id="btnText">

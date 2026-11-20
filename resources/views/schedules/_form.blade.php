@@ -1,3 +1,10 @@
+@push('styles')
+    <style>
+        .sub-item-row td {
+            background-color: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.02));
+        }
+    </style>
+@endpush
 @php
     $isEdit = isset($schedule) && $schedule->exists;
     $currency = config('company.currency_symbol');
@@ -300,190 +307,185 @@
     </div>
 </form>
 
-<style>
-    .sub-item-row td {
-        background-color: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.02));
-    }
-</style>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const editorEl = document.querySelector('#editor-container');
-        let quill = null;
-        if (typeof Quill !== 'undefined' && editorEl && !editorEl.classList.contains('ql-container')) {
-            quill = new Quill('#editor-container', {
-                theme: 'snow',
-                modules: {
-                    toolbar: [
-                        ['bold', 'italic', 'underline'],
-                        [{
-                            'list': 'ordered'
-                        }, {
-                            'list': 'bullet'
-                        }],
-                        ['clean']
-                    ]
-                }
-            });
-            const hiddenInput = document.querySelector('#other_info');
-            quill.on('text-change', function() {
-                const htmlContent = quill.root.innerHTML;
-                hiddenInput.value = (htmlContent === '<p><br></p>' || htmlContent.trim() === '') ? '' :
-                    htmlContent;
-            });
-        }
-
-        const oldItems = @json($oldItems);
-        const currency = @json($currency);
-        const hasQuotation = @json($hasQuotation);
-        const tbody = document.querySelector('#items-table tbody');
-        let globalIndex = 0;
-
-        const statusSelect = document.getElementById('status');
-
-        function canEditPaymentAndStatus() {
-            const currentStatus = statusSelect ? statusSelect.value : 'scheduled';
-            return currentStatus === 'ongoing' || currentStatus === 'completed';
-        }
-
-        function updatePaymentAndStatusState() {
-            const enabled = canEditPaymentAndStatus();
-            document.querySelectorAll('#personnel-table .personnel-payment, #personnel-table .form-check-input')
-                .forEach(el => {
-                    el.disabled = !enabled;
-                    if (!enabled) {
-                        el.title =
-                            "Payment and paid status can only be modified when status is Ongoing or Completed.";
-                        if (el.classList.contains('personnel-payment') && (el.value === '' || el.value ===
-                                null)) {
-                            el.value = '0';
-                        }
-                    } else {
-                        el.removeAttribute('title');
+@push('scripts')
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const editorEl = document.querySelector('#editor-container');
+            let quill = null;
+            if (typeof Quill !== 'undefined' && editorEl && !editorEl.classList.contains('ql-container')) {
+                quill = new Quill('#editor-container', {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: [
+                            ['bold', 'italic', 'underline'],
+                            [{
+                                'list': 'ordered'
+                            }, {
+                                'list': 'bullet'
+                            }],
+                            ['clean']
+                        ]
                     }
                 });
-        }
-
-        if (statusSelect) {
-            statusSelect.addEventListener('change', () => {
-                updatePaymentAndStatusState();
-                // If switching back to a locked state, reset any empty payment inputs to 0
-                if (!canEditPaymentAndStatus()) {
-                    document.querySelectorAll('#personnel-table .personnel-payment').forEach(input => {
-                        if (input.value === '' || isNaN(input.value)) {
-                            input.value = '0';
-                        }
-                    });
-                    document.querySelectorAll('#personnel-table .form-check-input').forEach(chk => {
-                        chk.checked = false;
-                    });
-                    recalcPersonnel();
-                }
-            });
-        }
-
-        document.getElementById('scheduleForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            if (quill) {
                 const hiddenInput = document.querySelector('#other_info');
-                const htmlContent = quill.root.innerHTML;
-                hiddenInput.value = (htmlContent === '<p><br></p>' || htmlContent.trim() === '') ? '' :
-                    htmlContent;
+                quill.on('text-change', function() {
+                    const htmlContent = quill.root.innerHTML;
+                    hiddenInput.value = (htmlContent === '<p><br></p>' || htmlContent.trim() === '') ? '' :
+                        htmlContent;
+                });
             }
 
-            // Fallback: If status is not ongoing/completed, ensure payment defaults to 0 and is_paid is 0 so validation passes seamlessly
-            const enabled = canEditPaymentAndStatus();
-            document.querySelectorAll('#personnel-table tr').forEach(tr => {
-                const paymentInput = tr.querySelector('.personnel-payment');
-                const checkbox = tr.querySelector('.form-check-input');
-                if (!enabled) {
-                    if (paymentInput) {
-                        paymentInput.disabled = false;
-                        if (paymentInput.value === '' || isNaN(paymentInput.value)) {
-                            paymentInput.value = '0';
-                        }
-                    }
-                    if (checkbox) {
-                        checkbox.disabled = false;
-                        checkbox.checked = false;
-                    }
-                } else {
-                    if (paymentInput) paymentInput.disabled = false;
-                    if (checkbox) checkbox.disabled = false;
-                }
-            });
+            const oldItems = @json($oldItems);
+            const currency = @json($currency);
+            const hasQuotation = @json($hasQuotation);
+            const tbody = document.querySelector('#items-table tbody');
+            let globalIndex = 0;
 
-            const isEdit = @json($isEdit);
-            const actionText = isEdit ? 'update this schedule' : 'save this new schedule';
+            const statusSelect = document.getElementById('status');
 
-            Swal.fire({
-                title: 'Are you sure?',
-                text: `Do you want to ${actionText}?`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#2b3a67',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, proceed!',
-                cancelButtonText: 'Cancel',
-                customClass: {
-                    popup: 'rounded-4 shadow'
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        title: 'Processing...',
-                        text: 'Please wait while we save your changes.',
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        showConfirmButton: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        },
-                        customClass: {
-                            popup: 'rounded-4 shadow'
+            function canEditPaymentAndStatus() {
+                const currentStatus = statusSelect ? statusSelect.value : 'scheduled';
+                return currentStatus === 'ongoing' || currentStatus === 'completed';
+            }
+
+            function updatePaymentAndStatusState() {
+                const enabled = canEditPaymentAndStatus();
+                document.querySelectorAll('#personnel-table .personnel-payment, #personnel-table .form-check-input')
+                    .forEach(el => {
+                        el.disabled = !enabled;
+                        if (!enabled) {
+                            el.title =
+                                "Payment and paid status can only be modified when status is Ongoing or Completed.";
+                            if (el.classList.contains('personnel-payment') && (el.value === '' || el.value ===
+                                    null)) {
+                                el.value = '0';
+                            }
+                        } else {
+                            el.removeAttribute('title');
                         }
                     });
-                    e.target.submit();
-                } else {
+            }
+
+            if (statusSelect) {
+                statusSelect.addEventListener('change', () => {
                     updatePaymentAndStatusState();
+                    // If switching back to a locked state, reset any empty payment inputs to 0
+                    if (!canEditPaymentAndStatus()) {
+                        document.querySelectorAll('#personnel-table .personnel-payment').forEach(input => {
+                            if (input.value === '' || isNaN(input.value)) {
+                                input.value = '0';
+                            }
+                        });
+                        document.querySelectorAll('#personnel-table .form-check-input').forEach(chk => {
+                            chk.checked = false;
+                        });
+                        recalcPersonnel();
+                    }
+                });
+            }
+
+            document.getElementById('scheduleForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                if (quill) {
+                    const hiddenInput = document.querySelector('#other_info');
+                    const htmlContent = quill.root.innerHTML;
+                    hiddenInput.value = (htmlContent === '<p><br></p>' || htmlContent.trim() === '') ? '' :
+                        htmlContent;
                 }
+
+                // Fallback: If status is not ongoing/completed, ensure payment defaults to 0 and is_paid is 0 so validation passes seamlessly
+                const enabled = canEditPaymentAndStatus();
+                document.querySelectorAll('#personnel-table tr').forEach(tr => {
+                    const paymentInput = tr.querySelector('.personnel-payment');
+                    const checkbox = tr.querySelector('.form-check-input');
+                    if (!enabled) {
+                        if (paymentInput) {
+                            paymentInput.disabled = false;
+                            if (paymentInput.value === '' || isNaN(paymentInput.value)) {
+                                paymentInput.value = '0';
+                            }
+                        }
+                        if (checkbox) {
+                            checkbox.disabled = false;
+                            checkbox.checked = false;
+                        }
+                    } else {
+                        if (paymentInput) paymentInput.disabled = false;
+                        if (checkbox) checkbox.disabled = false;
+                    }
+                });
+
+                const isEdit = @json($isEdit);
+                const actionText = isEdit ? 'update this schedule' : 'save this new schedule';
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: `Do you want to ${actionText}?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#2b3a67',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, proceed!',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        popup: 'rounded-4 shadow'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Processing...',
+                            text: 'Please wait while we save your changes.',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            },
+                            customClass: {
+                                popup: 'rounded-4 shadow'
+                            }
+                        });
+                        e.target.submit();
+                    } else {
+                        updatePaymentAndStatusState();
+                    }
+                });
             });
-        });
 
-        function formatMoney(amount) {
-            return currency + amount.toLocaleString('en-PH', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
-        }
+            function formatMoney(amount) {
+                return currency + amount.toLocaleString('en-PH', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
 
-        function renderRow(item = {}, isSubItem = false, insertAfterRow = null) {
-            const i = globalIndex++;
-            const tr = document.createElement('tr');
-            tr.className = isSubItem ? 'sub-item-row main-item-sub' : 'main-item-row';
-            tr.dataset.index = i;
-            if (isSubItem) tr.dataset.isSub = "1";
+            function renderRow(item = {}, isSubItem = false, insertAfterRow = null) {
+                const i = globalIndex++;
+                const tr = document.createElement('tr');
+                tr.className = isSubItem ? 'sub-item-row main-item-sub' : 'main-item-row';
+                tr.dataset.index = i;
+                if (isSubItem) tr.dataset.isSub = "1";
 
-            const paddingLeft = isSubItem ? 'ps-4' : '';
-            const badgeIcon = isSubItem ?
-                '<span class="text-muted small me-2"><i class="bi bi-arrow-return-right"></i> Sub:</span>' :
-                '<span class="badge bg-secondary me-2">Main</span>';
-            const safeDescription = (item.description ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-            const readonlyAttr = hasQuotation ? 'readonly' : '';
+                const paddingLeft = isSubItem ? 'ps-4' : '';
+                const badgeIcon = isSubItem ?
+                    '<span class="text-muted small me-2"><i class="bi bi-arrow-return-right"></i> Sub:</span>' :
+                    '<span class="badge bg-secondary me-2">Main</span>';
+                const safeDescription = (item.description ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                const readonlyAttr = hasQuotation ? 'readonly' : '';
 
-            let actionsHtml = '';
-            if (!hasQuotation) {
-                actionsHtml = `
+                let actionsHtml = '';
+                if (!hasQuotation) {
+                    actionsHtml = `
                 <td class="p-2 text-end align-middle">
                     <div class="btn-group" role="group">
                         ${!isSubItem ? `<button type="button" class="btn btn-sm btn-outline-primary add-sub" title="Add Sub-item"><i class="bi bi-plus-lg"></i></button>` : ''}
                         <button type="button" class="btn btn-sm btn-outline-danger remove" title="Remove"><i class="bi bi-x-lg"></i></button>
                     </div>
                 </td>`;
-            }
+                }
 
-            tr.innerHTML = `
+                tr.innerHTML = `
                 <td class="p-2 ${paddingLeft}">
                     <div class="d-flex align-items-center">
                         ${badgeIcon}
@@ -501,101 +503,101 @@
                 ${actionsHtml}
             `;
 
-            if (insertAfterRow && insertAfterRow.parentNode) {
-                insertAfterRow.parentNode.insertBefore(tr, insertAfterRow.nextSibling);
-            } else {
-                tbody.appendChild(tr);
-            }
-            recalc();
-        }
-
-        function recalc() {
-            let grand = 0;
-            tbody.querySelectorAll('tr').forEach(tr => {
-                const price = parseFloat(tr.querySelector('.price').value) || 0;
-                const qty = parseFloat(tr.querySelector('.qty').value) || 0;
-                const total = price * qty;
-                tr.querySelector('.line-total').textContent = formatMoney(total);
-                grand += total;
-            });
-            document.getElementById('grand-total').textContent = formatMoney(grand);
-        }
-
-        tbody.addEventListener('input', recalc);
-
-        tbody.addEventListener('click', e => {
-            if (hasQuotation) return;
-
-            if (e.target.closest('.remove')) {
-                const tr = e.target.closest('tr');
-                if (!tr.classList.contains('main-item-sub')) {
-                    let next = tr.nextElementSibling;
-                    while (next && next.classList.contains('main-item-sub')) {
-                        let toRemove = next;
-                        next = next.nextElementSibling;
-                        toRemove.remove();
-                    }
+                if (insertAfterRow && insertAfterRow.parentNode) {
+                    insertAfterRow.parentNode.insertBefore(tr, insertAfterRow.nextSibling);
+                } else {
+                    tbody.appendChild(tr);
                 }
-                tr.remove();
                 recalc();
             }
-            if (e.target.closest('.add-sub')) {
-                const mainTr = e.target.closest('tr');
-                let insertTarget = mainTr;
-                let nextRow = mainTr.nextElementSibling;
-                while (nextRow && nextRow.classList.contains('main-item-sub')) {
-                    insertTarget = nextRow;
-                    nextRow = nextRow.nextElementSibling;
+
+            function recalc() {
+                let grand = 0;
+                tbody.querySelectorAll('tr').forEach(tr => {
+                    const price = parseFloat(tr.querySelector('.price').value) || 0;
+                    const qty = parseFloat(tr.querySelector('.qty').value) || 0;
+                    const total = price * qty;
+                    tr.querySelector('.line-total').textContent = formatMoney(total);
+                    grand += total;
+                });
+                document.getElementById('grand-total').textContent = formatMoney(grand);
+            }
+
+            tbody.addEventListener('input', recalc);
+
+            tbody.addEventListener('click', e => {
+                if (hasQuotation) return;
+
+                if (e.target.closest('.remove')) {
+                    const tr = e.target.closest('tr');
+                    if (!tr.classList.contains('main-item-sub')) {
+                        let next = tr.nextElementSibling;
+                        while (next && next.classList.contains('main-item-sub')) {
+                            let toRemove = next;
+                            next = next.nextElementSibling;
+                            toRemove.remove();
+                        }
+                    }
+                    tr.remove();
+                    recalc();
                 }
-                renderRow({}, true, insertTarget);
-            }
-        });
-
-        const addRowBtn = document.getElementById('add-row');
-        if (addRowBtn) {
-            addRowBtn.addEventListener('click', () => renderRow());
-        }
-
-        if (oldItems.length > 0) {
-            oldItems.forEach(item => {
-                const isSub = item.parent_id !== null && item.parent_id !== undefined && item
-                    .parent_id !== "";
-                renderRow(item, isSub, tbody.lastElementChild);
+                if (e.target.closest('.add-sub')) {
+                    const mainTr = e.target.closest('tr');
+                    let insertTarget = mainTr;
+                    let nextRow = mainTr.nextElementSibling;
+                    while (nextRow && nextRow.classList.contains('main-item-sub')) {
+                        insertTarget = nextRow;
+                        nextRow = nextRow.nextElementSibling;
+                    }
+                    renderRow({}, true, insertTarget);
+                }
             });
-        } else {
-            renderRow();
-        }
 
-        const savedPersonnel = @json(old('personnel', isset($schedule) && $schedule->relationLoaded('personnel') ? $schedule->personnel : []));
-        const personnelTableBody = document.querySelector('#personnel-table tbody');
-        let personnelGlobalIndex = 0;
-
-        function formatPersonnelMoney(amount) {
-            return currency + amount.toLocaleString('en-PH', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
-        }
-
-        function renderPersonnelRow(person = {}) {
-            const i = personnelGlobalIndex++;
-            const tr = document.createElement('tr');
-            tr.dataset.index = i;
-
-            const safeName = (person.name ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-            const safeRole = (person.role_in_schedule ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-            const safeNotes = (person.notes ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-
-            const editable = canEditPaymentAndStatus();
-            let paymentVal = person.payment ?? '';
-            if (!editable && (paymentVal === '' || paymentVal === null)) {
-                paymentVal = 0;
+            const addRowBtn = document.getElementById('add-row');
+            if (addRowBtn) {
+                addRowBtn.addEventListener('click', () => renderRow());
             }
 
-            const isPaidChecked = (editable && person.is_paid) ? 'checked' : '';
-            const isPaymentDisabled = !editable ? 'disabled' : '';
+            if (oldItems.length > 0) {
+                oldItems.forEach(item => {
+                    const isSub = item.parent_id !== null && item.parent_id !== undefined && item
+                        .parent_id !== "";
+                    renderRow(item, isSub, tbody.lastElementChild);
+                });
+            } else {
+                renderRow();
+            }
 
-            tr.innerHTML = `
+            const savedPersonnel = @json(old('personnel', isset($schedule) && $schedule->relationLoaded('personnel') ? $schedule->personnel : []));
+            const personnelTableBody = document.querySelector('#personnel-table tbody');
+            let personnelGlobalIndex = 0;
+
+            function formatPersonnelMoney(amount) {
+                return currency + amount.toLocaleString('en-PH', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
+            function renderPersonnelRow(person = {}) {
+                const i = personnelGlobalIndex++;
+                const tr = document.createElement('tr');
+                tr.dataset.index = i;
+
+                const safeName = (person.name ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                const safeRole = (person.role_in_schedule ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                const safeNotes = (person.notes ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+                const editable = canEditPaymentAndStatus();
+                let paymentVal = person.payment ?? '';
+                if (!editable && (paymentVal === '' || paymentVal === null)) {
+                    paymentVal = 0;
+                }
+
+                const isPaidChecked = (editable && person.is_paid) ? 'checked' : '';
+                const isPaymentDisabled = !editable ? 'disabled' : '';
+
+                tr.innerHTML = `
                 <td class="p-2">
                     <input type="text" name="personnel[${i}][name]" class="form-control form-control-sm" placeholder="Staff Name..." value="${safeName}" required>
                 </td>
@@ -619,65 +621,65 @@
                 </td>
             `;
 
-            personnelTableBody.appendChild(tr);
-            recalcPersonnel();
-            updatePaymentAndStatusState();
-        }
-
-        function recalcPersonnel() {
-            let grand = 0;
-            personnelTableBody.querySelectorAll('tr').forEach(tr => {
-                const payment = parseFloat(tr.querySelector('.personnel-payment').value) || 0;
-                grand += payment;
-            });
-            document.getElementById('personnel-grand-total').textContent = formatPersonnelMoney(grand);
-        }
-
-        personnelTableBody.addEventListener('input', recalcPersonnel);
-
-        personnelTableBody.addEventListener('click', e => {
-            if (e.target.closest('.remove-personnel')) {
-                e.target.closest('tr').remove();
+                personnelTableBody.appendChild(tr);
                 recalcPersonnel();
+                updatePaymentAndStatusState();
             }
-        });
 
-        const addPersonnelBtn = document.getElementById('add-personnel-row');
-        if (addPersonnelBtn) {
-            addPersonnelBtn.addEventListener('click', () => renderPersonnelRow({
-                payment: canEditPaymentAndStatus() ? '' : 0,
-                is_paid: 0
-            }));
-        }
+            function recalcPersonnel() {
+                let grand = 0;
+                personnelTableBody.querySelectorAll('tr').forEach(tr => {
+                    const payment = parseFloat(tr.querySelector('.personnel-payment').value) || 0;
+                    grand += payment;
+                });
+                document.getElementById('personnel-grand-total').textContent = formatPersonnelMoney(grand);
+            }
 
-        if (savedPersonnel.length > 0) {
-            savedPersonnel.forEach(person => {
-                renderPersonnelRow(person);
+            personnelTableBody.addEventListener('input', recalcPersonnel);
+
+            personnelTableBody.addEventListener('click', e => {
+                if (e.target.closest('.remove-personnel')) {
+                    e.target.closest('tr').remove();
+                    recalcPersonnel();
+                }
             });
-        }
 
-        const expensesTableBody = document.querySelector('#expenses-table tbody');
-        if (expensesTableBody) {
-            const savedExpenses = @json(old('expenses', isset($schedule) && $schedule->relationLoaded('expenses') ? $schedule->expenses : []));
-            let expenseGlobalIndex = 0;
+            const addPersonnelBtn = document.getElementById('add-personnel-row');
+            if (addPersonnelBtn) {
+                addPersonnelBtn.addEventListener('click', () => renderPersonnelRow({
+                    payment: canEditPaymentAndStatus() ? '' : 0,
+                    is_paid: 0
+                }));
+            }
 
-            function formatExpenseMoney(amount) {
-                return currency + amount.toLocaleString('en-PH', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
+            if (savedPersonnel.length > 0) {
+                savedPersonnel.forEach(person => {
+                    renderPersonnelRow(person);
                 });
             }
 
-            function renderExpenseRow(exp = {}) {
-                const i = expenseGlobalIndex++;
-                const tr = document.createElement('tr');
-                tr.dataset.index = i;
+            const expensesTableBody = document.querySelector('#expenses-table tbody');
+            if (expensesTableBody) {
+                const savedExpenses = @json(old('expenses', isset($schedule) && $schedule->relationLoaded('expenses') ? $schedule->expenses : []));
+                let expenseGlobalIndex = 0;
 
-                const safeType = (exp.expense_type ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-                const safeNotes = (exp.notes ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-                const amountVal = exp.amount ?? '';
+                function formatExpenseMoney(amount) {
+                    return currency + amount.toLocaleString('en-PH', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                }
 
-                tr.innerHTML = `
+                function renderExpenseRow(exp = {}) {
+                    const i = expenseGlobalIndex++;
+                    const tr = document.createElement('tr');
+                    tr.dataset.index = i;
+
+                    const safeType = (exp.expense_type ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                    const safeNotes = (exp.notes ?? '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                    const amountVal = exp.amount ?? '';
+
+                    tr.innerHTML = `
                     <td class="p-2">
                         <input type="text" name="expenses[${i}][expense_type]" class="form-control form-control-sm" placeholder="e.g. Fuel, Tolls" value="${safeType}" required>
                     </td>
@@ -692,38 +694,39 @@
                     </td>
                 `;
 
-                expensesTableBody.appendChild(tr);
-                recalcExpenses();
-            }
-
-            function recalcExpenses() {
-                let grand = 0;
-                expensesTableBody.querySelectorAll('tr').forEach(tr => {
-                    const amount = parseFloat(tr.querySelector('.expense-amount').value) || 0;
-                    grand += amount;
-                });
-                document.getElementById('expenses-grand-total').textContent = formatExpenseMoney(grand);
-            }
-
-            expensesTableBody.addEventListener('input', recalcExpenses);
-
-            expensesTableBody.addEventListener('click', e => {
-                if (e.target.closest('.remove-expense')) {
-                    e.target.closest('tr').remove();
+                    expensesTableBody.appendChild(tr);
                     recalcExpenses();
                 }
-            });
 
-            const addExpenseBtn = document.getElementById('add-expense-row');
-            if (addExpenseBtn) {
-                addExpenseBtn.addEventListener('click', () => renderExpenseRow());
-            }
+                function recalcExpenses() {
+                    let grand = 0;
+                    expensesTableBody.querySelectorAll('tr').forEach(tr => {
+                        const amount = parseFloat(tr.querySelector('.expense-amount').value) || 0;
+                        grand += amount;
+                    });
+                    document.getElementById('expenses-grand-total').textContent = formatExpenseMoney(grand);
+                }
 
-            if (savedExpenses.length > 0) {
-                savedExpenses.forEach(exp => {
-                    renderExpenseRow(exp);
+                expensesTableBody.addEventListener('input', recalcExpenses);
+
+                expensesTableBody.addEventListener('click', e => {
+                    if (e.target.closest('.remove-expense')) {
+                        e.target.closest('tr').remove();
+                        recalcExpenses();
+                    }
                 });
+
+                const addExpenseBtn = document.getElementById('add-expense-row');
+                if (addExpenseBtn) {
+                    addExpenseBtn.addEventListener('click', () => renderExpenseRow());
+                }
+
+                if (savedExpenses.length > 0) {
+                    savedExpenses.forEach(exp => {
+                        renderExpenseRow(exp);
+                    });
+                }
             }
-        }
-    });
-</script>
+        });
+    </script>
+@endpush

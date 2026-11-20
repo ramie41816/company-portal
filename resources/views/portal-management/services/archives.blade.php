@@ -4,7 +4,7 @@
     <div class="page-head mb-4 d-flex justify-content-between align-items-center">
         <div>
             <h2 class="mb-1" style="color: var(--ink);"><i class="bi bi-archive"></i> Archived Services</h2>
-            <div class="sub text-muted">View and restore soft-deleted public services.</div>
+            <div class="sub">View and manage archived services.</div>
         </div>
     </div>
 
@@ -106,23 +106,25 @@
         </div>
     </div>
 
-    <script>
-        const restoreModal = document.getElementById('restoreModal');
-        if (restoreModal) {
-            restoreModal.addEventListener('show.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                document.getElementById('restoreForm').action = button.getAttribute('data-action');
-                document.getElementById('restoreName').textContent = button.getAttribute('data-name');
-            });
-        }
+    @push('scripts')
+        <script>
+            const restoreModal = document.getElementById('restoreModal');
+            if (restoreModal) {
+                restoreModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    document.getElementById('restoreForm').action = button.getAttribute('data-action');
+                    document.getElementById('restoreName').textContent = button.getAttribute('data-name');
+                });
+            }
 
-        const forceDeleteModal = document.getElementById('forceDeleteModal');
-        if (forceDeleteModal) {
-            forceDeleteModal.addEventListener('show.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                document.getElementById('forceDeleteForm').action = button.getAttribute('data-action');
-                document.getElementById('forceDeleteName').textContent = button.getAttribute('data-name');
-            });
-        }
-    </script>
+            const forceDeleteModal = document.getElementById('forceDeleteModal');
+            if (forceDeleteModal) {
+                forceDeleteModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    document.getElementById('forceDeleteForm').action = button.getAttribute('data-action');
+                    document.getElementById('forceDeleteName').textContent = button.getAttribute('data-name');
+                });
+            }
+        </script>
+    @endpush
 @endsection

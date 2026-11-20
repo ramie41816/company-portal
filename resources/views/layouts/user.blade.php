@@ -118,6 +118,4 @@
             </a>
         </div>
     </nav>
-
-    @stack('scripts')
 @endsection

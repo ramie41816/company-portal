@@ -14,9 +14,6 @@ use App\Http\Controllers\TemplateManagerController;
 use App\Http\Controllers\Portal\DashboardController;
 use App\Http\Controllers\Portal\ServiceController;
 use App\Http\Controllers\Portal\InquiryController;
-use App\Http\Controllers\InquiryController as PublicInquiryController;
-// Other Sercices
-use App\Models\Service;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn() => redirect()->route(auth()->check() ? 'home' : 'login'));

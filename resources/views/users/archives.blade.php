@@ -153,25 +153,27 @@
         </div>
     </div>
 
-    <script>
-        const restoreModal = document.getElementById('restoreModal');
-        if (restoreModal) {
-            restoreModal.addEventListener('show.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                document.getElementById('restoreForm').action = button.getAttribute('data-action');
-                document.getElementById('restoreName').textContent = button.getAttribute('data-name');
-            });
-        }
-
-        const forceDeleteModal = document.getElementById('forceDeleteModal');
-        if (forceDeleteModal) {
-            forceDeleteModal.addEventListener('show.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                document.getElementById('forceDeleteForm').action = button.getAttribute('data-action');
-                document.getElementById('forceDeleteName').textContent = button.getAttribute('data-name');
-            });
-        }
-    </script>
-
     <div class="mt-3">{{ $users->links() }}</div>
+
+    @push('scripts')
+        <script>
+            const restoreModal = document.getElementById('restoreModal');
+            if (restoreModal) {
+                restoreModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    document.getElementById('restoreForm').action = button.getAttribute('data-action');
+                    document.getElementById('restoreName').textContent = button.getAttribute('data-name');
+                });
+            }
+
+            const forceDeleteModal = document.getElementById('forceDeleteModal');
+            if (forceDeleteModal) {
+                forceDeleteModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    document.getElementById('forceDeleteForm').action = button.getAttribute('data-action');
+                    document.getElementById('forceDeleteName').textContent = button.getAttribute('data-name');
+                });
+            }
+        </script>
+    @endpush
 @endsection

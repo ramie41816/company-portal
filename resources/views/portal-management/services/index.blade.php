@@ -108,14 +108,16 @@
         </div>
     </div>
 
-    <script>
-        const archiveModal = document.getElementById('archiveModal');
-        if (archiveModal) {
-            archiveModal.addEventListener('show.bs.modal', function(event) {
-                const button = event.relatedTarget;
-                document.getElementById('archiveForm').action = button.dataset.action;
-                document.getElementById('deleteName').textContent = button.dataset.name;
-            });
-        }
-    </script>
+    @push('scripts')
+        <script>
+            const archiveModal = document.getElementById('archiveModal');
+            if (archiveModal) {
+                archiveModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    document.getElementById('archiveForm').action = button.dataset.action;
+                    document.getElementById('deleteName').textContent = button.dataset.name;
+                });
+            }
+        </script>
+    @endpush
 @endsection

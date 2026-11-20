@@ -147,11 +147,13 @@
         </div>
     </div>
 
-    <script>
-        document.getElementById('archiveModal').addEventListener('show.bs.modal', function(event) {
-            const button = event.relatedTarget;
-            document.getElementById('archiveForm').action = button.dataset.action;
-            document.getElementById('archiveName').textContent = button.dataset.name;
-        });
-    </script>
+    @push('scripts')
+        <script>
+            document.getElementById('archiveModal').addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                document.getElementById('archiveForm').action = button.dataset.action;
+                document.getElementById('archiveName').textContent = button.dataset.name;
+            });
+        </script>
+    @endpush
 @endsection

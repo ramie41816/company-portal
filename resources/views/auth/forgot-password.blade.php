@@ -32,8 +32,8 @@
         </div>
 
         {{-- Cloudflare Turnstile Widget --}}
-        <div class="mb-3">
-            <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}"></div>
+        <div class="mb-3 cf-turnstile-wrapper">
+            <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}" data-size="flexible"></div>
             @error('cf-turnstile-response')
                 <div class="invalid-feedback d-block mt-1">{{ $message }}</div>
             @enderror

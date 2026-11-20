@@ -5,6 +5,20 @@
 <head>
     @include('partials.head')
 
+    <style>
+        .cf-turnstile-wrapper,
+        .cf-turnstile-wrapper .cf-turnstile,
+        .cf-turnstile-wrapper .cf-turnstile div,
+        .cf-turnstile-wrapper .cf-turnstile iframe {
+            display: block;
+            width: 100% !important;
+            max-width: 100% !important;
+            min-width: 0;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+    </style>
+
     @if ($loginBg)
         <style>
             .auth-side.has-bg {
